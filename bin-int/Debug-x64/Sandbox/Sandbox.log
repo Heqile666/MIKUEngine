@@ -1,3 +1,0 @@
-﻿  main.cpp
-D:\MIKU\MIKUEngine\Sandbox\src\main.cpp(7,13): warning C4326: “main”的返回类型应为“int”而非“void”
-  Sandbox.vcxproj -> D:\MIKU\MIKUEngine\bin\Debug-x64\Sandbox\Sandbox.exe
