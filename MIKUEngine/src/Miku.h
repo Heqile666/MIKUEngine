@@ -3,7 +3,7 @@
 //For use by MIKUEngine application
 
 #include "Miku/Application.h"
-
+#include "Miku/Log.h"
 //---------Entry Point------------
 #include"Miku/EntryPoint.h"
 //--------------------------------

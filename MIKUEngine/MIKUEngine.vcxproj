@@ -19,12 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Miku\Log.h" />
     <ClInclude Include="src\Miku.h" />
     <ClInclude Include="src\Miku\Application.h" />
     <ClInclude Include="src\Miku\Core.h" />
     <ClInclude Include="src\Miku\EntryPoint.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Miku\Log.cpp" />
     <ClCompile Include="src\Miku\Application.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -117,6 +119,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>MIKU_BUILD_DLL;MIKU_PLATFORM_WINDOWS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)vender\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
