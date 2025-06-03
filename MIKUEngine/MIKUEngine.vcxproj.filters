@@ -4,6 +4,9 @@
     <Filter Include="Miku">
       <UniqueIdentifier>{9B15897C-874C-8A0D-3039-70101C4F060F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Miku\Events">
+      <UniqueIdentifier>{1F053126-8BBA-A91B-14AF-A3F28063A01F}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Miku.h" />
@@ -15,6 +18,18 @@
     </ClInclude>
     <ClInclude Include="src\Miku\EntryPoint.h">
       <Filter>Miku</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Events\ApplicationEvent.h">
+      <Filter>Miku\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Events\Event.h">
+      <Filter>Miku\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Events\KeyEvent.h">
+      <Filter>Miku\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Events\MouseEvent.h">
+      <Filter>Miku\Events</Filter>
     </ClInclude>
     <ClInclude Include="src\Miku\Log.h">
       <Filter>Miku</Filter>

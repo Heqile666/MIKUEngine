@@ -27,7 +27,8 @@ project "MIKUEngine"
 
     includedirs
     {
-        "%{prj.name}/vender/spdlog/include"
+        "%{prj.name}/vender/spdlog/include",
+        "%{prj.name}/src"
     }
     
     filter "system:windows"

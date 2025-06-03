@@ -8,3 +8,5 @@
 #else
 #error MIKU only support Windows!
 #endif // MIKU_PLATFORM_WINDOWS
+
+#define BIT(x) (1<<x)
