@@ -10,6 +10,12 @@ workspace "MIKUEngine"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+IncludeDir = {}
+IncludeDir["GLFW"] = "MIKUEngine/vender/GLFW/include"
+
+include "MIKUEngine/vender/GLFW"
+
+
 project "MIKUEngine"
     location "MIKUEngine"
     kind "SharedLib"
@@ -31,7 +37,13 @@ project "MIKUEngine"
     includedirs
     {
         "%{prj.name}/vender/spdlog/include",
-        "%{prj.name}/src"
+        "%{prj.name}/src",
+        "%{IncludeDir.GLFW}"
+    }
+
+    links{
+        "GLFW",
+        "opengl32.lib"
     }
     
     filter "system:windows"

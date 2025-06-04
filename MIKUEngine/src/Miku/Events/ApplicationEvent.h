@@ -1,5 +1,4 @@
 #pragma once
-#pragma onceAdd commentMore actions
 
 #include "Event.h"
 
