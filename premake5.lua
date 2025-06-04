@@ -18,6 +18,9 @@ project "MIKUEngine"
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+    pchheader "mikupch.h"
+    pchsource "MIKUEngine/src/mikupch.cpp"
+
     files
     {
         "%{prj.name}/src/**.h",

@@ -3,8 +3,6 @@
 
 #include "Event.h"
 
-#include <sstream>
-
 namespace MIKU {
 
 	class MIKU_API WindowResizeEvent :public Event

@@ -34,6 +34,7 @@
     <ClInclude Include="src\Miku\Log.h">
       <Filter>Miku</Filter>
     </ClInclude>
+    <ClInclude Include="src\mikupch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Miku\Application.cpp">
@@ -42,5 +43,6 @@
     <ClCompile Include="src\Miku\Log.cpp">
       <Filter>Miku</Filter>
     </ClCompile>
+    <ClCompile Include="src\mikupch.cpp" />
   </ItemGroup>
 </Project>

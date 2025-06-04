@@ -2,8 +2,6 @@
 
 #include "Event.h"
 
-#include <sstream>
-
 namespace MIKU {
 
 	class MIKU_API KeyEvent : public Event

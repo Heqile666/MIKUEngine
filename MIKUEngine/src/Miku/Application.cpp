@@ -1,6 +1,8 @@
+#include "mikupch.h"
 #include "Application.h"
 #include "Miku/Events/ApplicationEvent.h"
 #include "Miku/Log.h"
+
 namespace MIKU {
 	Application::Application()
 	{
