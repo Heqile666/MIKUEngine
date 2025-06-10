@@ -15,7 +15,6 @@ IncludeDir["GLFW"] = "MIKUEngine/vender/GLFW/include"
 
 include "MIKUEngine/vender/GLFW"
 
-
 project "MIKUEngine"
     location "MIKUEngine"
     kind "SharedLib"
@@ -36,20 +35,27 @@ project "MIKUEngine"
 
     includedirs
     {
+        "%{prj.name}/vender/DX12/include/directx",
         "%{prj.name}/vender/spdlog/include",
         "%{prj.name}/src",
-        "%{IncludeDir.GLFW}"
+        "%{IncludeDir.GLFW}",
     }
 
     links{
+        --DX12
+        "d3dcompiler.lib",
+        "D3D12.lib",
+        "dxgi.lib",
+        --windows
         "GLFW",
-        "opengl32.lib"
+        "opengl32.lib",
+      
     }
     
     filter "system:windows"
         cppdialect "C++17"
         staticruntime "On"
-        systemversion "10.0"
+        systemversion "latest"
         buildoptions { "/utf-8" }
         
         defines
@@ -65,10 +71,12 @@ project "MIKUEngine"
         
     filter "configurations:Debug"
         defines "MIKU_DEBUG"
+        buildoptions "/MDd"
         optimize "On"
 
     filter "configurations:Release"
         defines "MIKU_RELEASE"
+        buildoptions "/MD"
         optimize "On" 
 
     filter "configurations:Dist"
@@ -106,7 +114,7 @@ project "Sandbox"
     filter "system:windows"
         cppdialect "C++17"
         staticruntime "On"
-        systemversion "10.0"
+        systemversion "latest"
         
         defines
         {
@@ -116,12 +124,15 @@ project "Sandbox"
             
     filter "configurations:Debug"
         defines "MIKU_DEBUG"
+        buildoptions "/MDd"
         optimize "On"
 
     filter "configurations:Release"
         defines "MIKU_RELEASE"
+        buildoptions "/MD"
         optimize "On" 
 
     filter "configurations:Dist"
         defines "MIKU_DIST"
+        buildoptions "/MD"
         optimize "On"

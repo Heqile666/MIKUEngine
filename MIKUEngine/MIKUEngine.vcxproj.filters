@@ -37,6 +37,12 @@
     <ClInclude Include="src\Miku\Events\MouseEvent.h">
       <Filter>Miku\Events</Filter>
     </ClInclude>
+    <ClInclude Include="src\Miku\Layer.h">
+      <Filter>Miku</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\LayerStack.h">
+      <Filter>Miku</Filter>
+    </ClInclude>
     <ClInclude Include="src\Miku\Log.h">
       <Filter>Miku</Filter>
     </ClInclude>
@@ -50,6 +56,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Miku\Application.cpp">
+      <Filter>Miku</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\Layer.cpp">
+      <Filter>Miku</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\LayerStack.cpp">
       <Filter>Miku</Filter>
     </ClCompile>
     <ClCompile Include="src\Miku\Log.cpp">

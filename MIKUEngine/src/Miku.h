@@ -4,6 +4,7 @@
 
 #include "Miku/Application.h"
 #include "Miku/Log.h"
+#include "Miku/Layer.h"
 //---------Entry Point------------
 #include"Miku/EntryPoint.h"
 //--------------------------------
