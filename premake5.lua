@@ -35,7 +35,7 @@ project "MIKUEngine"
 
     includedirs
     {
-        "%{prj.name}/vender/DX12/include/directx",
+        "%{prj.name}/vender/DX12/include/MyDirectx",
         "%{prj.name}/vender/spdlog/include",
         "%{prj.name}/src",
         "%{IncludeDir.GLFW}",
