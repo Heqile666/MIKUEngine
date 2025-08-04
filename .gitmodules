@@ -1,9 +1,9 @@
-[submodule "vender/spdlog"]
-	path = MIKUEngine/vender/spdlog
-	url = https://github.com/gabime/spdlog.git
 [submodule "MIKUEngine/vender/GLFW"]
 	path = MIKUEngine/vender/GLFW
 	url = https://github.com/glfw/glfw.git
 [submodule "MIKUEngine/vender/DX12"]
 	path = MIKUEngine/vender/DX12
 	url = https://github.com/microsoft/DirectX-Headers.git
+[submodule "MIKUEngine/vender/spdlog"]
+	path = MIKUEngine/vender/spdlog
+	url = https://github.com/gabime/spdlog.git
