@@ -1,75 +1,879 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Miku">
-      <UniqueIdentifier>{9B15897C-874C-8A0D-3039-70101C4F060F}</UniqueIdentifier>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Miku\Events">
-      <UniqueIdentifier>{1F053126-8BBA-A91B-14AF-A3F28063A01F}</UniqueIdentifier>
+    <Filter Include="src\Miku">
+      <UniqueIdentifier>{123522CF-FE01-7DDA-271B-6B821347B268}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Platform">
-      <UniqueIdentifier>{2AC788B4-1694-E3BF-3FAD-D1672BD9184E}</UniqueIdentifier>
+    <Filter Include="src\Miku\Events">
+      <UniqueIdentifier>{B6380B3E-22C4-7802-2BD5-FBF697DFD402}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Platform\Windows">
-      <UniqueIdentifier>{64FBD71A-50F4-F66C-7926-DCF1657ED678}</UniqueIdentifier>
+    <Filter Include="src\Miku\ImGui">
+      <UniqueIdentifier>{BCAFD6CB-A87D-CAD1-9111-3BF87D7EA636}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Miku\Renderer">
+      <UniqueIdentifier>{F84CB7E4-6463-B57A-ADDA-409C19308602}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform">
+      <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform\DX12">
+      <UniqueIdentifier>{0F8DC4D8-7BA3-C26E-C41A-4E90307093F6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform\Windows">
+      <UniqueIdentifier>{5B054582-4794-CE4B-F0B2-E246DC20DFF1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender">
+      <UniqueIdentifier>{69728122-5514-ACF8-3ECF-BF4C2A103349}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\DX12">
+      <UniqueIdentifier>{57A29FBF-C357-18B5-4C4C-128CB8000FB9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\DX12\include">
+      <UniqueIdentifier>{CA30F93E-3692-D64C-BFFF-1CFF2B600D0C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\DX12\include\composition">
+      <UniqueIdentifier>{2D2894A9-990B-A3E9-A20E-D1250E71693A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\DX12\include\directx">
+      <UniqueIdentifier>{CCD565D6-38E3-93BC-C1C9-8FA72DD65F73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\DX12\include\dxguids">
+      <UniqueIdentifier>{3107A5F8-9D14-D3DE-26FB-CEC992079F95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\DX12\include\wsl">
+      <UniqueIdentifier>{0F557486-7B8C-BC1D-8496-2041F04CE316}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\DX12\include\wsl\stubs">
+      <UniqueIdentifier>{8FB64E9C-FBCE-35C6-C47B-C55F3053CA5F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\DX12\include\wsl\stubs\wrl">
+      <UniqueIdentifier>{3335F1FA-9FA3-467A-E88C-017A543A3C16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\GLFW">
+      <UniqueIdentifier>{4817A1BF-B4CC-19B5-3DC1-138CA97510B9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\GLFW\deps">
+      <UniqueIdentifier>{63F665FE-4FEF-8450-7821-6AD56479645C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\GLFW\deps\glad">
+      <UniqueIdentifier>{4A3F0B85-B6AB-C67F-7F9F-5EDDEBCAE8E7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\GLFW\include">
+      <UniqueIdentifier>{BB0655BC-2768-32CA-B0D5-787C1C366989}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\GLFW\include\GLFW">
+      <UniqueIdentifier>{DA2E1870-C653-67F0-EF9E-4C80DB22660E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\GLFW\src">
+      <UniqueIdentifier>{5F39874D-CBC4-F411-D4D5-770640E05012}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui">
+      <UniqueIdentifier>{93EA3DB6-7F4D-CD5A-28D3-0511141599DD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui\backends">
+      <UniqueIdentifier>{1DFA2BF3-8966-E7ED-525A-7F4BBE850956}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui\examples">
+      <UniqueIdentifier>{A1CDEC9D-0D3A-A898-D62D-40F64259CA00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui\examples\example_allegro5">
+      <UniqueIdentifier>{56B3A939-4205-8129-2B24-BE3917159A12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui\examples\libs">
+      <UniqueIdentifier>{9AFE12DE-860E-BFAE-EFC7-23CDDBF6AD47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui\examples\libs\emscripten">
+      <UniqueIdentifier>{63BAFA3C-CF7E-F92C-98E4-29F704689562}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui\examples\libs\glfw">
+      <UniqueIdentifier>{99026962-05E6-77A2-0EE9-A5DE7A4B3EF3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui\examples\libs\glfw\include">
+      <UniqueIdentifier>{0CB3374D-7842-F937-813E-DA4FED4C3444}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui\examples\libs\glfw\include\GLFW">
+      <UniqueIdentifier>{CB3578D2-B748-782B-6032-55184C241579}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui\examples\libs\usynergy">
+      <UniqueIdentifier>{0F7144D0-7B2A-AF7A-048A-C954704265EA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui\misc">
+      <UniqueIdentifier>{4E91F655-BAA7-F4EB-031F-800D6F74C573}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui\misc\cpp">
+      <UniqueIdentifier>{200276A6-8C6E-31A1-5562-C9FEC18D5309}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui\misc\freetype">
+      <UniqueIdentifier>{C1E7A261-ADF7-4E32-16B1-B35002E03DCB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\imgui\misc\single_file">
+      <UniqueIdentifier>{3EBF0610-AAD7-ED39-7384-7DD3DF5B82D3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\spdlog">
+      <UniqueIdentifier>{81528395-ED12-FFCB-B64D-484922CD43A8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\spdlog\bench">
+      <UniqueIdentifier>{90891AD2-FCEA-F7DF-8558-3E92F1B82E9F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\spdlog\include">
+      <UniqueIdentifier>{F46AF7F1-60D7-B2EC-29CB-4A4A95F6D454}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\spdlog\include\spdlog">
+      <UniqueIdentifier>{ACE050DD-989B-4089-4153-B9D32DED8A19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\spdlog\include\spdlog\cfg">
+      <UniqueIdentifier>{2BCF04E7-1720-F028-4084-DEEA2C348392}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\spdlog\include\spdlog\details">
+      <UniqueIdentifier>{21BDA5B9-0DA4-67B1-B6F4-CDCEA2BAE017}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\spdlog\include\spdlog\fmt">
+      <UniqueIdentifier>{E2DC04E7-CE2D-F028-F791-DEEAE3418392}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\spdlog\include\spdlog\fmt\bundled">
+      <UniqueIdentifier>{CFBDC862-BB3A-BCA5-E4B7-BCB9D0935839}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\spdlog\include\spdlog\sinks">
+      <UniqueIdentifier>{239F98BC-0FDB-9B26-78ED-B31D64484441}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vender\spdlog\tests">
+      <UniqueIdentifier>{235A60D3-8FBB-3DE1-1829-8493848974A0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Miku.h" />
+    <ClInclude Include="src\Miku.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="src\Miku\Application.h">
-      <Filter>Miku</Filter>
+      <Filter>src\Miku</Filter>
     </ClInclude>
     <ClInclude Include="src\Miku\Core.h">
-      <Filter>Miku</Filter>
+      <Filter>src\Miku</Filter>
     </ClInclude>
     <ClInclude Include="src\Miku\EntryPoint.h">
-      <Filter>Miku</Filter>
+      <Filter>src\Miku</Filter>
     </ClInclude>
     <ClInclude Include="src\Miku\Events\ApplicationEvent.h">
-      <Filter>Miku\Events</Filter>
+      <Filter>src\Miku\Events</Filter>
     </ClInclude>
     <ClInclude Include="src\Miku\Events\Event.h">
-      <Filter>Miku\Events</Filter>
+      <Filter>src\Miku\Events</Filter>
     </ClInclude>
     <ClInclude Include="src\Miku\Events\KeyEvent.h">
-      <Filter>Miku\Events</Filter>
+      <Filter>src\Miku\Events</Filter>
     </ClInclude>
     <ClInclude Include="src\Miku\Events\MouseEvent.h">
-      <Filter>Miku\Events</Filter>
+      <Filter>src\Miku\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\ImGui\ImGuiLayer.h">
+      <Filter>src\Miku\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="src\Miku\Layer.h">
-      <Filter>Miku</Filter>
+      <Filter>src\Miku</Filter>
     </ClInclude>
     <ClInclude Include="src\Miku\LayerStack.h">
-      <Filter>Miku</Filter>
+      <Filter>src\Miku</Filter>
     </ClInclude>
     <ClInclude Include="src\Miku\Log.h">
-      <Filter>Miku</Filter>
+      <Filter>src\Miku</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Renderer\GraphicsContext.h">
+      <Filter>src\Miku\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Renderer\RendererAPI.h">
+      <Filter>src\Miku\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Miku\Window.h">
-      <Filter>Miku</Filter>
+      <Filter>src\Miku</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\DX12\DX12Context.h">
+      <Filter>src\Platform\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\DX12\DX12Temp.h">
+      <Filter>src\Platform\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\DX12\DxException.h">
+      <Filter>src\Platform\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\DX12\ImGuiDX12Renderer.h">
+      <Filter>src\Platform\DX12</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h">
-      <Filter>Platform\Windows</Filter>
+      <Filter>src\Platform\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="src\mikupch.h" />
+    <ClInclude Include="src\mikupch.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\composition\dcomp-preview.h">
+      <Filter>vender\DX12\include\composition</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\DirectML.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3d12.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3d12compatibility.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3d12sdklayers.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3d12shader.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3d12video.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3dcommon.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3dx12.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_barriers.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_check_feature_support.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_core.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_default.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_pipeline_state_stream.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_property_format_table.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_render_pass.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_resource_helpers.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_root_signature.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_state_object.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\dxcore.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\dxcore_interface.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\dxgicommon.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\directx\dxgiformat.h">
+      <Filter>vender\DX12\include\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\dxguids\dxguids.h">
+      <Filter>vender\DX12\include\dxguids</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\wsl\stubs\basetsd.h">
+      <Filter>vender\DX12\include\wsl\stubs</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\wsl\stubs\oaidl.h">
+      <Filter>vender\DX12\include\wsl\stubs</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\wsl\stubs\ocidl.h">
+      <Filter>vender\DX12\include\wsl\stubs</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\wsl\stubs\rpc.h">
+      <Filter>vender\DX12\include\wsl\stubs</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\wsl\stubs\rpcndr.h">
+      <Filter>vender\DX12\include\wsl\stubs</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\wsl\stubs\unknwn.h">
+      <Filter>vender\DX12\include\wsl\stubs</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\wsl\stubs\unknwnbase.h">
+      <Filter>vender\DX12\include\wsl\stubs</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\wsl\stubs\winapifamily.h">
+      <Filter>vender\DX12\include\wsl\stubs</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\wsl\stubs\wrl\client.h">
+      <Filter>vender\DX12\include\wsl\stubs\wrl</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\wsl\stubs\wrl\implements.h">
+      <Filter>vender\DX12\include\wsl\stubs\wrl</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\wsl\winadapter.h">
+      <Filter>vender\DX12\include\wsl</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\DX12\include\wsl\wrladapter.h">
+      <Filter>vender\DX12\include\wsl</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\deps\getopt.h">
+      <Filter>vender\GLFW\deps</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\deps\glad\gl.h">
+      <Filter>vender\GLFW\deps\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\deps\glad\gles2.h">
+      <Filter>vender\GLFW\deps\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\deps\glad\vulkan.h">
+      <Filter>vender\GLFW\deps\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\deps\linmath.h">
+      <Filter>vender\GLFW\deps</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\deps\nuklear.h">
+      <Filter>vender\GLFW\deps</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\deps\nuklear_glfw_gl2.h">
+      <Filter>vender\GLFW\deps</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\deps\stb_image_write.h">
+      <Filter>vender\GLFW\deps</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\deps\tinycthread.h">
+      <Filter>vender\GLFW\deps</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\include\GLFW\glfw3.h">
+      <Filter>vender\GLFW\include\GLFW</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\include\GLFW\glfw3native.h">
+      <Filter>vender\GLFW\include\GLFW</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\cocoa_joystick.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\cocoa_platform.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\cocoa_time.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\internal.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\linux_joystick.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\mappings.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\null_joystick.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\null_platform.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\platform.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\posix_poll.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\posix_thread.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\posix_time.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\win32_joystick.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\win32_platform.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\win32_thread.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\win32_time.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\wl_platform.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\x11_platform.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\GLFW\src\xkb_unicode.h">
+      <Filter>vender\GLFW\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_allegro5.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_android.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_dx10.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_dx11.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_dx12.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_dx9.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_glfw.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_glut.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_metal.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_opengl2.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_opengl3.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_opengl3_loader.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_osx.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_sdl2.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_sdl3.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_sdlgpu3.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_sdlgpu3_shaders.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_sdlrenderer2.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_sdlrenderer3.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_vulkan.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_wgpu.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\backends\imgui_impl_win32.h">
+      <Filter>vender\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\examples\example_allegro5\imconfig_allegro5.h">
+      <Filter>vender\imgui\examples\example_allegro5</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\examples\libs\emscripten\emscripten_mainloop_stub.h">
+      <Filter>vender\imgui\examples\libs\emscripten</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\examples\libs\glfw\include\GLFW\glfw3.h">
+      <Filter>vender\imgui\examples\libs\glfw\include\GLFW</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\examples\libs\glfw\include\GLFW\glfw3native.h">
+      <Filter>vender\imgui\examples\libs\glfw\include\GLFW</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\examples\libs\usynergy\uSynergy.h">
+      <Filter>vender\imgui\examples\libs\usynergy</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\imconfig.h">
+      <Filter>vender\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\imgui.h">
+      <Filter>vender\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\imgui_internal.h">
+      <Filter>vender\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\imstb_rectpack.h">
+      <Filter>vender\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\imstb_textedit.h">
+      <Filter>vender\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\imstb_truetype.h">
+      <Filter>vender\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\misc\cpp\imgui_stdlib.h">
+      <Filter>vender\imgui\misc\cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\misc\freetype\imgui_freetype.h">
+      <Filter>vender\imgui\misc\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\imgui\misc\single_file\imgui_single_file.h">
+      <Filter>vender\imgui\misc\single_file</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\bench\utils.h">
+      <Filter>vender\spdlog\bench</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\async.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\async_logger-inl.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\async_logger.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\cfg\argv.h">
+      <Filter>vender\spdlog\include\spdlog\cfg</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\cfg\env.h">
+      <Filter>vender\spdlog\include\spdlog\cfg</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\cfg\helpers-inl.h">
+      <Filter>vender\spdlog\include\spdlog\cfg</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\cfg\helpers.h">
+      <Filter>vender\spdlog\include\spdlog\cfg</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\common-inl.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\common.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\backtracer-inl.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\backtracer.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\circular_q.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\console_globals.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\file_helper-inl.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\file_helper.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\fmt_helper.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\log_msg-inl.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\log_msg.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\log_msg_buffer-inl.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\log_msg_buffer.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\mpmc_blocking_q.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\null_mutex.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\os-inl.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\os.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\periodic_worker-inl.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\periodic_worker.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\registry-inl.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\registry.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\synchronous_factory.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\tcp_client-windows.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\tcp_client.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\thread_pool-inl.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\thread_pool.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\udp_client-windows.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\udp_client.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\details\windows_include.h">
+      <Filter>vender\spdlog\include\spdlog\details</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bin_to_hex.h">
+      <Filter>vender\spdlog\include\spdlog\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\args.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\base.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\chrono.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\color.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\compile.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\core.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\format-inl.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\format.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\os.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\ostream.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\printf.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\ranges.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\std.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\xchar.h">
+      <Filter>vender\spdlog\include\spdlog\fmt\bundled</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\chrono.h">
+      <Filter>vender\spdlog\include\spdlog\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\compile.h">
+      <Filter>vender\spdlog\include\spdlog\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\fmt.h">
+      <Filter>vender\spdlog\include\spdlog\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\ostr.h">
+      <Filter>vender\spdlog\include\spdlog\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\ranges.h">
+      <Filter>vender\spdlog\include\spdlog\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\std.h">
+      <Filter>vender\spdlog\include\spdlog\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\xchar.h">
+      <Filter>vender\spdlog\include\spdlog\fmt</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\formatter.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\fwd.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\logger-inl.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\logger.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\mdc.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\pattern_formatter-inl.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\pattern_formatter.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\android_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\ansicolor_sink-inl.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\ansicolor_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\base_sink-inl.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\base_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\basic_file_sink-inl.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\basic_file_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\callback_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\daily_file_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\dist_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\dup_filter_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\hourly_file_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\kafka_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\mongo_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\msvc_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\null_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\ostream_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\qt_sinks.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\ringbuffer_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\rotating_file_sink-inl.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\rotating_file_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\sink-inl.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\stdout_color_sinks-inl.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\stdout_color_sinks.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\stdout_sinks-inl.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\stdout_sinks.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\syslog_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\systemd_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\tcp_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\udp_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\win_eventlog_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\wincolor_sink-inl.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\wincolor_sink.h">
+      <Filter>vender\spdlog\include\spdlog\sinks</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\spdlog-inl.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\spdlog.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\stopwatch.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\tweakme.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\include\spdlog\version.h">
+      <Filter>vender\spdlog\include\spdlog</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\tests\includes.h">
+      <Filter>vender\spdlog\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\tests\test_sink.h">
+      <Filter>vender\spdlog\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\spdlog\tests\utils.h">
+      <Filter>vender\spdlog\tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Miku\Application.cpp">
-      <Filter>Miku</Filter>
+      <Filter>src\Miku</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\ImGui\ImGuiLayer.cpp">
+      <Filter>src\Miku\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="src\Miku\Layer.cpp">
-      <Filter>Miku</Filter>
+      <Filter>src\Miku</Filter>
     </ClCompile>
     <ClCompile Include="src\Miku\LayerStack.cpp">
-      <Filter>Miku</Filter>
+      <Filter>src\Miku</Filter>
     </ClCompile>
     <ClCompile Include="src\Miku\Log.cpp">
-      <Filter>Miku</Filter>
+      <Filter>src\Miku</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\Renderer\RendererAPI.cpp">
+      <Filter>src\Miku\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\DX12\DX12Context.cpp">
+      <Filter>src\Platform\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\DX12\DX12Temp.cpp">
+      <Filter>src\Platform\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\DX12\DxException.cpp">
+      <Filter>src\Platform\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\DX12\ImGuiDX12Renderer.cpp">
+      <Filter>src\Platform\DX12</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
-      <Filter>Platform\Windows</Filter>
+      <Filter>src\Platform\Windows</Filter>
     </ClCompile>
-    <ClCompile Include="src\mikupch.cpp" />
+    <ClCompile Include="src\mikupch.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

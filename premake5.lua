@@ -1,6 +1,6 @@
 workspace "MIKUEngine"
     architecture "x64"
-
+    startproject "Sandbox"
     configurations
     {
         "Debug",
@@ -8,17 +8,24 @@ workspace "MIKUEngine"
         "Dist"
     }
 
-outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"--debug-windows-x64
 
+--这里的是文件夹下的源代码文件
 IncludeDir = {}
 IncludeDir["GLFW"] = "MIKUEngine/vender/GLFW/include"
+IncludeDir["ImGui"] = "MIKUEngine/vender/imgui"
+IncludeDir["DX12"] = "MIKUEngine/vender/DX12/include/directx"
 
-include "MIKUEngine/vender/GLFW"
+include "MIKUEngine/vender/GLFW" --包含的是GLFW文件夹下的premake5.lua
+include "MIKUEngine/vender/imgui" --包含的是ImGui文件夹下的premake5.lua
+
+
 
 project "MIKUEngine"
     location "MIKUEngine"
     kind "SharedLib"
     language "C++"
+    staticruntime "off"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -29,16 +36,18 @@ project "MIKUEngine"
     files
     {
         "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp"
-
+        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/vender/**.h",
     }
 
     includedirs
     {
-        "%{prj.name}/vender/DX12/include/directx",
         "%{prj.name}/vender/spdlog/include",
         "%{prj.name}/src",
         "%{IncludeDir.GLFW}",
+        "%{IncludeDir.ImGui}",
+        "%{IncludeDir.DX12}",
+        
     }
 
     links{
@@ -47,14 +56,14 @@ project "MIKUEngine"
         "D3D12.lib",
         "dxgi.lib",
         --windows
-        "GLFW",
+        "GLFW",--link的vs项目
         "opengl32.lib",
+        "ImGui"
       
     }
     
     filter "system:windows"
         cppdialect "C++17"
-        staticruntime "On"
         systemversion "latest"
         buildoptions { "/utf-8" }
         
@@ -64,25 +73,26 @@ project "MIKUEngine"
             "MIKU_PLATFORM_WINDOWS"        
         }
         
-        postbuildcommands
-        {
-            ("{COPYFILE} %{cfg.buildtarget.relpath} ../bin/" ..outputdir.. "/Sandbox")
+        postbuildcommands {
+            "{MKDIR} %{cfg.targetdir}/../Sandbox/",
+            "{COPY} %{cfg.targetdir}/MIKUEngine.dll %{cfg.targetdir}/../Sandbox/"
         }
-        
     filter "configurations:Debug"
         defines "MIKU_DEBUG"
-        buildoptions "/MDd"
+        runtime "Debug"
         optimize "On"
 
     filter "configurations:Release"
         defines "MIKU_RELEASE"
-        buildoptions "/MD"
+        runtime "Release"
         optimize "On" 
 
     filter "configurations:Dist"
         defines "MIKU_DIST"
+        runtime "Release"
         optimize "On"
 
+   
 
 
 project "Sandbox"
@@ -113,7 +123,6 @@ project "Sandbox"
 
     filter "system:windows"
         cppdialect "C++17"
-        staticruntime "On"
         systemversion "latest"
         
         defines
@@ -136,3 +145,4 @@ project "Sandbox"
         defines "MIKU_DIST"
         buildoptions "/MD"
         optimize "On"
+   

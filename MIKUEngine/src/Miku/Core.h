@@ -9,6 +9,9 @@
 #error MIKU only support Windows!
 #endif // MIKU_PLATFORM_WINDOWS
 
+#ifdef MIKU_DEBUG
+	#define MIKU_ENABLE_ASSERTS
+#endif
 
 #ifdef  MIKU_ENABLE_ASSERTS
 	#define MIKU_ASSERT(x,...) {if(!(x)){MIKU_ERROR("Assertion Failed: {0}",__VA_ARGS__); __debugbreak;}}

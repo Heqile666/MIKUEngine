@@ -1,8 +1,9 @@
 #pragma once
 #include"mikupch.h"
-
 #include"Miku/Core.h"
 #include"Miku/Events/Event.h"
+
+struct GLFWwindow;
 
 namespace MIKU {
 	struct WindowProps {
@@ -23,9 +24,9 @@ namespace MIKU {
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
 		virtual ~Window() {}
-
-		virtual void OnUpdate() = 0;
 	
+		virtual void OnUpdate() = 0;
+		virtual GLFWwindow* GetGLFWwindow() = 0;
 		virtual unsigned int GetWidth() const = 0;
 		virtual unsigned int GetHeight() const = 0;
 

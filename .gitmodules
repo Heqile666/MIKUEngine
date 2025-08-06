@@ -7,3 +7,6 @@
 [submodule "MIKUEngine/vender/spdlog"]
 	path = MIKUEngine/vender/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "MIKUEngine/vender/imgui"]
+	path = MIKUEngine/vender/imgui
+	url = https://github.com/Heqile666/imgui.git

@@ -24,7 +24,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
+    <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
@@ -79,15 +79,16 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>mikupch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <PreprocessorDefinitions>MIKU_BUILD_DLL;MIKU_PLATFORM_WINDOWS;MIKU_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>vender\DX12\include\directx;vender\spdlog\include;src;vender\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>vender\spdlog\include;src;vender\GLFW\include;vender\imgui;vender\DX12\include\directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/utf-8 /MDd %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -99,7 +100,8 @@
       <ImportLibrary>..\bin\Debug-windows-x86_64\MIKUEngine\MIKUEngine.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>copy /B /Y ..\bin\Debug-windows-x86_64\MIKUEngine\MIKUEngine.dll ..\bin\Debug-windows-x86_64\Sandbox</Command>
+      <Command>IF NOT EXIST ..\bin\Debug-windows-x86_64\Sandbox (mkdir ..\bin\Debug-windows-x86_64\Sandbox)
+IF EXIST ..\bin\Debug-windows-x86_64\MIKUEngine\MIKUEngine.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\MIKUEngine\MIKUEngine.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\MIKUEngine\MIKUEngine.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -108,14 +110,14 @@
       <PrecompiledHeaderFile>mikupch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>MIKU_BUILD_DLL;MIKU_PLATFORM_WINDOWS;MIKU_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>vender\DX12\include\directx;vender\spdlog\include;src;vender\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>vender\spdlog\include;src;vender\GLFW\include;vender\imgui;vender\DX12\include\directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/utf-8 /MD %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -127,7 +129,8 @@
       <ImportLibrary>..\bin\Release-windows-x86_64\MIKUEngine\MIKUEngine.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>copy /B /Y ..\bin\Release-windows-x86_64\MIKUEngine\MIKUEngine.dll ..\bin\Release-windows-x86_64\Sandbox</Command>
+      <Command>IF NOT EXIST ..\bin\Release-windows-x86_64\Sandbox (mkdir ..\bin\Release-windows-x86_64\Sandbox)
+IF EXIST ..\bin\Release-windows-x86_64\MIKUEngine\MIKUEngine.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\MIKUEngine\MIKUEngine.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\MIKUEngine\MIKUEngine.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
@@ -136,13 +139,13 @@
       <PrecompiledHeaderFile>mikupch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>MIKU_BUILD_DLL;MIKU_PLATFORM_WINDOWS;MIKU_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>vender\DX12\include\directx;vender\spdlog\include;src;vender\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>vender\spdlog\include;src;vender\GLFW\include;vender\imgui;vender\DX12\include\directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -155,7 +158,8 @@
       <ImportLibrary>..\bin\Dist-windows-x86_64\MIKUEngine\MIKUEngine.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>copy /B /Y ..\bin\Dist-windows-x86_64\MIKUEngine\MIKUEngine.dll ..\bin\Dist-windows-x86_64\Sandbox</Command>
+      <Command>IF NOT EXIST ..\bin\Dist-windows-x86_64\Sandbox (mkdir ..\bin\Dist-windows-x86_64\Sandbox)
+IF EXIST ..\bin\Dist-windows-x86_64\MIKUEngine\MIKUEngine.dll\ (xcopy /Q /E /Y /I ..\bin\Dist-windows-x86_64\MIKUEngine\MIKUEngine.dll ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Dist-windows-x86_64\MIKUEngine\MIKUEngine.dll ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -167,18 +171,241 @@
     <ClInclude Include="src\Miku\Events\Event.h" />
     <ClInclude Include="src\Miku\Events\KeyEvent.h" />
     <ClInclude Include="src\Miku\Events\MouseEvent.h" />
+    <ClInclude Include="src\Miku\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Miku\Layer.h" />
     <ClInclude Include="src\Miku\LayerStack.h" />
     <ClInclude Include="src\Miku\Log.h" />
+    <ClInclude Include="src\Miku\Renderer\GraphicsContext.h" />
+    <ClInclude Include="src\Miku\Renderer\RendererAPI.h" />
     <ClInclude Include="src\Miku\Window.h" />
+    <ClInclude Include="src\Platform\DX12\DX12Context.h" />
+    <ClInclude Include="src\Platform\DX12\DX12Temp.h" />
+    <ClInclude Include="src\Platform\DX12\DxException.h" />
+    <ClInclude Include="src\Platform\DX12\ImGuiDX12Renderer.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\mikupch.h" />
+    <ClInclude Include="vender\DX12\include\composition\dcomp-preview.h" />
+    <ClInclude Include="vender\DX12\include\directx\DirectML.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3d12.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3d12compatibility.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3d12sdklayers.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3d12shader.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3d12video.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3dcommon.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3dx12.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_barriers.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_check_feature_support.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_core.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_default.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_pipeline_state_stream.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_property_format_table.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_render_pass.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_resource_helpers.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_root_signature.h" />
+    <ClInclude Include="vender\DX12\include\directx\d3dx12_state_object.h" />
+    <ClInclude Include="vender\DX12\include\directx\dxcore.h" />
+    <ClInclude Include="vender\DX12\include\directx\dxcore_interface.h" />
+    <ClInclude Include="vender\DX12\include\directx\dxgicommon.h" />
+    <ClInclude Include="vender\DX12\include\directx\dxgiformat.h" />
+    <ClInclude Include="vender\DX12\include\dxguids\dxguids.h" />
+    <ClInclude Include="vender\DX12\include\wsl\stubs\basetsd.h" />
+    <ClInclude Include="vender\DX12\include\wsl\stubs\oaidl.h" />
+    <ClInclude Include="vender\DX12\include\wsl\stubs\ocidl.h" />
+    <ClInclude Include="vender\DX12\include\wsl\stubs\rpc.h" />
+    <ClInclude Include="vender\DX12\include\wsl\stubs\rpcndr.h" />
+    <ClInclude Include="vender\DX12\include\wsl\stubs\unknwn.h" />
+    <ClInclude Include="vender\DX12\include\wsl\stubs\unknwnbase.h" />
+    <ClInclude Include="vender\DX12\include\wsl\stubs\winapifamily.h" />
+    <ClInclude Include="vender\DX12\include\wsl\stubs\wrl\client.h" />
+    <ClInclude Include="vender\DX12\include\wsl\stubs\wrl\implements.h" />
+    <ClInclude Include="vender\DX12\include\wsl\winadapter.h" />
+    <ClInclude Include="vender\DX12\include\wsl\wrladapter.h" />
+    <ClInclude Include="vender\GLFW\deps\getopt.h" />
+    <ClInclude Include="vender\GLFW\deps\glad\gl.h" />
+    <ClInclude Include="vender\GLFW\deps\glad\gles2.h" />
+    <ClInclude Include="vender\GLFW\deps\glad\vulkan.h" />
+    <ClInclude Include="vender\GLFW\deps\linmath.h" />
+    <ClInclude Include="vender\GLFW\deps\nuklear.h" />
+    <ClInclude Include="vender\GLFW\deps\nuklear_glfw_gl2.h" />
+    <ClInclude Include="vender\GLFW\deps\stb_image_write.h" />
+    <ClInclude Include="vender\GLFW\deps\tinycthread.h" />
+    <ClInclude Include="vender\GLFW\include\GLFW\glfw3.h" />
+    <ClInclude Include="vender\GLFW\include\GLFW\glfw3native.h" />
+    <ClInclude Include="vender\GLFW\src\cocoa_joystick.h" />
+    <ClInclude Include="vender\GLFW\src\cocoa_platform.h" />
+    <ClInclude Include="vender\GLFW\src\cocoa_time.h" />
+    <ClInclude Include="vender\GLFW\src\internal.h" />
+    <ClInclude Include="vender\GLFW\src\linux_joystick.h" />
+    <ClInclude Include="vender\GLFW\src\mappings.h" />
+    <ClInclude Include="vender\GLFW\src\null_joystick.h" />
+    <ClInclude Include="vender\GLFW\src\null_platform.h" />
+    <ClInclude Include="vender\GLFW\src\platform.h" />
+    <ClInclude Include="vender\GLFW\src\posix_poll.h" />
+    <ClInclude Include="vender\GLFW\src\posix_thread.h" />
+    <ClInclude Include="vender\GLFW\src\posix_time.h" />
+    <ClInclude Include="vender\GLFW\src\win32_joystick.h" />
+    <ClInclude Include="vender\GLFW\src\win32_platform.h" />
+    <ClInclude Include="vender\GLFW\src\win32_thread.h" />
+    <ClInclude Include="vender\GLFW\src\win32_time.h" />
+    <ClInclude Include="vender\GLFW\src\wl_platform.h" />
+    <ClInclude Include="vender\GLFW\src\x11_platform.h" />
+    <ClInclude Include="vender\GLFW\src\xkb_unicode.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_allegro5.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_android.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_dx10.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_dx11.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_dx12.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_dx9.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_glfw.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_glut.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_metal.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_opengl2.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_osx.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_sdl2.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_sdl3.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_sdlgpu3.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_sdlgpu3_shaders.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_sdlrenderer2.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_sdlrenderer3.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_vulkan.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_wgpu.h" />
+    <ClInclude Include="vender\imgui\backends\imgui_impl_win32.h" />
+    <ClInclude Include="vender\imgui\examples\example_allegro5\imconfig_allegro5.h" />
+    <ClInclude Include="vender\imgui\examples\libs\emscripten\emscripten_mainloop_stub.h" />
+    <ClInclude Include="vender\imgui\examples\libs\glfw\include\GLFW\glfw3.h" />
+    <ClInclude Include="vender\imgui\examples\libs\glfw\include\GLFW\glfw3native.h" />
+    <ClInclude Include="vender\imgui\examples\libs\usynergy\uSynergy.h" />
+    <ClInclude Include="vender\imgui\imconfig.h" />
+    <ClInclude Include="vender\imgui\imgui.h" />
+    <ClInclude Include="vender\imgui\imgui_internal.h" />
+    <ClInclude Include="vender\imgui\imstb_rectpack.h" />
+    <ClInclude Include="vender\imgui\imstb_textedit.h" />
+    <ClInclude Include="vender\imgui\imstb_truetype.h" />
+    <ClInclude Include="vender\imgui\misc\cpp\imgui_stdlib.h" />
+    <ClInclude Include="vender\imgui\misc\freetype\imgui_freetype.h" />
+    <ClInclude Include="vender\imgui\misc\single_file\imgui_single_file.h" />
+    <ClInclude Include="vender\spdlog\bench\utils.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\async.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\async_logger-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\async_logger.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\cfg\argv.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\cfg\env.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\cfg\helpers-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\cfg\helpers.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\common-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\common.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\backtracer-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\backtracer.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\circular_q.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\console_globals.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\file_helper-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\file_helper.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\fmt_helper.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\log_msg-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\log_msg.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\log_msg_buffer-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\log_msg_buffer.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\mpmc_blocking_q.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\null_mutex.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\os-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\os.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\periodic_worker-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\periodic_worker.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\registry-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\registry.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\synchronous_factory.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\tcp_client-windows.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\tcp_client.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\thread_pool-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\thread_pool.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\udp_client-windows.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\udp_client.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\details\windows_include.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bin_to_hex.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\args.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\base.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\chrono.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\color.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\compile.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\core.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\format-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\format.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\os.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\ostream.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\printf.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\ranges.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\std.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\bundled\xchar.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\chrono.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\compile.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\fmt.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\ostr.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\ranges.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\std.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fmt\xchar.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\formatter.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\fwd.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\logger-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\logger.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\mdc.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\pattern_formatter-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\pattern_formatter.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\android_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\ansicolor_sink-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\ansicolor_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\base_sink-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\base_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\basic_file_sink-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\basic_file_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\callback_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\daily_file_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\dist_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\dup_filter_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\hourly_file_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\kafka_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\mongo_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\msvc_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\null_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\ostream_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\qt_sinks.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\ringbuffer_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\rotating_file_sink-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\rotating_file_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\sink-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\stdout_color_sinks-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\stdout_color_sinks.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\stdout_sinks-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\stdout_sinks.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\syslog_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\systemd_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\tcp_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\udp_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\win_eventlog_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\wincolor_sink-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\sinks\wincolor_sink.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\spdlog-inl.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\spdlog.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\stopwatch.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\tweakme.h" />
+    <ClInclude Include="vender\spdlog\include\spdlog\version.h" />
+    <ClInclude Include="vender\spdlog\tests\includes.h" />
+    <ClInclude Include="vender\spdlog\tests\test_sink.h" />
+    <ClInclude Include="vender\spdlog\tests\utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Miku\Application.cpp" />
+    <ClCompile Include="src\Miku\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Miku\Layer.cpp" />
     <ClCompile Include="src\Miku\LayerStack.cpp" />
     <ClCompile Include="src\Miku\Log.cpp" />
+    <ClCompile Include="src\Miku\Renderer\RendererAPI.cpp" />
+    <ClCompile Include="src\Platform\DX12\DX12Context.cpp" />
+    <ClCompile Include="src\Platform\DX12\DX12Temp.cpp" />
+    <ClCompile Include="src\Platform\DX12\DxException.cpp" />
+    <ClCompile Include="src\Platform\DX12\ImGuiDX12Renderer.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\mikupch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
@@ -187,6 +414,9 @@
   <ItemGroup>
     <ProjectReference Include="vender\GLFW\GLFW.vcxproj">
       <Project>{154B857C-0182-860D-AA6E-6C109684020F}</Project>
+    </ProjectReference>
+    <ProjectReference Include="vender\imgui\ImGui.vcxproj">
+      <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

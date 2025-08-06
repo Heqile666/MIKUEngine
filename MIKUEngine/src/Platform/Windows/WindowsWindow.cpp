@@ -3,6 +3,7 @@
 #include "Miku/Events/ApplicationEvent.h"
 #include "Miku/Events/MouseEvent.h"
 #include "Miku/Events/KeyEvent.h"
+#include "Platform/DX12/DX12Context.h"
 
 namespace MIKU {
 
@@ -47,7 +48,10 @@ namespace MIKU {
 		}
 
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
-		glfwMakeContextCurrent(m_Window);
+		
+		m_Context = new DX12Context(m_Window);
+		m_Context->Init();
+
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 
@@ -142,7 +146,7 @@ namespace MIKU {
 	void WindowsWindow::OnUpdate()
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(m_Window);
+		m_Context->SwapBuffer();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)

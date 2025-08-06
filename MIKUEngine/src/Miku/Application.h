@@ -4,7 +4,6 @@
 #include "Miku/LayerStack.h"
 #include "Miku/Events/Event.h"
 #include "Miku/Events/ApplicationEvent.h"
-#include "d3d12.h"
 
 namespace MIKU {
 
@@ -17,14 +16,20 @@ namespace MIKU {
 		void OnEvent(Event& e);
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* layer);
-		void TestDX12();
+		
+		inline static Application& Get() { return *s_Instance; }
+		inline Window& GetWindow() { return *m_Window; }
 
 	private:
+		std::unique_ptr<class DX12Temp> DX12;//不同项目的cpp文件和头文件不互通，所以这里用前置声明，并在cpp文件中包含DX12Temp
 		bool OnWindowClose(WindowCloseEvent& e);
 		std::unique_ptr<Window> m_Window;
 		bool m_Running = true;
 		LayerStack m_LayerStack;
-		ID3D12Device* pD3DDevice = nullptr;
+	
+	private:
+		static Application* s_Instance;
+		
 
 		
 	};

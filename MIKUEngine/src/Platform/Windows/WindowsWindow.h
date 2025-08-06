@@ -1,6 +1,9 @@
 #pragma once
 #include "Miku/Window.h"
 #include <GLFW/glfw3.h>
+#include "Miku/Renderer/GraphicsContext.h"
+
+
 
 namespace MIKU {
 	
@@ -20,12 +23,15 @@ namespace MIKU {
 		inline void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
+		GLFWwindow* GetGLFWwindow() { return m_Window; }
 	private:
 		virtual void Init(const WindowProps& props); 
 		virtual void Shutdown();
 
+
 	private:
 			GLFWwindow* m_Window;
+			GraphicsContext* m_Context;
 			struct WindowData {
 				std::string Title;
 				unsigned int Width, Height;
