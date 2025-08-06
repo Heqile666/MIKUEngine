@@ -7,6 +7,8 @@
 
 namespace MIKU {
 
+	class DX12Temp;
+
 	class MIKU_API Application
 	{
 	public:
@@ -19,9 +21,10 @@ namespace MIKU {
 		
 		inline static Application& Get() { return *s_Instance; }
 		inline Window& GetWindow() { return *m_Window; }
+		inline DX12Temp& GetDX12() { return *DX12; }
 
 	private:
-		std::unique_ptr<class DX12Temp> DX12;//不同项目的cpp文件和头文件不互通，所以这里用前置声明，并在cpp文件中包含DX12Temp
+		std::unique_ptr<DX12Temp> DX12;//不同项目的cpp文件和头文件不互通，所以这里用前置声明，并在cpp文件中包含DX12Temp
 		bool OnWindowClose(WindowCloseEvent& e);
 		std::unique_ptr<Window> m_Window;
 		bool m_Running = true;

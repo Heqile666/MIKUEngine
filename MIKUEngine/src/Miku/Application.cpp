@@ -16,7 +16,7 @@ namespace MIKU {
 		m_Window = std::unique_ptr<Window>(Window::Create());
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 		DX12 = std::make_unique<DX12Temp>(m_Window);
-		DX12->Init();
+		MIKU_CORE_ASSERT(DX12->Init(),"DX12 init failed!")
 	}
 	Application::~Application()
 	{

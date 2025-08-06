@@ -201,6 +201,9 @@
     <ClInclude Include="src\Platform\DX12\ImGuiDX12Renderer.h">
       <Filter>src\Platform\DX12</Filter>
     </ClInclude>
+    <ClInclude Include="src\Platform\DX12\ImGuiGLFW.h">
+      <Filter>src\Platform\DX12</Filter>
+    </ClInclude>
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h">
       <Filter>src\Platform\Windows</Filter>
     </ClInclude>
@@ -867,6 +870,9 @@
       <Filter>src\Platform\DX12</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\DX12\ImGuiDX12Renderer.cpp">
+      <Filter>src\Platform\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\DX12\ImGuiGLFW.cpp">
       <Filter>src\Platform\DX12</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">

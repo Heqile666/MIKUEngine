@@ -3,15 +3,6 @@
 
 extern MIKU::Application* MIKU::CreateApplication();
 
-
-class A {
-public:
-	int a = 10;
-
-};
-
-
-
 int main(int argc, char** argv) {
 	MIKU::Log::Init();
 	MIKU_CORE_WARN("Initialized Log!");
@@ -22,7 +13,7 @@ int main(int argc, char** argv) {
 
 	sandbox->Run();
 
-	delete sandbox;	
+	delete sandbox;
 
 }
 

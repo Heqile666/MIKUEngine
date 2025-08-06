@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Miku/Layer.h"
-#include "Platform/DX12/DX12Temp.h"
 namespace MIKU {
 
+	class DX12Temp;
+	
 	class MIKU_API ImGuiLayer :public Layer {
 	public:
 		ImGuiLayer();
@@ -16,7 +17,7 @@ namespace MIKU {
 		void OnEvent(Event& event);
 	private:
 		float m_Time = 0.0f;
-		DX12Temp* DX12Temp;
+		DX12Temp* DX12;
 
 	};
 

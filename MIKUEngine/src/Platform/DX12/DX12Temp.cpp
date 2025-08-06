@@ -1,5 +1,8 @@
 #include "mikupch.h"
 #include "DX12Temp.h"
+#include <imgui.h>
+#include <Platform/DX12/ImGuiDX12Renderer.h>
+#include <Platform/DX12/ImGuiGLFW.h>
 
 namespace MIKU {
    
@@ -29,7 +32,7 @@ namespace MIKU {
         CreateDSV();
         resourceBarrierBuild();
         CreateViewPortAndScissorRect();
-
+        g_pd3dSrvDescHeapAlloc.Create(d3dDevice.Get(), srvHeap.Get());
         return true;
     }
 
@@ -73,6 +76,20 @@ namespace MIKU {
             1.0f, 0, 0, nullptr);
 
         cmdList->OMSetRenderTargets(1, &rtvHandle, true, &dsvHandle);
+
+        ID3D12DescriptorHeap* heaps[] = { srvHeap.Get() };
+        cmdList->SetDescriptorHeaps(_countof(heaps), heaps);
+
+
+        ImGui_ImplDX12_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        static bool show = true;
+        ImGui::ShowDemoWindow(&show);
+
+        ImGui::Render();
+        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList.Get());
 
         // ×ÊÔ´×´Ì¬×ª»»£ºRender Target -> Present
         cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
@@ -164,12 +181,20 @@ namespace MIKU {
         ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap)));
 
         // DSV¶Ñ
-        D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
+       
         dsvHeapDesc.NumDescriptors = 1;
         dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
         dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
         dsvHeapDesc.NodeMask = 0;
         ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap)));
+
+        //SRV¶Ñ
+        srvHeapDesc.NumDescriptors = 1;
+        srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+        srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+        srvHeapDesc.NodeMask = 0;
+        ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap))); 
+
     }
 
     void DX12Temp::CreateRTV() {
@@ -183,7 +208,7 @@ namespace MIKU {
     }
 
     void DX12Temp::CreateDSV() {
-        D3D12_RESOURCE_DESC dsvDesc = {};
+       
         dsvDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         dsvDesc.Alignment = 0;
         dsvDesc.Width = 1280;

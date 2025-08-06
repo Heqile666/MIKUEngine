@@ -182,6 +182,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\MIKUEngine\MIKUEngine.dll\ (xcopy /Q /E /Y /
     <ClInclude Include="src\Platform\DX12\DX12Temp.h" />
     <ClInclude Include="src\Platform\DX12\DxException.h" />
     <ClInclude Include="src\Platform\DX12\ImGuiDX12Renderer.h" />
+    <ClInclude Include="src\Platform\DX12\ImGuiGLFW.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\mikupch.h" />
     <ClInclude Include="vender\DX12\include\composition\dcomp-preview.h" />
@@ -406,6 +407,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\MIKUEngine\MIKUEngine.dll\ (xcopy /Q /E /Y /
     <ClCompile Include="src\Platform\DX12\DX12Temp.cpp" />
     <ClCompile Include="src\Platform\DX12\DxException.cpp" />
     <ClCompile Include="src\Platform\DX12\ImGuiDX12Renderer.cpp" />
+    <ClCompile Include="src\Platform\DX12\ImGuiGLFW.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\mikupch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
