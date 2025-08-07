@@ -6,7 +6,12 @@
 #include "MIKU/Application.h"
 #include "Platform/DX12/DX12Temp.h"
 #include "Platform/DX12/ImGuiGLFW.h"
+
+
+ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
+
 namespace MIKU {
+	
 	
 	ImGuiLayer::ImGuiLayer()
 		: Layer("ImGuiLayer")
@@ -78,6 +83,103 @@ namespace MIKU {
 
 	void ImGuiLayer::OnEvent(Event& event)
 	{
+		//传入事件
+		EventDispatcher dispatcher(event);
+
+		//对具体的事件进行消费
+		dispatcher.Dispatch<MouseButtonPressedEvent>(MIKU_BIND_EVENT_FN(ImGuiLayer::OnMouseButtonPressedEvent));
+		dispatcher.Dispatch<MouseButtonReleasedEvent>(MIKU_BIND_EVENT_FN(ImGuiLayer::OnMouseButtonReleasedEvent));
+		dispatcher.Dispatch<MouseMovedEvent>(MIKU_BIND_EVENT_FN(ImGuiLayer::OnMouseMovedEvent));
+		dispatcher.Dispatch<MouseScrolledEvent>(MIKU_BIND_EVENT_FN(ImGuiLayer::OnMouseScrolledEvent));
+		dispatcher.Dispatch<KeyPressedEvent>(MIKU_BIND_EVENT_FN(ImGuiLayer::OnKeyPressedEvent));
+		dispatcher.Dispatch<KeyTypedEvent>(MIKU_BIND_EVENT_FN(ImGuiLayer::OnKeyTypedEvent));
+		dispatcher.Dispatch<KeyReleasedEvent>(MIKU_BIND_EVENT_FN(ImGuiLayer::OnKeyReleasedEvent));
+		dispatcher.Dispatch<WindowResizeEvent>(MIKU_BIND_EVENT_FN(ImGuiLayer::OnWindowResizeEvent));
+
 	}
+
+	bool ImGuiLayer::OnMouseButtonPressedEvent(MouseButtonPressedEvent& e)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		io.MouseDown[e.GetMouseButton()] = true;
+
+		return false;
+	}
+
+	bool ImGuiLayer::OnMouseButtonReleasedEvent(MouseButtonReleasedEvent& e)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		io.MouseDown[e.GetMouseButton()] = false;
+
+		return false;
+	}
+
+	bool ImGuiLayer::OnMouseMovedEvent(MouseMovedEvent& e)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		io.MousePos = ImVec2(e.GetX(), e.GetY());
+
+		return false;
+	}
+
+	bool ImGuiLayer::OnMouseScrolledEvent(MouseScrolledEvent& e)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		io.MouseWheelH += e.GetXOffset();
+		io.MouseWheel += e.GetYOffset();
+
+		return false;
+	}
+
+	bool ImGuiLayer::OnKeyPressedEvent(KeyPressedEvent& e)
+	{
+
+		//ImGui::IsKeyPressed(ImGuiKey_Space)
+		//ImGuiIO& io = ImGui::GetIO();
+		/*io.KeysDown[e.GetKeyCode()] = true;
+
+		ImGui::IsKeyPressed(ImGuiKey_Space)
+		io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
+		io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
+		io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
+		io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];*/
+
+		ImGui::IsKeyPressed(ImGui_ImplGlfw_KeyToImGuiKey(e.GetKeyCode(),e.GetScanCode()) , e.GetRepeatCount() > 0 ? true : false);
+		return false;
+	}
+
+	bool ImGuiLayer::OnKeyReleasedEvent(KeyReleasedEvent& e)
+	{
+		/*ImGuiIO& io = ImGui::GetIO();
+		io.KeysDown[e.GetKeyCode()] = false;*/
+		ImGui::IsKeyReleased(ImGui_ImplGlfw_KeyToImGuiKey(e.GetKeyCode(),e.GetScanCode()));
+		return false;
+	}
+
+	bool ImGuiLayer::OnKeyTypedEvent(KeyTypedEvent& e)
+	{
+	/*	ImGuiIO& io = ImGui::GetIO();
+		int keycode = e.GetKeyCode();
+		if (keycode > 0 && keycode < 0x10000)
+			io.AddInputCharacter((unsigned short)keycode);*/
+
+		return false;
+	}
+
+	bool ImGuiLayer::OnWindowResizeEvent(WindowResizeEvent& e)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		io.DisplaySize = ImVec2(e.GetWidth(), e.GetHeight());
+		io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
+		//glViewport(0, 0, e.GetWidth(), e.GetHeight());
+		DX12 = &(Application::Get().GetDX12());
+		DX12->viewPort.Height = e.GetHeight();
+		DX12->viewPort.Width = e.GetWidth();
+	
+		DX12->scissorRect.right = e.GetWidth();
+		DX12->scissorRect.bottom = e.GetHeight();
+		return false;
+	}
+
 
 }

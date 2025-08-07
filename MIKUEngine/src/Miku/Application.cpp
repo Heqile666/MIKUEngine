@@ -41,13 +41,12 @@ namespace MIKU {
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
 
-		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();) {
+		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();) 
+		{
 			(*--it)->OnEvent(e);
 			if (e.Handled)
 				break;
 		}
-
-
 	}
 
 	void Application::PushLayer(Layer* layer)

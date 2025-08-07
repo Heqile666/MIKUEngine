@@ -2,13 +2,13 @@
 #include "Miku/Core.h"
 #include "mikupch.h"
 namespace MIKU {
-	enum class EventType {
-
-			None = 0,
-			WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
-			AppTick, AppUpdate, AppRender,
-			KeyPressed, KeyReleased,
-			MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
+	enum class EventType 
+	{
+		None = 0,
+		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
+		AppTick, AppUpdate, AppRender,
+		KeyPressed, KeyReleased,KeyTyped,
+		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 
 	};
 
@@ -51,7 +51,7 @@ namespace MIKU {
 	class EventDispatcher {
 		
 		template<typename T>
-		using EventFn = std::function<bool(T&)>;
+		using EventFn = std::function<bool(T&)>;//f返回类型是bool，函数参数是T&
 	public:
 		EventDispatcher(Event& event) :m_Event(event) 
 		{
@@ -59,9 +59,11 @@ namespace MIKU {
 		}
 		template<typename T>
 		//func是回调函数
-		bool Dispatch(EventFn<T> func) {
-			if (m_Event.GetEventType() == T::GetStaticType()) {
-				m_Event.Handled = func(*(T*)&m_Event);
+		bool Dispatch(EventFn<T> func) 
+		{
+			if (m_Event.GetEventType() == T::GetStaticType())//如果传入的事件等于模板参数的特定事件，则进行消费
+			{
+				m_Event.Handled = func(*(T*)&m_Event);//取m_Event的地址转换成T*(子类事件),最后在解引用，当作参数传递给回调函数
 				return true;
 			}
 			return false;
