@@ -1,15 +1,15 @@
 [submodule "MIKUEngine/vender/GLFW"]
 	path = MIKUEngine/vender/GLFW
-	url = https://github.com/glfw/glfw.git
+	url = https://github.com/Heqile666/glfw.git
 [submodule "MIKUEngine/vender/DX12"]
 	path = MIKUEngine/vender/DX12
-	url = https://github.com/microsoft/DirectX-Headers.git
+	url = https://github.com/Heqile666/DirectX-Headers.git
 [submodule "MIKUEngine/vender/spdlog"]
 	path = MIKUEngine/vender/spdlog
-	url = https://github.com/gabime/spdlog.git
+	url = https://github.com/Heqile666/spdlog.git
 [submodule "MIKUEngine/vender/imgui"]
 	path = MIKUEngine/vender/imgui
 	url = https://github.com/Heqile666/imgui.git
 [submodule "MIKUEngine/vender/glm"]
 	path = MIKUEngine/vender/glm
-	url = https://github.com/g-truc/glm
+	url = https://github.com/Heqile666/glm.git
