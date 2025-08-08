@@ -10,3 +10,6 @@
 [submodule "MIKUEngine/vender/imgui"]
 	path = MIKUEngine/vender/imgui
 	url = https://github.com/Heqile666/imgui.git
+[submodule "MIKUEngine/vender/glm"]
+	path = MIKUEngine/vender/glm
+	url = https://github.com/g-truc/glm

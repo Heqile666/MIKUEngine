@@ -15,6 +15,7 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "MIKUEngine/vender/GLFW/include"
 IncludeDir["ImGui"] = "MIKUEngine/vender/imgui"
 IncludeDir["DX12"] = "MIKUEngine/vender/DX12/include/directx"
+IncludeDir["glm"] = "MIKUEngine/vender/glm"
 
 include "MIKUEngine/vender/GLFW" --包含的是GLFW文件夹下的premake5.lua
 include "MIKUEngine/vender/imgui" --包含的是ImGui文件夹下的premake5.lua
@@ -37,7 +38,8 @@ project "MIKUEngine"
     {
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.cpp",
-        "%{prj.name}/vender/**.h",
+        "%{prj.name}/vender/glm/glm/**.hpp",
+        "%{prj.name}/vender/glm/glm/**.inl",
     }
 
     includedirs
@@ -47,6 +49,7 @@ project "MIKUEngine"
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.ImGui}",
         "%{IncludeDir.DX12}",
+        "%{IncludeDir.glm}",
         
     }
 
@@ -113,7 +116,8 @@ project "Sandbox"
     includedirs
     {
         "MIKUEngine/vender/spdlog/include",
-        "MIKUEngine/src"
+        "MIKUEngine/src",
+        "%{IncludeDir.glm}",
     }
 
     links
