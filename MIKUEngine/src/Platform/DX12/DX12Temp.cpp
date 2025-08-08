@@ -8,7 +8,7 @@ namespace MIKU {
    
 
     bool DX12Temp::InitWindow(std::unique_ptr<Window>& window) {
-        WindowHandle = glfwGetWin32Window(window->GetGLFWwindow());
+        WindowHandle = glfwGetWin32Window((GLFWwindow*)window->GetNativeWindow());
         return WindowHandle != nullptr;
     }
 

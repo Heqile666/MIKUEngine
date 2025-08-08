@@ -840,6 +840,10 @@
     <ClInclude Include="vender\spdlog\tests\utils.h">
       <Filter>vender\spdlog\tests</Filter>
     </ClInclude>
+    <ClInclude Include="src\Miku\Input.h" />
+    <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
+    <ClInclude Include="src\Miku\KeyCodes.h" />
+    <ClInclude Include="src\Miku\MouseButtonCodes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Miku\Application.cpp">
@@ -881,5 +885,6 @@
     <ClCompile Include="src\mikupch.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
   </ItemGroup>
 </Project>

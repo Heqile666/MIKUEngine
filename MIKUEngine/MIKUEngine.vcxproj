@@ -172,9 +172,12 @@ IF EXIST ..\bin\Dist-windows-x86_64\MIKUEngine\MIKUEngine.dll\ (xcopy /Q /E /Y /
     <ClInclude Include="src\Miku\Events\KeyEvent.h" />
     <ClInclude Include="src\Miku\Events\MouseEvent.h" />
     <ClInclude Include="src\Miku\ImGui\ImGuiLayer.h" />
+    <ClInclude Include="src\Miku\Input.h" />
+    <ClInclude Include="src\Miku\KeyCodes.h" />
     <ClInclude Include="src\Miku\Layer.h" />
     <ClInclude Include="src\Miku\LayerStack.h" />
     <ClInclude Include="src\Miku\Log.h" />
+    <ClInclude Include="src\Miku\MouseButtonCodes.h" />
     <ClInclude Include="src\Miku\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Miku\Renderer\RendererAPI.h" />
     <ClInclude Include="src\Miku\Window.h" />
@@ -183,6 +186,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\MIKUEngine\MIKUEngine.dll\ (xcopy /Q /E /Y /
     <ClInclude Include="src\Platform\DX12\DxException.h" />
     <ClInclude Include="src\Platform\DX12\ImGuiDX12Renderer.h" />
     <ClInclude Include="src\Platform\DX12\ImGuiGLFW.h" />
+    <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\mikupch.h" />
     <ClInclude Include="vender\DX12\include\composition\dcomp-preview.h" />
@@ -408,6 +412,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\MIKUEngine\MIKUEngine.dll\ (xcopy /Q /E /Y /
     <ClCompile Include="src\Platform\DX12\DxException.cpp" />
     <ClCompile Include="src\Platform\DX12\ImGuiDX12Renderer.cpp" />
     <ClCompile Include="src\Platform\DX12\ImGuiGLFW.cpp" />
+    <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\mikupch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>

@@ -56,7 +56,7 @@ namespace MIKU {
 		init_info.SrvDescriptorAllocFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu_handle) { return g_pd3dSrvDescHeapAlloc.Alloc(out_cpu_handle, out_gpu_handle); };
 		init_info.SrvDescriptorFreeFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle) { return g_pd3dSrvDescHeapAlloc.Free(cpu_handle, gpu_handle); };
 		ImGui_ImplDX12_Init(&init_info);
-		ImGui_ImplGlfw_InitForOther(Application::Get().GetWindow().GetGLFWwindow(), true);
+		ImGui_ImplGlfw_InitForOther((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow(), true);
 		
 		
 	}

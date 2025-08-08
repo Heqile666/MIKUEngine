@@ -6,6 +6,11 @@
 #include "Miku/Log.h"
 #include "Miku/Layer.h"
 #include "Miku/ImGui/ImGuiLayer.h"
+
+#include "Miku/Input.h"
+#include "Miku/KeyCodes.h"
+#include "Miku/MouseButtonCodes.h"
+
 //---------Entry Point------------
 #include"Miku/EntryPoint.h"
 //--------------------------------

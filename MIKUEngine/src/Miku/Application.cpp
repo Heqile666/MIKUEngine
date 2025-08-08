@@ -2,7 +2,7 @@
 #include "Application.h"
 #include <GLFW/glfw3.h>
 #include "Platform/DX12/DX12Temp.h"
-
+#include "Input.h"
 namespace MIKU {
 
 #define BIND_EVENT_FN(x) std::bind(&Application::x,this,std::placeholders::_1)
@@ -32,7 +32,8 @@ namespace MIKU {
 				layer->OnUpdate();
 			DX12->Run();
 			m_Window->OnUpdate();
-
+			auto [x, y] = Input::GetMousePosition();
+			MIKU_CORE_TRACE("{0},{1}", x, y);
 			
 		}
 	}
