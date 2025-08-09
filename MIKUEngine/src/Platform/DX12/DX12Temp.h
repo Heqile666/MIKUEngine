@@ -116,7 +116,9 @@ namespace MIKU {
 
         // 运行和绘制
         void Run();
+        void Begin();
         void Draw();
+        void End();
 
         // 资源和对象创建
         void CreateDevice();

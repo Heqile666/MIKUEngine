@@ -1385,6 +1385,9 @@
     <ClCompile Include="src\Miku\Application.cpp">
       <Filter>src\Miku</Filter>
     </ClCompile>
+    <ClCompile Include="src\Miku\ImGui\ImGuiBuild.cpp">
+      <Filter>src\Miku\ImGui</Filter>
+    </ClCompile>
     <ClCompile Include="src\Miku\ImGui\ImGuiLayer.cpp">
       <Filter>src\Miku\ImGui</Filter>
     </ClCompile>

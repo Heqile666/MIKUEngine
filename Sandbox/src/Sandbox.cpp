@@ -51,7 +51,7 @@ class Sandbox :public MIKU::Application {
 public:
 	Sandbox() {
 		PushLayer(new ExampleLayer());
-		PushOverlay(new MIKU::ImGuiLayer());
+	
 	}
 	~Sandbox() {
 	

@@ -44,11 +44,10 @@ namespace MIKU {
         return true;
     }
 
-    void DX12Temp::Run() {
-        Draw();
-    }
+   
 
-    void DX12Temp::Draw() {
+    void DX12Temp::Begin()
+    {
         ThrowIfFailed(cmdAllocator->Reset());
         ThrowIfFailed(cmdList->Reset(cmdAllocator.Get(), nullptr));
 
@@ -79,18 +78,11 @@ namespace MIKU {
 
         ID3D12DescriptorHeap* heaps[] = { srvHeap.Get() };
         cmdList->SetDescriptorHeaps(_countof(heaps), heaps);
+    }
 
-
-        ImGui_ImplDX12_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        static bool show = true;
-        ImGui::ShowDemoWindow(&show);
-
-        ImGui::Render();
-        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList.Get());
-
+    void DX12Temp::End()
+    {
+        UINT& backBufferIndex = mCurrentBackBuffer;
         // ×ÊÔ´×´Ì¬×ª»»£ºRender Target -> Present
         cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
             swapChainBuffer[backBufferIndex].Get(),
@@ -108,6 +100,7 @@ namespace MIKU {
 
         FlushCmdQueue();
     }
+
 
     void DX12Temp::CreateDevice() {
         ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)));
@@ -260,6 +253,8 @@ namespace MIKU {
             CloseHandle(eventHandle);
         }
     }
+
+
 
     void DX12Temp::CreateViewPortAndScissorRect() {
         viewPort.TopLeftX = 0.0f;

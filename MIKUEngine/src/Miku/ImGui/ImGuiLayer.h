@@ -14,10 +14,12 @@ namespace MIKU {
 		ImGuiLayer(std::unique_ptr<DX12Temp>& DX12Temp);
 		~ImGuiLayer();
 
-		virtual void OnAttach();
-		virtual void OnDetach();
-		virtual void OnImGuiRender() {}
-		virtual void OnUpdate();
+		virtual void OnAttach() override;
+		virtual void OnDetach() override;
+		virtual void OnImGuiRender() override;
+
+		void Begin();
+		void End();
 		
 	private:
 	

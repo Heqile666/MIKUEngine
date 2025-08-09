@@ -4,6 +4,7 @@
 #include "Miku/LayerStack.h"
 #include "Miku/Events/Event.h"
 #include "Miku/Events/ApplicationEvent.h"
+#include "Miku/ImGui/ImGuiLayer.h"
 
 namespace MIKU {
 
@@ -27,6 +28,9 @@ namespace MIKU {
 		std::unique_ptr<DX12Temp> DX12;//不同项目的cpp文件和头文件不互通，所以这里用前置声明，并在cpp文件中包含DX12Temp
 		bool OnWindowClose(WindowCloseEvent& e);
 		std::unique_ptr<Window> m_Window;
+
+		ImGuiLayer* m_ImGuiLayer;
+
 		bool m_Running = true;
 		LayerStack m_LayerStack;
 	

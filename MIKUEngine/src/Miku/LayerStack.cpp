@@ -2,32 +2,43 @@
 #include "LayerStack.h"
 
 namespace MIKU {
-	LayerStack::LayerStack() {
-		m_LayerInsert = m_Layer.begin();
+	LayerStack::LayerStack() 
+	{
+		
 	}
-	LayerStack::~LayerStack() {
-		for (Layer* layer : m_Layer) {
+
+	LayerStack::~LayerStack() 
+	{
+		for (Layer* layer : m_Layer) 
+		{
 			delete layer;
 		}
 	}
 
-	void LayerStack::PushLayer(Layer* layer) {
-		m_LayerInsert = m_Layer.emplace(m_LayerInsert, layer);
+	void LayerStack::PushLayer(Layer* layer) 
+	{
+		m_Layer.emplace(m_Layer.begin()+m_LayerInsertIndex, layer);
+		m_LayerInsertIndex++;
 	}
-	void LayerStack::PushOverlay(Layer* overlay) {
+	void LayerStack::PushOverlay(Layer* overlay) 
+	{
 		m_Layer.emplace_back(overlay);
 	}
 
-	void LayerStack::PopLayer(Layer* layer) {
+	void LayerStack::PopLayer(Layer* layer) 
+	{
 		auto it = std::find(m_Layer.begin(), m_Layer.end(), layer);
-		if (it != m_Layer.end()) {
+		if (it != m_Layer.end()) 
+		{
+
 			m_Layer.erase(it);
-			m_LayerInsert--;
+			m_LayerInsertIndex--;
 		
 		}
 	}
 
-	void LayerStack::PopOverlay(Layer* overlay) {
+	void LayerStack::PopOverlay(Layer* overlay) 
+	{
 		auto it = std::find(m_Layer.begin(), m_Layer.end(), overlay);
 		if (it != m_Layer.end())
 			m_Layer.erase(it);

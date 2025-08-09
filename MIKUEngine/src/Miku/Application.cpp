@@ -13,10 +13,17 @@ namespace MIKU {
 	{
 		MIKU_CORE_ASSERT(!s_Instance,"Application already exists!")
 		s_Instance = this;
+
 		m_Window = std::unique_ptr<Window>(Window::Create());
-		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 		DX12 = std::make_unique<DX12Temp>(m_Window);
-		MIKU_CORE_ASSERT(DX12->Init(),"DX12 init failed!")
+		MIKU_CORE_ASSERT(DX12->Init(), "DX12 init failed!")
+		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+
+		m_ImGuiLayer = new ImGuiLayer();
+		
+		
+		PushOverlay(m_ImGuiLayer);
+		
 	}
 	Application::~Application()
 	{
@@ -26,14 +33,22 @@ namespace MIKU {
 	
 		
 		while (m_Running) {
-		/*	glClearColor(1, 0, 1, 1);
-			glClear(GL_COLOR_BUFFER_BIT);*/
+			//事件产生并处理
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate();
-			DX12->Run();
+
+			//DX12渲染初始环境
+			DX12->Begin();
+
+			m_ImGuiLayer->Begin();
+			for (Layer* layer : m_LayerStack)
+				layer->OnImGuiRender();
+			m_ImGuiLayer->End();
+			
+			DX12->End();
+			
+			//事件轮询
 			m_Window->OnUpdate();
-			auto [x, y] = Input::GetMousePosition();
-			MIKU_CORE_TRACE("{0},{1}", x, y);
 			
 		}
 	}

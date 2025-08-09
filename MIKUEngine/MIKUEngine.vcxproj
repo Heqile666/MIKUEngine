@@ -610,6 +610,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\MIKUEngine\MIKUEngine.dll\ (xcopy /Q /E /Y /
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Miku\Application.cpp" />
+    <ClCompile Include="src\Miku\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Miku\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Miku\Layer.cpp" />
     <ClCompile Include="src\Miku\LayerStack.cpp" />
