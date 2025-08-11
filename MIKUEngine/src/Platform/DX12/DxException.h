@@ -2,7 +2,7 @@
 #include <comdef.h>
 #include <string>
 
-//ºê¶¨ÒåThrowIfFailed
+//å®å®šä¹‰ThrowIfFailed
 #ifndef ThrowIfFailed
 #define ThrowIfFailed(x)                                              \
 {                                                                     \
@@ -12,15 +12,15 @@
 }
 #endif
 namespace MIKU {
-	//AnsiToWStringº¯Êı£¨×ª»»³É¿í×Ö·ûÀàĞÍµÄ×Ö·û´®£¬wstring£©
-	//ÔÚWindowsÆ½Ì¨ÉÏ£¬ÎÒÃÇÓ¦¸Ã¶¼Ê¹ÓÃwstringºÍwchar_t£¬´¦Àí·½Ê½ÊÇÔÚ×Ö·û´®Ç°+L
+	//AnsiToWStringå‡½æ•°ï¼ˆè½¬æ¢æˆå®½å­—ç¬¦ç±»å‹çš„å­—ç¬¦ä¸²ï¼Œwstringï¼‰
+	//åœ¨Windowså¹³å°ä¸Šï¼Œæˆ‘ä»¬åº”è¯¥éƒ½ä½¿ç”¨wstringå’Œwchar_tï¼Œå¤„ç†æ–¹å¼æ˜¯åœ¨å­—ç¬¦ä¸²å‰+L
 	inline std::wstring AnsiToWString(const std::string& str)
 	{
 		WCHAR buffer[512];
 		MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, buffer, 512);
 		return std::wstring(buffer);
 	}
-	//DxExceptionÀà
+	//DxExceptionç±»
 
 
 	class DxException

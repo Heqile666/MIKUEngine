@@ -24,10 +24,13 @@ include "MIKUEngine/vender/imgui" --包含的是ImGui文件夹下的premake5.lua
 
 project "MIKUEngine"
     location "MIKUEngine"
-    kind "SharedLib"
+    kind "StaticLib" --项目本身是静态库
     language "C++"
-    staticruntime "off"
-
+    cppdialect "C++17"
+    staticruntime "on" --使用静态链接
+    buildoptions { "/utf-8" }
+    linkoptions { "/ignore:4006" }
+    
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
@@ -40,6 +43,12 @@ project "MIKUEngine"
         "%{prj.name}/src/**.cpp",
         "%{prj.name}/vender/glm/glm/**.hpp",
         "%{prj.name}/vender/glm/glm/**.inl",
+    }
+
+    defines
+    {
+        "_CRT_SECURE_NO_WARNINGS"
+
     }
 
     includedirs
@@ -60,30 +69,31 @@ project "MIKUEngine"
         "dxgi.lib",
         --windows
         "GLFW",--link的vs项目
-        "opengl32.lib",
         "ImGui"
       
     }
     
     filter "system:windows"
-        cppdialect "C++17"
         systemversion "latest"
-        buildoptions { "/utf-8" }
+      
         
         defines
         {
             "MIKU_BUILD_DLL",
-            "MIKU_PLATFORM_WINDOWS"        
+            "MIKU_PLATFORM_WINDOWS",
+            "GLFW_INCLUDE_NONE", --不包含GLFW的OpenGL头文件
+            
         }
         
-        postbuildcommands {
-            "{MKDIR} %{cfg.targetdir}/../Sandbox/",
-            "{COPY} %{cfg.targetdir}/MIKUEngine.dll %{cfg.targetdir}/../Sandbox/"
-        }
+       -- postbuildcommands {
+       --     "{MKDIR} %{cfg.targetdir}/../Sandbox/",
+       --     "{COPY} %{cfg.targetdir}/MIKUEngine.dll %{cfg.targetdir}/../Sandbox/"
+       -- }
+
     filter "configurations:Debug"
         defines "MIKU_DEBUG"
         runtime "Debug"
-        optimize "On"
+        optimize "off"
 
     filter "configurations:Release"
         defines "MIKU_RELEASE"
@@ -102,7 +112,10 @@ project "Sandbox"
     location "Sandbox"
     kind "ConsoleApp"
     language "C++"
+    cppdialect "C++17"
+    staticruntime "on"
     buildoptions { "/utf-8" }
+  
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
@@ -126,7 +139,6 @@ project "Sandbox"
     }
 
     filter "system:windows"
-        cppdialect "C++17"
         systemversion "latest"
         
         defines
@@ -137,16 +149,16 @@ project "Sandbox"
             
     filter "configurations:Debug"
         defines "MIKU_DEBUG"
-        buildoptions "/MDd"
-        optimize "On"
+        runtime "Debug"
+        optimize "off"
 
     filter "configurations:Release"
         defines "MIKU_RELEASE"
-        buildoptions "/MD"
+        runtime "Release"
         optimize "On" 
 
     filter "configurations:Dist"
         defines "MIKU_DIST"
-        buildoptions "/MD"
+        runtime "Release"
         optimize "On"
    

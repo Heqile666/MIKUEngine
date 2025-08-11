@@ -64,7 +64,7 @@ namespace MIKU {
            
         };
         ~DX12Temp() = default;
-        // 设备和DXGI接口
+       
         ComPtr<ID3D12Device> d3dDevice;
         ComPtr<IDXGIFactory4> dxgiFactory;
         ComPtr<ID3D12Fence> fence;
@@ -93,7 +93,7 @@ namespace MIKU {
 
         int mCurrentFence = 0;
 
-        // 交换链描述符
+       
         DXGI_SWAP_CHAIN_DESC swapChainDesc;
 
         D3D12_RESOURCE_DESC dsvDesc;
@@ -109,18 +109,15 @@ namespace MIKU {
     public:
        
 
-        // 初始化相关
         bool Init();
         bool InitWindow(std::unique_ptr<Window>& window);
         bool InitDirect3D();
 
-        // 运行和绘制
         void Run();
         void Begin();
         void Draw();
         void End();
 
-        // 资源和对象创建
         void CreateDevice();
         void CreateFence();
         void GetDescriptorSize();
@@ -133,7 +130,7 @@ namespace MIKU {
         void CreateViewPortAndScissorRect();
         void resourceBarrierBuild();
 
-        // 命令队列同步
+      
         void FlushCmdQueue();
 
     private:

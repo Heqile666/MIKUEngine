@@ -65,8 +65,8 @@ namespace MIKU {
 		init_info.Device = DX12->d3dDevice.Get();
 		init_info.NumFramesInFlight = DX12->swapChainDesc.BufferCount;
 		init_info.RTVFormat = DX12->swapChainDesc.BufferDesc.Format;
-		init_info.SrvDescriptorHeap = DX12->srvHeap.Get(); // 必须是 SHADER_VISIBLE 的 SRV Heap
-		init_info.CommandQueue = DX12->cmdQueue.Get(); //主渲染队列
+		init_info.SrvDescriptorHeap = DX12->srvHeap.Get(); 
+		init_info.CommandQueue = DX12->cmdQueue.Get(); 
 		static ExampleDescriptorHeapAllocator g_pd3dSrvDescHeapAlloc = DX12->g_pd3dSrvDescHeapAlloc;
 		init_info.SrvDescriptorAllocFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu_handle) { return g_pd3dSrvDescHeapAlloc.Alloc(out_cpu_handle, out_gpu_handle); };
 		init_info.SrvDescriptorFreeFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle) { return g_pd3dSrvDescHeapAlloc.Free(cpu_handle, gpu_handle); };
@@ -99,7 +99,7 @@ namespace MIKU {
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		Application& app = Application::Get();
-		io.DisplaySize = ImVec2(app.GetWindow().GetWidth(), app.GetWindow().GetHeight());
+		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());
 
 		// Rendering
 		ImGui::Render();

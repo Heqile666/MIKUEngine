@@ -53,7 +53,7 @@ namespace MIKU {
 
         UINT& backBufferIndex = mCurrentBackBuffer;
 
-        // 资源状态转换：Present -> Render Target
+        
         cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
             swapChainBuffer[backBufferIndex].Get(),
             D3D12_RESOURCE_STATE_PRESENT,
@@ -83,7 +83,7 @@ namespace MIKU {
     void DX12Temp::End()
     {
         UINT& backBufferIndex = mCurrentBackBuffer;
-        // 资源状态转换：Render Target -> Present
+    
         cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
             swapChainBuffer[backBufferIndex].Get(),
             D3D12_RESOURCE_STATE_RENDER_TARGET,
@@ -139,7 +139,7 @@ namespace MIKU {
         ThrowIfFailed(d3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&cmdQueue)));
         ThrowIfFailed(d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAllocator)));
         ThrowIfFailed(d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAllocator.Get(), nullptr, IID_PPV_ARGS(&cmdList)));
-        // cmdList->Close(); // 这里不关闭，后续会重置
+        
     }
 
     void DX12Temp::CreateSwapChain() {
@@ -165,7 +165,7 @@ namespace MIKU {
     }
 
     void DX12Temp::CreateDescriptorHeap() {
-        // RTV堆
+     
        
         rtvHeapDesc.NumDescriptors = 2;
         rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -173,7 +173,7 @@ namespace MIKU {
         rtvHeapDesc.NodeMask = 0;
         ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap)));
 
-        // DSV堆
+     
        
         dsvHeapDesc.NumDescriptors = 1;
         dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
@@ -181,7 +181,7 @@ namespace MIKU {
         dsvHeapDesc.NodeMask = 0;
         ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap)));
 
-        //SRV堆
+       
         srvHeapDesc.NumDescriptors = 1;
         srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;

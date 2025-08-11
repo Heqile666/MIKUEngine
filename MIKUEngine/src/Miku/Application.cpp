@@ -33,11 +33,11 @@ namespace MIKU {
 	
 		
 		while (m_Running) {
-			//ÊÂ¼þ²úÉú²¢´¦Àí
+			//äº‹ä»¶äº§ç”Ÿå¹¶å¤„ç†
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate();
 
-			//DX12äÖÈ¾³õÊ¼»·¾³
+			//DX12æ¸²æŸ“åˆå§‹çŽ¯å¢ƒ
 			DX12->Begin();
 
 			m_ImGuiLayer->Begin();
@@ -47,7 +47,7 @@ namespace MIKU {
 			
 			DX12->End();
 			
-			//ÊÂ¼þÂÖÑ¯
+			//äº‹ä»¶è½®è¯¢
 			m_Window->OnUpdate();
 			
 		}

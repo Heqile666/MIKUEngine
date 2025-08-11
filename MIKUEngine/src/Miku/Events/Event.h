@@ -51,19 +51,19 @@ namespace MIKU {
 	class EventDispatcher {
 		
 		template<typename T>
-		using EventFn = std::function<bool(T&)>;//f·µ»ØÀàĞÍÊÇbool£¬º¯Êı²ÎÊıÊÇT&
+		using EventFn = std::function<bool(T&)>;//fè¿”å›ç±»å‹æ˜¯boolï¼Œå‡½æ•°å‚æ•°æ˜¯T&
 	public:
 		EventDispatcher(Event& event) :m_Event(event) 
 		{
 		
 		}
 		template<typename T>
-		//funcÊÇ»Øµ÷º¯Êı
+		//funcæ˜¯å›è°ƒå‡½æ•°
 		bool Dispatch(EventFn<T> func) 
 		{
-			if (m_Event.GetEventType() == T::GetStaticType())//Èç¹û´«ÈëµÄÊÂ¼şµÈÓÚÄ£°å²ÎÊıµÄÌØ¶¨ÊÂ¼ş£¬Ôò½øĞĞÏû·Ñ
+			if (m_Event.GetEventType() == T::GetStaticType())//å¦‚æœä¼ å…¥çš„äº‹ä»¶ç­‰äºæ¨¡æ¿å‚æ•°çš„ç‰¹å®šäº‹ä»¶ï¼Œåˆ™è¿›è¡Œæ¶ˆè´¹
 			{
-				m_Event.Handled = func(*(T*)&m_Event);//È¡m_EventµÄµØÖ·×ª»»³ÉT*(×ÓÀàÊÂ¼ş),×îºóÔÚ½âÒıÓÃ£¬µ±×÷²ÎÊı´«µİ¸ø»Øµ÷º¯Êı
+				m_Event.Handled = func(*(T*)&m_Event);//å–m_Eventçš„åœ°å€è½¬æ¢æˆT*(å­ç±»äº‹ä»¶),æœ€ååœ¨è§£å¼•ç”¨ï¼Œå½“ä½œå‚æ•°ä¼ é€’ç»™å›è°ƒå‡½æ•°
 				return true;
 			}
 			return false;
