@@ -1,5 +1,5 @@
 #pragma once
-#include"Miku/Core.h"
+#include"Miku/Core/CoreDefinitions.h"
 #include "Miku/Events/Event.h"
 
 namespace MIKU {

@@ -1,8 +1,8 @@
 #include "mikupch.h"
 #include "DX12Temp.h"
 #include <imgui.h>
-#include <Platform/DX12/ImGuiDX12Renderer.h>
-#include <Platform/DX12/ImGuiGLFW.h>
+#include <Platform/RenderBackend/DX12/ImGuiDX12Renderer.h>
+#include <Platform/RenderBackend/DX12/ImGuiGLFW.h>
 
 namespace MIKU {
    

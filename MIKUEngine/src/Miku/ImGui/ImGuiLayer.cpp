@@ -1,11 +1,11 @@
 #include "mikupch.h"
 #include "ImGuiLayer.h"
 #include "imgui.h"
-#include "Platform/DX12/ImGuiDX12Renderer.h"
+#include "Platform/RenderBackend/DX12/ImGuiDX12Renderer.h"
 #include <GLFW/glfw3.h>
 #include "MIKU/Application.h"
-#include "Platform/DX12/DX12Temp.h"
-#include "Platform/DX12/ImGuiGLFW.h"
+#include "Platform/RenderBackend/DX12/DX12Temp.h"
+#include "Platform/RenderBackend/DX12/ImGuiGLFW.h"
 
 
 ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
@@ -39,6 +39,9 @@ namespace MIKU {
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+
+		//If you are using a custom back - end, refer to the ImGuiPlatformIO structureand existing backends / +examples / 
+		//to implement support for multi - viewports in your engine.This is not particularly easy to add.
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
@@ -107,10 +110,10 @@ namespace MIKU {
 
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			GLFWwindow* backup_current_context = glfwGetCurrentContext();
+			
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
-			glfwMakeContextCurrent(backup_current_context);
+			
 		}
 	}
 

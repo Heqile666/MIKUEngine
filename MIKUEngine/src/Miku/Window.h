@@ -1,6 +1,6 @@
 #pragma once
 #include"mikupch.h"
-#include"Miku/Core.h"
+#include"Miku/Core/CoreDefinitions.h"
 #include"Miku/Events/Event.h"
 
 struct GLFWwindow;

@@ -1,5 +1,5 @@
 #pragma once
-#include "Miku/Core.h"
+#include"Miku/Core/CoreDefinitions.h"
 #include "mikupch.h"
 namespace MIKU {
 	enum class EventType 
