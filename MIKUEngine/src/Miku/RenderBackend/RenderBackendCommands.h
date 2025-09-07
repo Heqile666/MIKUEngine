@@ -1,0 +1,35 @@
+#pragma once
+
+enum class RenderBackendCommandType
+{
+    CopyBuffer,
+    CopyTexture,
+    UpdateBuffer,
+    UpdateTexture,
+    ClearTexture,
+    Barriers,
+    Transitions,
+    BeginTiming,
+    EndTiming,
+    ResolveTimingQueryResults,
+    Dispatch,
+    DispatchIndirect,
+    //BuildBottomLevelAS,
+    //BuildTopLevelAS,
+    //TraceRays,
+    SetViewport,
+    SetScissor,
+    SetStencilReference,
+    BeginRenderPass,
+    EndRenderPass,
+    Draw,
+    DrawIndirect,
+    DispatchMesh,
+    DispatchMeshIndirect,
+    BeginDebugLabel,
+    EndDebugLabel,
+    //EvaluateDLSS,
+    //FSR2Dispatch,
+    Count,
+
+};

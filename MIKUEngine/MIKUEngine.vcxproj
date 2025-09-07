@@ -152,6 +152,8 @@
     <ClInclude Include="src\Miku\Core.h" />
     <ClInclude Include="src\Miku\Core\CoreDefinitions.h" />
     <ClInclude Include="src\Miku\Core\CoreTypes.h" />
+    <ClInclude Include="src\Miku\Core\Math\Math.h" />
+    <ClInclude Include="src\Miku\Core\Memory\Memory.h" />
     <ClInclude Include="src\Miku\EntryPoint.h" />
     <ClInclude Include="src\Miku\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Miku\Events\Event.h" />
@@ -165,6 +167,8 @@
     <ClInclude Include="src\Miku\Log.h" />
     <ClInclude Include="src\Miku\MouseButtonCodes.h" />
     <ClInclude Include="src\Miku\RenderBackend\GraphicsContext.h" />
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommandList.h" />
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommands.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommon.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendDefinitions.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendHandles.h" />
@@ -602,11 +606,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Miku\Application.cpp" />
+    <ClCompile Include="src\Miku\Core\Memory\MemoryArena.cpp" />
     <ClCompile Include="src\Miku\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Miku\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Miku\Layer.cpp" />
     <ClCompile Include="src\Miku\LayerStack.cpp" />
     <ClCompile Include="src\Miku\Log.cpp" />
+    <ClCompile Include="src\Miku\RenderBackend\RenderBackend.cpp" />
     <ClCompile Include="src\Platform\RenderBackend\DX12\DX12Context.cpp" />
     <ClCompile Include="src\Platform\RenderBackend\DX12\DX12Temp.cpp" />
     <ClCompile Include="src\Platform\RenderBackend\DX12\DxException.cpp" />
@@ -625,6 +631,9 @@
     <ProjectReference Include="vender\imgui\ImGui.vcxproj">
       <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

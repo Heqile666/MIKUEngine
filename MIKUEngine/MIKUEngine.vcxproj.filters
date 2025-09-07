@@ -1376,6 +1376,10 @@
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendTypes.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommon.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendDefinitions.h" />
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommandList.h" />
+    <ClInclude Include="src\Miku\Core\Memory\Memory.h" />
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommands.h" />
+    <ClInclude Include="src\Miku\Core\Math\Math.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Miku\Application.cpp">
@@ -1410,5 +1414,10 @@
     <ClCompile Include="src\Platform\RenderBackend\DX12\DxException.cpp" />
     <ClCompile Include="src\Platform\RenderBackend\DX12\ImGuiDX12Renderer.cpp" />
     <ClCompile Include="src\Platform\RenderBackend\DX12\ImGuiGLFW.cpp" />
+    <ClCompile Include="src\Miku\RenderBackend\RenderBackend.cpp" />
+    <ClCompile Include="src\Miku\Core\Memory\MemoryArena.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

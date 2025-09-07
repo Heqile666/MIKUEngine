@@ -1,6 +1,5 @@
 #pragma once
-
-#include "RenderBackendCommon.h"
+#include "Miku/Core/CoreDefinitions.h"
 #include <limits>
 namespace MIKU 
 {
@@ -28,7 +27,6 @@ namespace MIKU
 
 	};
 
-	//模板的作用在于区分不同的资源类型
 	template<typename ObjectType>
 	class RenderBackendHandleTyped :public RenderBackendHandle 
 	{
@@ -63,4 +61,10 @@ namespace MIKU
 
 	class RenderBackendShader;
 	using RenderBackendShaderHandle = RenderBackendHandleTyped<RenderBackendShader>;
+
+	class RenderBackendTimingQueryHeap;
+	using RenderBackendTimingQueryHeapHandle = RenderBackendHandleTyped<RenderBackendTimingQueryHeap>;
+
+	class RenderBackendOcclusionQueryHeap;
+	using RenderBackendOcclusionQueryHeapHandle = RenderBackendHandleTyped<RenderBackendOcclusionQueryHeap>;
 }
