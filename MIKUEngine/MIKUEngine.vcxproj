@@ -151,14 +151,19 @@
     <ClInclude Include="src\Miku\Application.h" />
     <ClInclude Include="src\Miku\Core.h" />
     <ClInclude Include="src\Miku\Core\CoreDefinitions.h" />
-    <ClInclude Include="src\Miku\Core\CoreTypes.h" />
-    <ClInclude Include="src\Miku\Core\Math\Math.h" />
-    <ClInclude Include="src\Miku\Core\Memory\Memory.h" />
+    <ClInclude Include="src\Miku\Foundation\Foundation.h" />
+    <ClInclude Include="src\Miku\Foundation\FoundationModule.h" />
+    <ClInclude Include="src\Miku\Foundation\FundamentalTypes.h" />
+    <ClInclude Include="src\Miku\Foundation\Memory\Memory.h" />
     <ClInclude Include="src\Miku\EntryPoint.h" />
     <ClInclude Include="src\Miku\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Miku\Events\Event.h" />
     <ClInclude Include="src\Miku\Events\KeyEvent.h" />
     <ClInclude Include="src\Miku\Events\MouseEvent.h" />
+    <ClInclude Include="src\Miku\Foundation\EnumClass.h" />
+    <ClInclude Include="src\Miku\Foundation\Mathematics\MathematicsModule.h" />
+    <ClInclude Include="src\Miku\Foundation\Mathematics\MathUtility.h" />
+    <ClInclude Include="src\Miku\Foundation\Misc\Misc.h" />
     <ClInclude Include="src\Miku\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Miku\Input.h" />
     <ClInclude Include="src\Miku\KeyCodes.h" />
@@ -166,13 +171,18 @@
     <ClInclude Include="src\Miku\LayerStack.h" />
     <ClInclude Include="src\Miku\Log.h" />
     <ClInclude Include="src\Miku\MouseButtonCodes.h" />
-    <ClInclude Include="src\Miku\RenderBackend\GraphicsContext.h" />
+    <ClInclude Include="src\Miku\RenderBackend\Direct3D12RenderBackend\D3D12MemoryAllocator\D3D12MemAlloc.h" />
+    <ClInclude Include="src\Miku\RenderBackend\Direct3D12RenderBackend\Direct3D12RenderBackend.h" />
+    <ClInclude Include="src\Miku\RenderBackend\Direct3D12RenderBackend\Direct3D12RenderBackendCommon.h" />
+    <ClInclude Include="src\Miku\RenderBackend\Direct3D12RenderBackend\Direct3D12RenderBackendPrivate.h" />
+    <ClInclude Include="src\Miku\RenderBackend\Direct3D12RenderBackend\Direct3D12RenderBackendUtility.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommandList.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommands.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommon.h" />
-    <ClInclude Include="src\Miku\RenderBackend\RenderBackendDefinitions.h" />
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendConfig.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendHandles.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendInterface.h" />
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendModule.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendTextureFormat.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendTypes.h" />
     <ClInclude Include="src\Miku\Renderer\GraphicsContext.h" />
@@ -606,13 +616,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Miku\Application.cpp" />
-    <ClCompile Include="src\Miku\Core\Memory\MemoryArena.cpp" />
+    <ClCompile Include="src\Miku\Foundation\Memory\MemoryArena.cpp" />
+    <ClCompile Include="src\Miku\Foundation\Misc\CRC.cpp" />
     <ClCompile Include="src\Miku\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Miku\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Miku\Layer.cpp" />
     <ClCompile Include="src\Miku\LayerStack.cpp" />
     <ClCompile Include="src\Miku\Log.cpp" />
+    <ClCompile Include="src\Miku\RenderBackend\Direct3D12RenderBackend\D3D12MemoryAllocator\D3D12MemAlloc.cpp" />
+    <ClCompile Include="src\Miku\RenderBackend\Direct3D12RenderBackend\Direct3D12RenderBackend.cpp" />
     <ClCompile Include="src\Miku\RenderBackend\RenderBackend.cpp" />
+    <ClCompile Include="src\Miku\RenderBackend\RenderBackendCommandList.cpp" />
+    <ClCompile Include="src\Miku\RenderBackend\RenderBackendTextureFormat.cpp" />
     <ClCompile Include="src\Platform\RenderBackend\DX12\DX12Context.cpp" />
     <ClCompile Include="src\Platform\RenderBackend\DX12\DX12Temp.cpp" />
     <ClCompile Include="src\Platform\RenderBackend\DX12\DxException.cpp" />
@@ -634,6 +649,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="C:\Users\qilehe\Downloads\HorizonDev-refactor\Source\HorizonEngine\Source\Rendering\RenderBackend\Direct3D12RenderBackend\D3D12MemoryAllocator\LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

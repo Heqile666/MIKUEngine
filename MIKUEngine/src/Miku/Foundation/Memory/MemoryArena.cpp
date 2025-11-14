@@ -1,7 +1,6 @@
 #include "mikupch.h"
 #include "Memory.h"
-#include "Miku/Core/CoreDefinitions.h"
-#include "Miku/Core/Math/Math.h"
+
 namespace MIKU
 {
 	LinearArena* GArena = new LinearArena(nullptr, 10485760);
@@ -15,7 +14,7 @@ namespace MIKU
 			newPtr = arena->Alloc(newSize, alignment);
 			if (ptr) 
 			{
-				memcpy(newPtr, ptr, Math::Min(oldSize, newSize));
+				memcpy(newPtr, ptr, std::min(oldSize, newSize));
 				arena->Free(ptr, oldSize);
 			}
 			else 

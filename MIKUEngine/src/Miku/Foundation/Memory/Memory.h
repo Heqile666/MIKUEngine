@@ -1,8 +1,17 @@
 #pragma once
-#include "Miku/Core/CoreTypes.h"
 #include <cstddef>
 #include <corecrt_malloc.h>
-#include <Miku/Core/CoreDefinitions.h>
+#include <Miku/Foundation/FundamentalTypes.h>
+
+
+#define MIKU_DEFAULT_ALIGNMENT uint64(8)
+
+#define MIKU_ARENA_ALLOC(arena, size)                                          (::MIKU::ArenaRealloc(arena, nullptr, 0,       size,    MIKU_DEFAULT_ALIGNMENT, __FILE__, __LINE__))
+#define MIKU_ARENA_FREE(arena, ptr ,size)                                      (::MIKU::ArenaRealloc(arena, ptr,     size,    0 ,      MIKU_DEFAULT_ALIGNMENT, __FILE__, __LINE__))
+#define MIKU_ARENA_REALLOC(arena, ptr, oldSize, newSize)                       (::MIKU::ArenaRealloc(arena, ptr,     oldSize, newSize, MIKU_DEFAULT_ALIGNMENT, __FILE__, __LINE__))
+#define MIKU_ARENA_ALIGNED_ALLOC(arena, size, alignment)                       (::MIKU::ArenaRealloc(arena, nullptr, 0,       size,    alignment,            __FILE__, __LINE__))
+#define MIKU_ARENA_ALIGNED_FREE(arena, ptr, size, alignment)                   (::MIKU::ArenaRealloc(arena, ptr,     size,    0,       alignment,            __FILE__, __LINE__))
+#define MIKU_ARENA_ALIGNED_REALLOC(arena, ptr, oldSize, newSize, alignment)    (::MIKU::ArenaRealloc(arena, ptr,     oldSize, newSize, alignment,            __FILE__, __LINE__))
 namespace MIKU
 {
 	class MemoryArena

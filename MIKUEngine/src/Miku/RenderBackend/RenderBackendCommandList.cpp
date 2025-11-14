@@ -1,0 +1,439 @@
+#include "RenderBackendCommandList.h"
+
+namespace MIKU 
+{
+	void RenderBackendCommandList::CopyBuffer(
+		RenderBackendBufferHandle srcBuffer,
+		uint64 srcOffset,
+		RenderBackendBufferHandle dstBuffer,
+		uint64 dstOffset,
+		uint64 bytes)
+	{
+		RenderBackendCommandCopyBuffer* command = AllocateCommand<RenderBackendCommandCopyBuffer>(RenderBackendCommandCopyBuffer::Type);
+		command->srcBuffer = srcBuffer;
+		command->srcOffset = srcOffset;
+		command->dstBuffer = dstBuffer;
+		command->dstOffset = dstOffset;
+		command->bytes = bytes;
+	}
+
+	void RenderBackendCommandList::CopyTexture2D(
+		RenderBackendTextureHandle srcTexture,
+		const Offset2D& srcOffset,
+		uint32 srcMipLevel,
+		RenderBackendTextureHandle dstTexture,
+		const Offset2D& dstOffset,
+		uint32 dstMipLevel,
+		const Extent2D extent) 
+	{
+		RenderBackendCommandCopyTexture* command = AllocateCommand<RenderBackendCommandCopyTexture>(RenderBackendCommandCopyTexture::Type);
+		command->srcTexture = srcTexture;
+		command->srcOffset = { srcOffset.x, srcOffset.y, 0 };
+		command->srcSubresourceLayers = { srcMipLevel,0,1 };
+		command->dstTexture = dstTexture;
+		command->dstOffset = { dstOffset.x, dstOffset.y,0 };
+		command->dstSubresourceLayers = { dstMipLevel,0,1 };
+		command->extent = { extent.width,extent.height,1 };
+
+	}
+
+	void RenderBackendCommandList::ClearBufferUAV(
+		RenderBackendBufferHandle buffer,
+		uint32 data) 
+	{
+		RenderBackendCommandClearBufferUAV* command = AllocateCommand<RenderBackendCommandClearBufferUAV>(RenderBackendCommandClearBufferUAV::Type);
+		command->buffer = buffer;
+		command->data = data;
+	}
+
+	void RenderBackendCommandList::ClearTextureUAV(
+		const RenderBackendTextureUAVDesc& uav,
+		const RenderBackendTextureClearValue& clearColor) 
+	{
+		RenderBackendCommandClearTextureUAV* command = AllocateCommand<RenderBackendCommandClearTextureUAV>(RenderBackendCommandClearTextureUAV::Type);
+		command->uav = uav;
+		command->clearValue = clearColor;
+	
+	}
+
+	void RenderBackendCommandList::Barriers(
+		const RenderBackendBarrier* barriers,
+		uint32 barrierCount
+	)
+	{
+		RenderBackendCommandBarriers* command = AllocateCommand<RenderBackendCommandBarriers>(RenderBackendCommandBarriers::Type, sizeof(RenderBackendCommandBarriers) + barrierCount * sizeof(RenderBackendBarrier));
+		command->barrierCount = barrierCount;
+		command->barriers = (RenderBackendBarrier*)(((uint8*)command) + sizeof(RenderBackendCommandBarriers));
+		memcpy(command->barriers, barriers, barrierCount * sizeof(RenderBackendBarrier));
+	}
+
+	void RenderBackendCommandList::BeginTimingQuery(
+		RenderBackendTimingQueryHeapHandle timingQueryHeap,
+		uint32 region
+	)
+	{
+		auto* command = AllocateCommand<RenderBackendCommandBeginTimingQuery>(RenderBackendCommandBeginTimingQuery::Type);
+		command->timingQueryHeap = timingQueryHeap;
+		command->region = region;
+	}
+
+	void RenderBackendCommandList::EndTimingQuery(
+		RenderBackendTimingQueryHeapHandle timingQueryHeap,
+		uint32 region) 
+	{
+		auto* command = AllocateCommand<RenderBackendCommandEndTimingQuery>(RenderBackendCommandEndTimingQuery::Type);
+		command->timingQueryHeap = timingQueryHeap;
+		command->region = region;
+	}
+
+	void RenderBackendCommandList::ResolveTimingQueryResults(
+		RenderBackendTimingQueryHeapHandle timingQueryHeap,
+		uint32 regionStart,
+		uint32 regionCount,
+		RenderBackendBufferHandle buffer,
+		uint64 offset
+	)
+	{
+		auto* command = AllocateCommand<RenderBackendCommandResolveTimingQueryResults>(RenderBackendCommandResolveTimingQueryResults::Type);
+		command->timingQueryHeap = timingQueryHeap;
+		command->regionStart = regionStart;
+		command->regionCount = regionCount;
+		command->buffer = buffer;
+		command->offset = offset;
+	}
+
+	void RenderBackendCommandList::BeginDebugLabel(
+		const char* name,
+		const Vector4f& color)
+	{
+		auto* command = AllocateCommand<RenderBackendCommandBeginDebugLabel>(RenderBackendCommandBeginDebugLabel::Type);
+		memcpy(&command->labelName, name, std::min(std::strlen(name) + 1, 255ull));
+		command->color[0] = color[0];
+		command->color[1] = color[1];
+		command->color[2] = color[2];
+		command->color[3] = color[3];
+	}
+
+	void RenderBackendCommandList::EndDebugLabel()
+	{
+		auto* command = AllocateCommand<RenderBackendCommandEndDebugLabel>(RenderBackendCommandEndDebugLabel::Type);
+	}
+
+	void RenderBackendCommandList::SetComputePipelineState(RenderBackendShaderHandle computeShader)
+	{
+
+	}
+
+	void RenderBackendCommandList::SetComputePipelineConstants(
+		const RenderBackendPushConstantValues& pushConstantValues)
+	{
+
+	}
+
+	void RenderBackendCommandList::Dispatch(
+		uint32 threadGroupCountX,
+		uint32 threadGroupCountY,
+		uint32 threadGroupCountZ)
+	{
+
+	}
+
+	void RenderBackendCommandList::Dispatch(
+		RenderBackendShaderHandle computeShader,
+		const RenderBackendPushConstantValues& pushConstantValues,
+		uint32 threadGroupCountX,
+		uint32 threadGroupCountY,
+		uint32 threadGroupCountZ) 
+	{
+		RenderBackendCommandDispatch* command = AllocateCommand<RenderBackendCommandDispatch>(RenderBackendCommandDispatch::Type);
+		command->computeShader = computeShader;
+		command->threadGroupCountX = threadGroupCountX;
+		command->threadGroupCountY = threadGroupCountY;
+		command->threadGroupCountZ = threadGroupCountZ;
+		memcpy(&command->pushConstantValues, &pushConstantValues, sizeof(RenderBackendPushConstantValues));
+	}
+
+	void RenderBackendCommandList::DispatchIndirect(
+		RenderBackendBufferHandle argumentBuffer,
+		uint64 argumentBufferOffset)
+	{
+
+	}
+
+	void RenderBackendCommandList::DispatchIndirect(
+		RenderBackendShaderHandle computerShader,
+		const RenderBackendPushConstantValues& pushConstantValues,
+		RenderBackendBufferHandle argumentBuffer,
+		uint64 argumentBufferOffset
+	)
+	{
+		RenderBackendCommandDispatchIndirect* command = AllocateCommand<RenderBackendCommandDispatchIndirect>(RenderBackendCommandDispatchIndirect::Type);
+		command->computeShader = computerShader;
+		command->argumentBuffer = argumentBuffer;
+		command->argumentBufferOffset = argumentBufferOffset;
+		memcpy(&command->pushConstantValues, &pushConstantValues, sizeof(RenderBackendPushConstantValues));
+
+	}
+
+	void RenderBackendCommandList::SetViewports(
+		const RenderBackendViewport* viewports,
+		uint32 viewportCount
+	)
+	{
+		RenderBackendCommandSetViewport* command = AllocateCommand<RenderBackendCommandSetViewport>(RenderBackendCommandSetViewport::Type);
+		command->viewportCount = viewportCount;
+		memcpy(command->viewports, viewports, viewportCount * sizeof(RenderBackendViewport));
+	}
+
+
+	void RenderBackendCommandList::SetScissors(
+		const RenderBackendScissor* scissors,
+		uint32 scissorCount)
+	{
+		RenderBackendCommandSetScissor* command = AllocateCommand<RenderBackendCommandSetScissor>(RenderBackendCommandSetScissor::Type);
+		command->scissorCount = scissorCount;
+		memcpy(command->scissors, scissors, scissorCount * sizeof(RenderBackendScissor));
+	}
+
+	void RenderBackendCommandList::SetStencilReference(
+		uint32 stencilReference
+	)
+	{
+		RenderBackendCommandSetStencilReference* command = AllocateCommand<RenderBackendCommandSetStencilReference>(RenderBackendCommandSetStencilReference::Type);
+		command->stencilReference = stencilReference;
+	}
+
+	void RenderBackendCommandList::BeginRenderPass(
+		const RenderBackendRenderPassInfo& renderPassInfo
+	)
+	{
+		RenderBackendCommandBeginRenderPass* command = AllocateCommand<RenderBackendCommandBeginRenderPass>(RenderBackendCommandBeginRenderPass::Type);
+		memcpy(command, &renderPassInfo, sizeof(RenderBackendRenderPassInfo));
+	}
+
+	void RenderBackendCommandList::EndRenderPass() 
+	{
+		RenderBackendCommandEndRenderPass* command = AllocateCommand<RenderBackendCommandEndRenderPass>(RenderBackendCommandEndRenderPass::Type);
+	}
+	
+	void RenderBackendCommandList::Draw(
+		RenderBackendShaderHandle vertexShader,
+		RenderBackendShaderHandle pixelShader,
+		const RenderBackendGraphicsPipelineStateDescription& graphicsPipelineState,
+		const RenderBackendPushConstantValues& pushConstantValues,
+		uint32 vertexCount,
+		uint32 instanceCount,
+		uint32 firstVertex,
+		uint32 firstInstance,
+		RenderBackendPrimitiveTopology topology
+
+	)
+	{
+		RenderBackendCommandDraw* command = AllocateCommand<RenderBackendCommandDraw>(RenderBackendCommandDraw::Type);
+		command->vertexShader = vertexShader;
+		command->pixelShader = pixelShader;
+		command->pipelineState = graphicsPipelineState;
+		command->draw.vertexCount = vertexCount;
+		command->draw.instanceCount = instanceCount;
+		command->draw.firstVertex = firstVertex;
+		command->draw.firstInstance = firstInstance;
+		command->topology = topology;
+		command->indexBuffer = RenderBackendBufferHandle::Null;
+		memcpy(&command->pushConstantValues, &pushConstantValues, sizeof(RenderBackendPushConstantValues));
+	}
+
+	void RenderBackendCommandList::DrawIndexed(
+		RenderBackendShaderHandle vertexShader,
+		RenderBackendShaderHandle pixelShader,
+		const RenderBackendGraphicsPipelineStateDescription& graphicsPipelineState,
+		const RenderBackendPushConstantValues& pushConstantValues,
+		RenderBackendBufferHandle indexBuffer,
+		uint32 indexCount,
+		uint32 instanceCount,
+		uint32 firstIndex,
+		int32 vertexOffset,
+		uint32 firstInstance,
+		RenderBackendPrimitiveTopology topology
+	)
+	{
+		RenderBackendCommandDraw* command = AllocateCommand<RenderBackendCommandDraw>(RenderBackendCommandDraw::Type);
+		command->vertexShader = vertexShader;
+		command->pixelShader = pixelShader;
+		command->pipelineState = graphicsPipelineState;
+		command->indexBuffer = indexBuffer;
+		command->drawIndexed.indexCount = indexCount;
+		command->drawIndexed.instanceCount = instanceCount;
+		command->drawIndexed.firstIndex = firstIndex;
+		command->drawIndexed.vertexOffset = vertexOffset;
+		command->drawIndexed.firstInstance = firstInstance;
+		command->topology = topology;
+		memcpy(&command->pushConstantValues, &pushConstantValues, sizeof(RenderBackendPushConstantValues));
+	}
+
+	void RenderBackendCommandList::DrawIndirect(
+		RenderBackendShaderHandle vertexShader,
+		RenderBackendShaderHandle pixelShader,
+		const RenderBackendGraphicsPipelineStateDescription& graphicsPipelineState,
+		const RenderBackendPushConstantValues& pushConstantValues,
+		RenderBackendBufferHandle argumentBuffer,
+		uint64 argumentBufferOffset,
+		uint32 drawCount,
+		RenderBackendPrimitiveTopology topology
+	)
+	{
+		RenderBackendCommandDrawIndirect* command = AllocateCommand<RenderBackendCommandDrawIndirect>(RenderBackendCommandDrawIndirect::Type);
+		command->vertexShader = vertexShader;
+		command->pixelShader = pixelShader;
+		command->pipelineState = graphicsPipelineState;
+		command->indexBuffer = RenderBackendBufferHandle::Null;
+		command->argumentBuffer = argumentBuffer;
+		command->argumentBufferOffset = argumentBufferOffset;
+		command->drawCount = drawCount;
+		command->topology = topology;
+		memcpy(&command->pushConstantValues, &pushConstantValues, sizeof(RenderBackendPushConstantValues));
+	}
+
+	void RenderBackendCommandList::DrawIndexedIndirect(
+		RenderBackendShaderHandle vertexShader,
+		RenderBackendShaderHandle pixelShader,
+		const RenderBackendGraphicsPipelineStateDescription& graphicsPipelineState,
+		const RenderBackendPushConstantValues& pushConstantValues,
+		RenderBackendBufferHandle indexBuffer,
+		RenderBackendBufferHandle argumentBuffer,
+		uint64 argumentBufferOffset,
+		uint32 drawCount,
+		RenderBackendPrimitiveTopology topology
+	) 
+	{
+		RenderBackendCommandDrawIndirect* command = AllocateCommand<RenderBackendCommandDrawIndirect>(RenderBackendCommandDrawIndirect::Type);
+		command->vertexShader = vertexShader;
+		command->pixelShader = pixelShader;
+		command->pipelineState = graphicsPipelineState;
+		command->indexBuffer = indexBuffer;
+		command->argumentBuffer = argumentBuffer;
+		command->argumentBufferOffset = argumentBufferOffset;
+		command->drawCount = drawCount;
+		command->topology = topology;
+		memcpy(&command->pushConstantValues, &pushConstantValues, sizeof(RenderBackendPushConstantValues));
+	}
+
+	void RenderBackendCommandList::DispatchMesh(
+		RenderBackendShaderHandle amplificationShader,
+		RenderBackendShaderHandle meshShader,
+		RenderBackendShaderHandle pixelShader,
+		const RenderBackendGraphicsPipelineStateDescription& graphicsPipelineState,
+		const RenderBackendPushConstantValues& pushConstantValues,
+		uint32 threadGroupCountX,
+		uint32 threadGroupCountY,
+		uint32 threadGroupCountZ,
+		RenderBackendPrimitiveTopology topology
+	)
+	{
+		RenderBackendCommandDispatchMesh* command = AllocateCommand<RenderBackendCommandDispatchMesh>(RenderBackendCommandDispatchMesh::Type);
+		command->amplificationShader = amplificationShader;
+		command->meshShader = meshShader;
+		command->pixelShader = pixelShader;
+		command->pipelineState = graphicsPipelineState;
+		command->topology = topology;
+		command->threadGroupCountX = threadGroupCountX;
+		command->threadGroupCountY = threadGroupCountY;
+		command->threadGroupCountZ = threadGroupCountZ;
+		memcpy(&command->pushConstantValues, &pushConstantValues, sizeof(RenderBackendPushConstantValues));
+
+	}
+
+	void RenderBackendCommandList::DispatchMeshIndirect(
+		RenderBackendShaderHandle amplificationShader,
+		RenderBackendShaderHandle meshShader,
+		RenderBackendShaderHandle pixelShader,
+		const RenderBackendGraphicsPipelineStateDescription& graphicsPipelineState,
+		const RenderBackendPushConstantValues& pushConstantValues,
+		RenderBackendBufferHandle argumentBuffer,
+		uint64 argumentBufferOffset,
+		uint32 drawCount,
+		RenderBackendPrimitiveTopology topology
+	)
+	{
+		RenderBackendCommandDispatchMeshIndirect* command = AllocateCommand<RenderBackendCommandDispatchMeshIndirect>(RenderBackendCommandDispatchMeshIndirect::Type);
+		command->amplificationShader = amplificationShader;
+		command->meshShader = meshShader;
+		command->pixelShader = pixelShader;
+		command->pipelineState = graphicsPipelineState;
+		command->topology = topology;
+		command->argumentBuffer = argumentBuffer;
+		command->argumentBufferOffset = argumentBufferOffset;
+		command->drawCount = drawCount;
+		memcpy(&command->pushConstantValues, &pushConstantValues, sizeof(RenderBackendPushConstantValues));
+	}
+
+	/*void RenderBackendCommandList::BuildRayTracingBottomLevelAccelerationStructure(
+		RenderBackendRayTracingAccelerationStructureHandle blas)
+	{
+		RenderBackendCommandBuildRayTracingBottomLevelAccelerationStructure* command = AllocateCommand<RenderBackendCommandBuildRayTracingBottomLevelAccelerationStructure>(RenderBackendCommandBuildRayTracingBottomLevelAccelerationStructure::Type);
+		command->srcBLAS = RenderBackendRayTracingAccelerationStructureHandle::Null;
+		command->dstBLAS = blas;
+	}
+
+	void RenderBackendCommandList::BuildRayTracingTopLevelAccelerationStructure(
+		RenderBackendRayTracingAccelerationStructureHandle tlas)
+	{
+		RenderBackendCommandBuildRayTracingTopLevelAccelerationStructure* command = AllocateCommand<RenderBackendCommandBuildRayTracingTopLevelAccelerationStructure>(RenderBackendCommandBuildRayTracingTopLevelAccelerationStructure::Type);
+		command->srcTLAS = RenderBackendRayTracingAccelerationStructureHandle::Null;
+		command->dstTLAS = tlas;
+	}
+
+	void RenderBackendCommandList::UpdateRayTracingTopLevelAccelerationStructure(
+		RenderBackendRayTracingAccelerationStructureHandle srcTLAS,
+		RenderBackendRayTracingAccelerationStructureHandle dstTLAS)
+	{
+		RenderBackendCommandBuildRayTracingTopLevelAccelerationStructure* command = AllocateCommand<RenderBackendCommandBuildRayTracingTopLevelAccelerationStructure>(RenderBackendCommandBuildRayTracingTopLevelAccelerationStructure::Type);
+		command->srcTLAS = srcTLAS;
+		command->dstTLAS = dstTLAS;
+	}
+
+	void RenderBackendCommandList::UpdateRayTracingBottomLevelAccelerationStructure(
+		RenderBackendRayTracingAccelerationStructureHandle srcBLAS,
+		RenderBackendRayTracingAccelerationStructureHandle dstBLAS)
+	{
+		RenderBackendCommandBuildRayTracingBottomLevelAccelerationStructure* command = AllocateCommand<RenderBackendCommandBuildRayTracingBottomLevelAccelerationStructure>(RenderBackendCommandBuildRayTracingBottomLevelAccelerationStructure::Type);
+		command->srcBLAS = srcBLAS;
+		command->dstBLAS = dstBLAS;
+	}
+
+	void RenderBackendCommandList::DispatchRays(
+		RenderBackendRayTracingPipelineStateHandle pipelineState,
+		RenderBackendBufferHandle shaderBindingTable,
+		const RenderBackendPushConstantValues& pushConstantValues,
+		uint32 width,
+		uint32 height,
+		uint32 depth)
+	{
+		RenderBackendCommandDispatchRays* command = AllocateCommand<RenderBackendCommandDispatchRays>(RenderBackendCommandDispatchRays::Type);
+		command->pipelineStateObject = pipelineState;
+		command->shaderBindingTable = shaderBindingTable;
+		command->width = width;
+		command->height = height;
+		command->depth = depth;
+		memcpy(&command->pushConstantValues, &pushConstantValues, sizeof(RenderBackendPushConstantValues));
+	}*/
+
+	void RenderBackendCommandList::DispatchSuperSampling(
+		void* context,
+		RenderBackendDispatchSuperSamplingCallback callback,
+		RenderBackendTextureHandle output,
+		RenderBackendTextureHandle color,
+		RenderBackendTextureHandle depth,
+		RenderBackendTextureHandle motionVectors,
+		RenderBackendTextureHandle exposure
+	) 
+	{
+		RenderBackendCommandDispatchSuperSampling* command = AllocateCommand<RenderBackendCommandDispatchSuperSampling>(RenderBackendCommandDispatchSuperSampling::Type);
+		command->context = context;
+		command->callback = callback;
+		command->output = output;
+		command->color = color;
+		command->depth = depth;
+		command->motionVectors = motionVectors;
+		command->exposure = exposure;
+	}
+}

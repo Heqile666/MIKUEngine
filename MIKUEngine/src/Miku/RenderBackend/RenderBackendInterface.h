@@ -6,11 +6,34 @@
 
 namespace MIKU 
 {
+
+	class RenderBackendCommandList;
+
+	using PhysicalDeviceID = uint32;
+
 	enum class RenderBackendType 
 	{
 		UnKnown,
-		DX12,
+		D3D12,
 		Vulkan,
+	};
+
+
+	enum class RenderBackendFeature
+	{
+		HardwareRayTracing,
+	};
+
+	struct RenderBackendDesc
+	{
+		RenderBackendType              type;
+		const char* applicationName;
+		uint32                         applicationVersion;
+		const char* engineName;
+		uint32                         engineVersion;
+		bool                           enableDebugLayer;
+		const RenderBackendFeature* features;
+		uint32                         featureCount;
 	};
 
 	class RenderBackend 
@@ -28,7 +51,7 @@ namespace MIKU
 		virtual bool PresentSwapChain(RenderBackendSwapChainHandle swapChain) = 0;
 		virtual RenderBackendTextureHandle GetActiveSwapChainBuffer(RenderBackendSwapChainHandle swapChain) = 0;
 		
-		virtual RenderBackendBufferHandle CreateBuffer(uint32 deviceMask, const RenderBackendBufferDesc* desc, const void* data, const char* name) = 0;
+		virtual RenderBackendBufferHandle CreateBuffer(uint32 deviceMask, const RenderBackendBufferDescription* desc, const void* data, const char* name) = 0;
 		virtual void ResizeBuffer(RenderBackendBufferHandle buffer, uint64 size) = 0;
 		virtual void MapBuffer(RenderBackendBufferHandle buffer, void** data) = 0;
 		virtual void UnmapBuffer(RenderBackendBufferHandle buffer) = 0;
@@ -40,8 +63,8 @@ namespace MIKU
 		virtual void UploadTexture(RenderBackendTextureHandle handle, const RenderBackendTextureUploadDataDesc& data) = 0;
 		virtual void GetTextureReadbackData(RenderBackendTextureHandle texture, void** data) = 0;
 
-		virtual RenderBackendTextureSRVHandle CreateTextureSRV(uint32 deviceMask, const RenderBackendTextureSRVDesc* desc, const char* name) = 0;
-		virtual RenderBackendTextureUAVHandle CreateTextureUAV(uint32 deviceMask, const RenderBackendTextureUAVDesc* desc, const char* name) = 0;
+		//virtual RenderBackendTextureSRVHandle CreateTextureSRV(uint32 deviceMask, const RenderBackendTextureSRVDesc* desc, const char* name) = 0;
+		//virtual RenderBackendTextureUAVHandle CreateTextureUAV(uint32 deviceMask, const RenderBackendTextureUAVDesc* desc, const char* name) = 0;
 		virtual int32 GetTextureSRVDescriptorIndex(uint32 deviceMask, RenderBackendTextureHandle srv) = 0;
 		virtual int32 GetTextureUAVDescriptorIndex(uint32 deviceMask, RenderBackendTextureHandle uav) = 0;
 		virtual int32 GetBufferUAVDescriptorIndex(uint32 deviceMask, RenderBackendBufferHandle uav) = 0;
@@ -55,6 +78,24 @@ namespace MIKU
 		virtual RenderBackendTimingQueryHeapHandle CreateTimingQueryHeap(uint32 deviceMask, const RenderBackendTimingQueryHeapDesc* desc, const char* name) = 0;
 		virtual void DestroyTimingQueryHeap(RenderBackendTimingQueryHeapHandle timingQueryHeap) = 0;
 
+		virtual void SubmitCommandList(RenderBackendCommandList** commandLists, uint32 numCommandLists, RenderBackendSwapChainHandle swapChain) = 0;
+
+		virtual void SetObjectName(RenderBackendTextureHandle handle, const char* name) = 0;
+
+		virtual void SetObjectName(RenderBackendBufferHandle handle, const char* name) = 0;
+
+		void UpdateBuffer(RenderBackendBufferHandle handle, uint64 offset, const void* data, uint64 size)
+		{
+			void* bufferAllocation = nullptr;
+			MapBuffer(handle, &bufferAllocation);
+			memcpy(bufferAllocation, data, size); // TODO: offset
+			UnmapBuffer(handle);
+		}
+
 	};
 
+
+	RenderBackend* RenderBackendCreateInstance(const RenderBackendDesc* desc);
+
+	void RenderBackendDestroyInstance(RenderBackend* backend);
 }

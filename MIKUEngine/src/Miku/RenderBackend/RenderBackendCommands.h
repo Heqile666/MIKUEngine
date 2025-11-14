@@ -1,35 +1,303 @@
 #pragma once
+#include "RenderBackendCommon.h"
+#include "RenderBackendConfig.h"
+#include "RenderBackendHandles.h"
+#include "RenderBackendTypes.h"
+#include <Miku/Core/CoreTypes.h>
 
-enum class RenderBackendCommandType
+namespace MIKU
 {
-    CopyBuffer,
-    CopyTexture,
-    UpdateBuffer,
-    UpdateTexture,
-    ClearTexture,
-    Barriers,
-    Transitions,
-    BeginTiming,
-    EndTiming,
-    ResolveTimingQueryResults,
-    Dispatch,
-    DispatchIndirect,
-    //BuildBottomLevelAS,
-    //BuildTopLevelAS,
-    //TraceRays,
-    SetViewport,
-    SetScissor,
-    SetStencilReference,
-    BeginRenderPass,
-    EndRenderPass,
-    Draw,
-    DrawIndirect,
-    DispatchMesh,
-    DispatchMeshIndirect,
-    BeginDebugLabel,
-    EndDebugLabel,
-    //EvaluateDLSS,
-    //FSR2Dispatch,
-    Count,
+    enum class RenderBackendCommandQueueType : uint8
+    {
+        None = 0,
+        Graphics = (1 << 0),
+        Compute = (1 << 1),
+        Copy = (1 << 2),
+        All = Graphics | Compute | Copy
+    };
 
-};
+    enum class RenderBackendCommandType
+    {
+        CopyBuffer,
+        CopyTexture,
+        UpdateBuffer,
+        UpdateTexture,
+        ClearBuffer,
+        ClearTexture,
+        Barriers,
+        BeginTiming,
+        EndTiming,
+        ResolveTimingQueryResults,
+        Dispatch,
+        DispatchIndirect,
+        SetViewport,
+        SetScissor,
+        SetStencilReference,
+        BeginRenderPass,
+        EndRenderPass,
+        Draw,
+        DrawIndirect,
+        DispatchMesh,
+        DispatchMeshIndirect,
+        BeginDebugLabel,
+        EndDebugLabel,
+        BuildRayTracingBottomLevelAccelerationStructure,
+        BuildRayTracingTopLevelAccelerationStructure,
+        DispatchRays,
+        DispatchRaysIndirect,
+        DispatchGraph,
+        DispatchSuperSampling,
+        Count,
+    };
+
+    template<RenderBackendCommandType commandType, RenderBackendCommandQueueType queueType>
+    struct RenderBackendCommand
+    {
+        static const RenderBackendCommandType Type = commandType;
+        static const RenderBackendCommandQueueType QueueType = queueType;
+    };
+
+    struct RenderBackendCommandCopyBuffer : RenderBackendCommand<RenderBackendCommandType::CopyBuffer, RenderBackendCommandQueueType::All>
+    {
+        RenderBackendBufferHandle srcBuffer;
+        uint64 srcOffset;
+        RenderBackendBufferHandle dstBuffer;
+        uint64 dstOffset;
+        uint64 bytes;
+    };
+
+    struct RenderBackendCommandCopyTexture : RenderBackendCommand<RenderBackendCommandType::CopyTexture, RenderBackendCommandQueueType::All>
+    {
+        RenderBackendTextureHandle srcTexture;
+        RenderBackendOffset3D srcOffset;
+        RenderBackendTextureSubresourceLayers srcSubresourceLayers;
+        RenderBackendTextureHandle dstTexture;
+        RenderBackendOffset3D dstOffset;
+        RenderBackendTextureSubresourceLayers dstSubresourceLayers;
+        RenderBackendExtent3D extent;
+    };
+
+    struct RenderBackendCommandUpdateBuffer : RenderBackendCommand<RenderBackendCommandType::UpdateBuffer, RenderBackendCommandQueueType::All>
+    {
+        RenderBackendBufferHandle buffer;
+        uint64 offset;
+        const void* data;
+        uint64 size;
+    };
+
+    struct RenderBackendCommandUpdateTexture : RenderBackendCommand<RenderBackendCommandType::UpdateTexture, RenderBackendCommandQueueType::All>
+    {
+        RenderBackendTextureHandle texture;
+    };
+
+    struct RenderBackendCommandClearBufferUAV : RenderBackendCommand<RenderBackendCommandType::ClearBuffer, RenderBackendCommandQueueType::All>
+    {
+        RenderBackendBufferHandle buffer;
+        uint32 data;
+    };
+
+    struct RenderBackendCommandClearTextureUAV : RenderBackendCommand<RenderBackendCommandType::ClearTexture, RenderBackendCommandQueueType::All>
+    {
+        RenderBackendTextureUAVDesc uav;
+        RenderBackendTextureClearValue clearValue;
+    };
+
+    struct RenderBackendCommandBarriers : RenderBackendCommand<RenderBackendCommandType::Barriers, RenderBackendCommandQueueType::All>
+    {
+        uint32 barrierCount;
+        RenderBackendBarrier* barriers;
+    };
+
+    struct RenderBackendCommandBeginTimingQuery : RenderBackendCommand<RenderBackendCommandType::BeginTiming, RenderBackendCommandQueueType::All>
+    {
+        RenderBackendTimingQueryHeapHandle timingQueryHeap;
+        uint32 region;
+    };
+
+    struct RenderBackendCommandEndTimingQuery : RenderBackendCommand<RenderBackendCommandType::EndTiming, RenderBackendCommandQueueType::All>
+    {
+        RenderBackendTimingQueryHeapHandle timingQueryHeap;
+        uint32 region;
+    };
+
+    struct RenderBackendCommandResolveTimingQueryResults : RenderBackendCommand<RenderBackendCommandType::ResolveTimingQueryResults, RenderBackendCommandQueueType::Graphics>
+    {
+        RenderBackendTimingQueryHeapHandle timingQueryHeap;
+        uint32 regionStart;
+        uint32 regionCount;
+        RenderBackendBufferHandle buffer;
+        uint64 offset;
+    };
+
+    struct RenderBackendCommandDispatch : RenderBackendCommand<RenderBackendCommandType::Dispatch, RenderBackendCommandQueueType::Compute>
+    {
+        RenderBackendShaderHandle computeShader;
+        RenderBackendPushConstantValues pushConstantValues;
+        uint32 threadGroupCountX;
+        uint32 threadGroupCountY;
+        uint32 threadGroupCountZ;
+    };
+
+    struct RenderBackendCommandDispatchIndirect : RenderBackendCommand<RenderBackendCommandType::DispatchIndirect, RenderBackendCommandQueueType::Compute>
+    {
+        RenderBackendShaderHandle computeShader;
+        RenderBackendPushConstantValues pushConstantValues;
+        RenderBackendBufferHandle argumentBuffer;
+        uint64 argumentBufferOffset;
+    };
+
+    struct RenderBackendCommandSetViewport : RenderBackendCommand<RenderBackendCommandType::SetViewport, RenderBackendCommandQueueType::Graphics>
+    {
+        uint32 viewportCount;
+        RenderBackendViewport viewports[RenderBackendMaxViewportCount];
+    };
+
+    struct RenderBackendCommandSetScissor : RenderBackendCommand<RenderBackendCommandType::SetScissor, RenderBackendCommandQueueType::Graphics>
+    {
+        uint32 scissorCount;
+        RenderBackendScissor scissors[RenderBackendMaxViewportCount];
+
+    };
+
+    struct RenderBackendCommandSetStencilReference : RenderBackendCommand<RenderBackendCommandType::SetStencilReference, RenderBackendCommandQueueType::Graphics>
+    {
+        uint32 stencilReference;
+    };
+
+    struct RenderBackendCommandBeginRenderPass : RenderBackendCommand<RenderBackendCommandType::BeginRenderPass, RenderBackendCommandQueueType::Graphics>
+    {
+        RenderBackendRenderPassInfo renderPassInfo;
+    };
+
+    struct RenderBackendCommandEndRenderPass : RenderBackendCommand<RenderBackendCommandType::EndRenderPass, RenderBackendCommandQueueType::Graphics>
+    {
+
+    };
+
+    struct RenderBackendCommandDraw : RenderBackendCommand<RenderBackendCommandType::Draw, RenderBackendCommandQueueType::Graphics>
+    {
+        RenderBackendShaderHandle vertexShader;
+        RenderBackendShaderHandle pixelShader;
+        RenderBackendGraphicsPipelineStateDescription pipelineState;
+        RenderBackendPushConstantValues pushConstantValues;
+        RenderBackendBufferHandle indexBuffer;
+        union
+        {
+            struct
+            {
+                uint32 vertexCount;
+                uint32 instanceCount;
+                uint32 firstVertex;
+                uint32 firstInstance;
+            } draw;
+            struct
+            {
+                uint32 indexCount;
+                uint32 instanceCount;
+                uint32 firstIndex;
+                int32 vertexOffset;
+                uint32 firstInstance;
+            } drawIndexed;
+        };
+        RenderBackendPrimitiveTopology topology;
+    };
+
+    struct RenderBackendCommandDrawIndirect : RenderBackendCommand<RenderBackendCommandType::DrawIndirect, RenderBackendCommandQueueType::Graphics>
+    {
+        RenderBackendShaderHandle vertexShader;
+        RenderBackendShaderHandle pixelShader;
+        RenderBackendGraphicsPipelineStateDescription pipelineState;
+        RenderBackendPushConstantValues pushConstantValues;
+        RenderBackendBufferHandle indexBuffer;
+        RenderBackendBufferHandle argumentBuffer;
+        uint64 argumentBufferOffset;
+        uint32 drawCount;
+        RenderBackendPrimitiveTopology topology;
+    };
+
+    struct RenderBackendCommandDispatchMesh : RenderBackendCommand<RenderBackendCommandType::DispatchMesh, RenderBackendCommandQueueType::Graphics>
+    {
+        RenderBackendShaderHandle amplificationShader;
+        RenderBackendShaderHandle meshShader;
+        RenderBackendShaderHandle pixelShader;
+        RenderBackendGraphicsPipelineStateDescription pipelineState;
+        RenderBackendPushConstantValues pushConstantValues;
+        RenderBackendPrimitiveTopology topology;
+        uint32 threadGroupCountX;
+        uint32 threadGroupCountY;
+        uint32 threadGroupCountZ;
+    };
+
+    struct RenderBackendCommandDispatchMeshIndirect : RenderBackendCommand<RenderBackendCommandType::DispatchMeshIndirect, RenderBackendCommandQueueType::Graphics>
+    {
+        RenderBackendShaderHandle amplificationShader;
+        RenderBackendShaderHandle meshShader;
+        RenderBackendShaderHandle pixelShader;
+        RenderBackendGraphicsPipelineStateDescription pipelineState;
+        RenderBackendPushConstantValues pushConstantValues;
+        RenderBackendPrimitiveTopology topology;
+        RenderBackendBufferHandle argumentBuffer;
+        uint64 argumentBufferOffset;
+        uint32 drawCount;
+    };
+
+    struct RenderBackendCommandBeginDebugLabel : RenderBackendCommand<RenderBackendCommandType::BeginDebugLabel, RenderBackendCommandQueueType::All>
+    {
+        char labelName[256];
+        float color[4];
+    };
+
+    struct RenderBackendCommandEndDebugLabel : RenderBackendCommand<RenderBackendCommandType::EndDebugLabel, RenderBackendCommandQueueType::All>
+    {
+
+    };
+
+    ////////////////////////////////////////////////RayTracing
+    struct RenderBackendCommandBuildRayTracingBottomLevelAccelerationStructure : RenderBackendCommand<RenderBackendCommandType::BuildRayTracingBottomLevelAccelerationStructure, RenderBackendCommandQueueType::Compute>
+    {
+        RenderBackendRayTracingAccelerationStructureHandle srcBLAS;
+        RenderBackendRayTracingAccelerationStructureHandle dstBLAS;
+    };
+
+    struct RenderBackendCommandBuildRayTracingTopLevelAccelerationStructure : RenderBackendCommand<RenderBackendCommandType::BuildRayTracingTopLevelAccelerationStructure, RenderBackendCommandQueueType::Compute>
+    {
+        RenderBackendRayTracingAccelerationStructureHandle srcTLAS;
+        RenderBackendRayTracingAccelerationStructureHandle dstTLAS;
+    };
+
+    struct RenderBackendCommandDispatchRays : RenderBackendCommand<RenderBackendCommandType::DispatchRays, RenderBackendCommandQueueType::Graphics>
+    {
+        RenderBackendRayTracingPipelineStateHandle pipelineStateObject;
+        RenderBackendBufferHandle shaderBindingTable;
+        RenderBackendPushConstantValues pushConstantValues;
+        uint32 width;
+        uint32 height;
+        uint32 depth;
+    };
+
+    struct RenderBackendCommandDispatchRaysIndirect : RenderBackendCommand<RenderBackendCommandType::DispatchRaysIndirect, RenderBackendCommandQueueType::Graphics>
+    {
+        RenderBackendRayTracingPipelineStateHandle pipelineStateObject;
+        RenderBackendBufferHandle shaderBindingTable;
+        RenderBackendPushConstantValues pushConstantValues;
+        RenderBackendBufferHandle argumentBuffer;
+    };
+    //////////////////////////////////////////////////////////////
+
+    struct RenderBackendCommandDispatchGraph : RenderBackendCommand<RenderBackendCommandType::DispatchGraph, RenderBackendCommandQueueType::Graphics>
+    {
+
+    };
+
+    struct RenderBackendCommandDispatchSuperSampling : RenderBackendCommand<RenderBackendCommandType::DispatchSuperSampling, RenderBackendCommandQueueType::Compute>
+    {
+        void* context;
+        RenderBackendDispatchSuperSamplingCallback callback;
+        RenderBackendTextureHandle output;
+        RenderBackendTextureHandle color;
+        RenderBackendTextureHandle depth;
+        RenderBackendTextureHandle motionVectors;
+        RenderBackendTextureHandle exposure;
+
+    };
+}

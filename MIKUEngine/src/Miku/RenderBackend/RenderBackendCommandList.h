@@ -5,6 +5,7 @@
 #include <vector>
 #include <Miku/RenderBackend/RenderBackendHandles.h>
 #include <Miku/RenderBackend/RenderBackendTypes.h>
+#include <Miku/Core/Math/Math.h>
 namespace MIKU 
 {
 	
@@ -22,15 +23,15 @@ namespace MIKU
 		virtual ~RenderBackendCommandListBase() {}
 
 		template <typename T>
-		FORCEINLINE T* AllocatedCommand(RenderBackendCommandType type, uint64 size = sizeof(T)) 
+		T* AllocateCommand(RenderBackendCommandType type, uint64 size = sizeof(T)) 
 		{
-			void* data = AllocatedCommandInternal(size);
+			void* data = AllocateCommandInternal(size);
 			container.types.push_back(type);
 			container.commands.push_back(data);
 			container.numCommands++;
-			return (T*)data;
+			return static_cast<T*>(data);
 		}
-		FORCEINLINE RenderBackendCommandContainer* GetCommandContainer() 
+		RenderBackendCommandContainer* GetCommandContainer() 
 		{
 			return &container;
 		}
@@ -38,7 +39,7 @@ namespace MIKU
 		MemoryArena* arena;
 		RenderBackendCommandContainer container;
 
-		FORCEINLINE void* AllocatedCommandInternal(uint64 size) 
+		void* AllocateCommandInternal(uint64 size) 
 		{
 			void* data = MIKU_ARENA_ALLOC(arena, size);
 			return data;
@@ -52,26 +53,65 @@ namespace MIKU
 	public:
 		RenderBackendCommandList(MemoryArena* arena) :RenderBackendCommandListBase(arena) {}
 
-		//Copy Commands
-		void CopyTexture2D(RenderBackendTextureHandle srcTexture, const Offset2D& srcOffset, uint32 srcMipLevel, RenderBackendTextureHandle dstTexture, const Offset2D& dstOffset, uint32 dstMipLevel, const Extent2D extent);
-		void CopyBuffer(RenderBackendBufferHandle srcBuffer, uint64 srcOffset, RenderBackendBufferHandle dstBuffer, uint64 dstOffset, uint64 bytes);
-		void UpdateBuffer(RenderBackendBufferHandle buffer, uint64 offset, const void* data, uint64 size);
+        // Copy commands
+        void CopyBuffer(RenderBackendBufferHandle srcBuffer, uint64 srcOffset, RenderBackendBufferHandle dstBuffer, uint64 dstOffset, uint64 bytes);
 
-		//Compute Commands
-		//TODO
-		
-		//Graphics Commands
-		void SetViewport(RenderBackendViewport* viewports, uint32 numViewports);
-		void SetScissors(RenderBackendScissor* scissors, uint32 numScissors);
-		void SetStencilReference(uint32 stencilReference);
-		void Transitions(RenderBackendBarrier* transitions, uint32 numTransitions);
-		void BeginRenderPass(const RenderBackendRenderPassInfo& renderPassInfo);
-		void EndRenderPass();
-		void Draw(RenderBackendShaderHandle shader, const RenderBackendGraphicsPipelineState,);
+        void CopyTexture2D(RenderBackendTextureHandle srcTexture, const Offset2D& srcOffset, uint32 srcMipLevel, RenderBackendTextureHandle dstTexture, const Offset2D& dstOffset, uint32 dstMipLevel, const Extent2D extent);
+
+        void ClearBufferUAV(RenderBackendBufferHandle buffer, uint32 data);
+        void ClearTextureUAV(const RenderBackendTextureUAVDesc& uav, const RenderBackendTextureClearValue& clearColor);
+
+        void Barriers(const RenderBackendBarrier* barriers, uint32 barrierCount);
+
+        void BeginDebugLabel(const char* name, const Vector4f& color);
+
+        void EndDebugLabel();
+
+        // Compute commands
+        void SetComputePipelineState(RenderBackendShaderHandle computeShader);
+        void SetComputePipelineConstants(const RenderBackendPushConstantValues& pushConstantValues);
+        void Dispatch(uint32 threadGroupCountX, uint32 threadGroupCountY, uint32 threadGroupCountZ);
+        void Dispatch(RenderBackendShaderHandle computeShader, const RenderBackendPushConstantValues& pushConstantValues, uint32 threadGroupCountX, uint32 threadGroupCountY, uint32 threadGroupCountZ);
+
+        void DispatchIndirect(RenderBackendBufferHandle argumentBuffer, uint64 argumentBufferOffset);
+        void DispatchIndirect(RenderBackendShaderHandle computeShader, const RenderBackendPushConstantValues& pushConstantValues, RenderBackendBufferHandle argumentBuffer, uint64 argumentBufferOffset);
+
+        // Graphics commands
+        void SetViewports(const RenderBackendViewport* viewports, uint32 viewportCount);
+        void SetScissors(const RenderBackendScissor* scissors, uint32 scissorCount);
+        void SetStencilReference(uint32 stencilReference);
+        void BeginRenderPass(const RenderBackendRenderPassInfo& renderPassInfo);
+        void EndRenderPass();
+        void Draw(RenderBackendShaderHandle vertexShader, RenderBackendShaderHandle pixelShader, const RenderBackendGraphicsPipelineStateDescription& graphicsPipelineState, const RenderBackendPushConstantValues& pushConstantValues, uint32 vertexCount, uint32 instanceCount, uint32 firstVertex, uint32 firstInstance, RenderBackendPrimitiveTopology topology);
+        void DrawIndexed(RenderBackendShaderHandle vertexShader, RenderBackendShaderHandle pixelShader, const RenderBackendGraphicsPipelineStateDescription& graphicsPipelineState, const RenderBackendPushConstantValues& pushConstantValues, RenderBackendBufferHandle indexBuffer, uint32 indexCount, uint32 instanceCount, uint32 firstIndex, int32 vertexOffset, uint32 firstInstance, RenderBackendPrimitiveTopology topology);
+        void DrawIndirect(RenderBackendShaderHandle vertexShader, RenderBackendShaderHandle pixelShader, const RenderBackendGraphicsPipelineStateDescription& graphicsPipelineState, const RenderBackendPushConstantValues& pushConstantValues, RenderBackendBufferHandle argumentBuffer, uint64 argumentBufferOffset, uint32 drawCount, RenderBackendPrimitiveTopology topology);
+        void DrawIndexedIndirect(RenderBackendShaderHandle vertexShader, RenderBackendShaderHandle pixelShader, const RenderBackendGraphicsPipelineStateDescription& graphicsPipelineState, const RenderBackendPushConstantValues& pushConstantValues, RenderBackendBufferHandle indexBuffer, RenderBackendBufferHandle argumentBuffer, uint64 argumentBufferOffset, uint32 drawCount, RenderBackendPrimitiveTopology topology);
+
+        // Mesh shading commands
+        void DispatchMesh(RenderBackendShaderHandle amplificationShader, RenderBackendShaderHandle meshShader, RenderBackendShaderHandle pixelShader, const RenderBackendGraphicsPipelineStateDescription& graphicsPipelineState, const RenderBackendPushConstantValues& pushConstantValues, uint32 threadGroupCountX, uint32 threadGroupCountY, uint32 threadGroupCountZ, RenderBackendPrimitiveTopology topology);
+        void DispatchMeshIndirect(RenderBackendShaderHandle amplificationShader, RenderBackendShaderHandle meshShader, RenderBackendShaderHandle pixelShader, const RenderBackendGraphicsPipelineStateDescription& graphicsPipelineState, const RenderBackendPushConstantValues& pushConstantValues, RenderBackendBufferHandle argumentBuffer, uint64 argumentBufferOffset, uint32 drawCount, RenderBackendPrimitiveTopology topology);
+
+        void BeginTimingQuery(RenderBackendTimingQueryHeapHandle timingQueryHeap, uint32 region);
+        void EndTimingQuery(RenderBackendTimingQueryHeapHandle timingQueryHeap, uint32 region);
+        void ResolveTimingQueryResults(RenderBackendTimingQueryHeapHandle timingQueryHeap, uint32 regionStart, uint32 regionCount, RenderBackendBufferHandle buffer, uint64 offset);
+
+        // Ray tracing commands
+        /*void BuildRayTracingTopLevelAccelerationStructure(RenderBackendRayTracingAccelerationStructureHandle tlas);
+        void BuildRayTracingBottomLevelAccelerationStructure(RenderBackendRayTracingAccelerationStructureHandle blas);
+        void UpdateRayTracingTopLevelAccelerationStructure(RenderBackendRayTracingAccelerationStructureHandle srcTLAS, RenderBackendRayTracingAccelerationStructureHandle dstTLAS);
+        void UpdateRayTracingBottomLevelAccelerationStructure(RenderBackendRayTracingAccelerationStructureHandle srcBLAS, RenderBackendRayTracingAccelerationStructureHandle dstBLAS);
+        void DispatchRays(RenderBackendRayTracingPipelineStateHandle pipelineState, RenderBackendBufferHandle shaderBindingTable, const RenderBackendPushConstantValues& pushConstantValues, uint32 width, uint32 height, uint32 depth);*/
+
+        void DispatchSuperSampling(
+            void* context,
+            RenderBackendDispatchSuperSamplingCallback callback,
+            RenderBackendTextureHandle output,
+            RenderBackendTextureHandle color,
+            RenderBackendTextureHandle depth,
+            RenderBackendTextureHandle motionVectors,
+            RenderBackendTextureHandle exposure);
+    };
 
 
-	};
-
-
-
+	
 }

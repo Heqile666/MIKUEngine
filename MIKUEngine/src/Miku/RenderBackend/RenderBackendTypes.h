@@ -1,19 +1,66 @@
 ﻿#pragma once
-#include "Miku/Core/CoreTypes.h"
 #include "RenderBackendTextureFormat.h"
-#include "Miku/Core/CoreDefinitions.h"
+#include <Miku/Foundation/FundamentalTypes.h>
+#include<Miku/Foundation/Foundation.h>
+#include <Miku/Foundation/EnumClass.h>
 #include "Miku/RenderBackend/RenderBackendHandles.h"
+#include <Miku/RenderBackend/RenderBackendConfig.h>
+#include <string>
 #include <memory>
 #include <vector>
-#include <Miku/RenderBackend/RenderBackendDefinitions.h>
-#include <string>
+
 
 namespace MIKU
 {
-    using PhysicalDeviceID = uint32;
+  
+    enum class RenderBackendGPUVendorID
+    {
+        Unknown = 0,
+        NIVIDIA = 0x10DE,
+        AMD = 0x1002,
+        Intel = 0x8086,
+    };
+
+    enum class RenderBackendQueueFamily 
+    {
+        Copy = 0,
+        Compute = 1,
+        Graphics = 2,
+        OpticalFlow = 3,
+        Count
+    
+    };
+
+    static_assert((uint32)RenderBackendQueueFamily::Graphics == 2, "Graphics queue index should be 2.");
+    static_assert((uint32)RenderBackendQueueFamily::Count == RenderBackendQueueFamilyCount);
+
+    struct RenderBackendExtent2D 
+    {
+        uint32 width;
+        uint32 height;
+    };
 
 
-   
+    struct RenderBackendExtent3D
+    {
+        uint32 width;
+        uint32 height;
+        uint32 depth;
+    };
+
+    struct RenderBackendOffset2D
+    {
+        int32 x;
+        int32 y;
+    };
+
+    struct RenderBackendOffset3D
+    {
+        int32 x;
+        int32 y;
+        int32 z;
+    };
+
 
     struct RenderBackendShaderBlob 
     {
@@ -35,9 +82,37 @@ namespace MIKU
         CopyDst = 9,
         UnorderedAccess = 10,
         DepthStencil = 11,
-
+        RayTracingAccelerationStructureReadOnly = 12,
+        RayTracingAccelerationStructure = 13,
     
     };
+
+    enum class RenderBackendResourceStateFlags 
+    {
+        None = 0,
+        Undefined = (1 << 0),
+        // Read only
+        Present = (1 << 1),
+        IndirectArgument = (1 << 2),
+        VertexBuffer = (1 << 3),
+        IndexBuffer = (1 << 4),
+        ShaderResource = (1 << 5),
+        CopySrc = (1 << 6),
+        DepthStencilReadOnly = (1 << 7),
+        // Write only
+        RenderTarget = (1 << 8),
+        CopyDst = (1 << 9),
+        // Read-write
+        UnorderedAccess = (1 << 10),
+        DepthStencil = (1 << 11),
+
+        ReadOnlyMask = Present | IndirectArgument | VertexBuffer | IndexBuffer | ShaderResource | CopySrc | DepthStencilReadOnly,
+        WriteOnlyMask = RenderTarget | CopyDst,
+        ReadWriteMask = UnorderedAccess | DepthStencil,
+        WritableMask = RenderTarget | CopyDst | UnorderedAccess | DepthStencil,
+    
+    };
+    MIKU_ENUM_CLASS_OPERATORS(RenderBackendResourceStateFlags);
 
     enum class RenderBackendBufferCreateFlags
     {
@@ -54,16 +129,128 @@ namespace MIKU
         VertexBuffer = (1 << 7),
         IndexBuffer = (1 << 8),
         UniformBuffer = (1 << 9),
-        AccelerationStruture = (1 << 10),
-        ShaderBindingTable = (1 << 11),
+        StructuredBuffer = (1 << 10),
+        RayTracingAccelerationStructure = (1 << 11),
+        ShaderBindingTable = (1 << 12),
         // Memory access
-        CreateMapped = (1 << 12),
-        CpuOnly = (1 << 13),
-        GpuOnly = (1 << 14),
-        CpuToGpu = (1 << 15),
-        GpuToCpu = (1 << 16),
+        CreateMapped = (1 << 13),
+        CpuOnly = (1 << 14),
+        GpuOnly = (1 << 15),
+        CpuToGpu = (1 << 16),
+        GpuToCpu = (1 << 17),
     };
     MIKU_ENUM_CLASS_OPERATORS(RenderBackendBufferCreateFlags);
+
+    struct RenderBackendBufferSubresourceRange 
+    {
+        static const uint64 WholeSize;
+        static const RenderBackendBufferSubresourceRange Whole;
+        uint64 offset;
+        uint64 size;
+        RenderBackendBufferSubresourceRange(uint64 offset, uint64 size) 
+            :offset(offset)
+            , size(size)
+        {
+            
+        }
+    };
+
+    struct RenderBackendRayTracingShaderGroupDesc
+    {
+        static const uint32 ShaderUnused = ~0u;
+
+        static RenderBackendRayTracingShaderGroupDesc CreateRayGen(uint32 rayGenerationShader)
+        {
+            return RenderBackendRayTracingShaderGroupDesc(
+                RenderBackendRayTracingShaderGroupType::RayGen,
+                rayGenerationShader,
+                ShaderUnused,
+                ShaderUnused,
+                ShaderUnused,
+                ShaderUnused);
+        }
+
+        static RenderBackendRayTracingShaderGroupDesc CreateMiss(uint32 missShader)
+        {
+            return RenderBackendRayTracingShaderGroupDesc(
+                RenderBackendRayTracingShaderGroupType::Miss,
+                ShaderUnused,
+                missShader,
+                ShaderUnused,
+                ShaderUnused,
+                ShaderUnused);
+        }
+
+        static RenderBackendRayTracingShaderGroupDesc CreateTrianglesHitGroup(uint32 closestHitShader, uint32 anyHitShader, uint32 intersectionShader)
+        {
+            return RenderBackendRayTracingShaderGroupDesc(
+                RenderBackendRayTracingShaderGroupType::TrianglesHitGroup,
+                ShaderUnused,
+                ShaderUnused,
+                closestHitShader,
+                anyHitShader,
+                intersectionShader);
+        }
+
+        RenderBackendRayTracingShaderGroupDesc()
+            : type(RenderBackendRayTracingShaderGroupType::RayGen)
+            , rayGenerationShader(ShaderUnused)
+            , missShader(ShaderUnused)
+            , closestHitShader(ShaderUnused)
+            , anyHitShader(ShaderUnused)
+            , intersectionShader(ShaderUnused)
+        {
+
+        }
+
+        RenderBackendRayTracingShaderGroupDesc(
+            RenderBackendRayTracingShaderGroupType type,
+            uint32 rayGenerationShader,
+            uint32 missShader,
+            uint32 closestHitShader,
+            uint32 anyHitShader,
+            uint32 intersectionShader)
+            : type(type)
+            , rayGenerationShader(rayGenerationShader)
+            , missShader(missShader)
+            , closestHitShader(closestHitShader)
+            , anyHitShader(anyHitShader)
+            , intersectionShader(intersectionShader)
+        {
+
+        }
+
+        RenderBackendRayTracingShaderGroupType type;
+        uint32 rayGenerationShader;
+        uint32 missShader;
+        uint32 closestHitShader;
+        uint32 anyHitShader;
+        uint32 intersectionShader;
+    };
+
+    struct RenderBackendRayTracingPipelineStateDesc
+    {
+        uint32 maxRayRecursionDepth;
+        std::vector<RenderBackendShaderHandle> shaders;
+        std::vector<RenderBackendRayTracingShaderGroupDesc> shaderGroupDescs;
+    };
+
+    struct RenderBackendRayTracingShaderBindingTableDesc
+    {
+        RenderBackendRayTracingPipelineStateHandle rayTracingPipelineState;
+        uint32 shaderRecordCount;
+        std::vector<uint32> shaderGroupIndices;
+        std::vector<uint32> shaderRecordSizes;
+        std::vector<void*>  shaderRecordValues;
+    };
+
+    enum class RenderBackendSwapChainPresentMode
+    {
+        Immediate,
+        Maibox,
+        FIFO,
+        FIFORelaxed,
+    };
 
 	struct RenderBackendSwapChainDesc 
 	{
@@ -74,20 +261,19 @@ namespace MIKU
 		bool vsync;
 		bool fullScreen;
 		RenderBackendTextureFormat format;
-	
-	
+        RenderBackendSwapChainPresentMode presentMode;
 	};
 
-	struct RenderBackendBufferDesc 
+	struct RenderBackendBufferDescription
 	{
-        RenderBackendBufferDesc() = default;
-        RenderBackendBufferDesc(uint32 elementSize, uint32 elementCount, RenderBackendBufferCreateFlags flags)
+        RenderBackendBufferDescription() = default;
+        RenderBackendBufferDescription(uint32 elementSize, uint32 elementCount, RenderBackendBufferCreateFlags flags)
             : elementSize(elementSize)
             , elementCount(elementCount)
             , size(elementSize* elementCount)
             , flags(flags) {}
 
-        FORCEINLINE bool operator==(const RenderBackendBufferDesc& rhs) const
+        bool operator==(const RenderBackendBufferDescription& rhs) const
         {
             return size == rhs.size
                 && elementSize == rhs.size
@@ -101,67 +287,82 @@ namespace MIKU
         uint32 elementCount;
         RenderBackendBufferCreateFlags flags;
 
-        static RenderBackendBufferDesc Create(uint32 elementSize, uint32 elementCount, RenderBackendBufferCreateFlags flags) 
+        static RenderBackendBufferDescription Create(uint32 elementSize, uint32 elementCount, RenderBackendBufferCreateFlags flags)
         {
-            return RenderBackendBufferDesc(elementSize, elementCount, flags);
+            return RenderBackendBufferDescription(elementSize, elementCount, flags);
         }
 	    
-        static RenderBackendBufferDesc CreateUpload(uint64 bytes) 
+        static RenderBackendBufferDescription CreateUpload(uint64 bytes)
         {
             auto flags = RenderBackendBufferCreateFlags::Upload | RenderBackendBufferCreateFlags::CreateMapped;
-            return RenderBackendBufferDesc(4, (uint32)(bytes >> 2), flags);
+            return RenderBackendBufferDescription(4, (uint32)(bytes >> 2), flags);
         }
 	    
-        static RenderBackendBufferDesc CreateUpload(uint64 bytes, RenderBackendBufferCreateFlags flags)
+        static RenderBackendBufferDescription CreateUpload(uint64 bytes, RenderBackendBufferCreateFlags flags)
         {
             flags |= RenderBackendBufferCreateFlags::Upload | RenderBackendBufferCreateFlags::CreateMapped;
-            return RenderBackendBufferDesc(4, (uint32)(bytes >> 2), flags);
+            return RenderBackendBufferDescription(4, (uint32)(bytes >> 2), flags);
         }
 
-        static RenderBackendBufferDesc CreateReadback(uint64 bytes)
+        static RenderBackendBufferDescription CreateReadback(uint64 bytes)
         {
             auto flags = RenderBackendBufferCreateFlags::Readback | RenderBackendBufferCreateFlags::CreateMapped;
-            return RenderBackendBufferDesc(4, (uint32)(bytes >> 2), flags);
+            return RenderBackendBufferDescription(4, (uint32)(bytes >> 2), flags);
         }
 
-        static RenderBackendBufferDesc CreateIndirectArguments(uint64 bytes)
+        static RenderBackendBufferDescription CreateIndirectArguments(uint64 bytes)
         {
             auto flags = RenderBackendBufferCreateFlags::IndirectArguments | RenderBackendBufferCreateFlags::UnorderedAccess | RenderBackendBufferCreateFlags::ShaderResource;
-            return RenderBackendBufferDesc(4, (uint32)(bytes >> 2), flags);
+            return RenderBackendBufferDescription(4, (uint32)(bytes >> 2), flags);
         }
 
-        static RenderBackendBufferDesc CreateIndirectArguments(uint32 elementSize, uint32 elementCount)
+        static RenderBackendBufferDescription CreateIndirectArguments(uint32 elementSize, uint32 elementCount)
         {
             auto flags = RenderBackendBufferCreateFlags::IndirectArguments | RenderBackendBufferCreateFlags::UnorderedAccess | RenderBackendBufferCreateFlags::ShaderResource;
-            return RenderBackendBufferDesc(elementSize, elementCount, flags);
+            return RenderBackendBufferDescription(elementSize, elementCount, flags);
         }
 
-        static RenderBackendBufferDesc CreateByteAddress(uint64 bytes, bool dynamic = false)
+        static RenderBackendBufferDescription CreateIndex(uint32 indexStride, uint32 indexCount)
+        {
+            RenderBackendBufferCreateFlags flags = RenderBackendBufferCreateFlags::IndexBuffer | RenderBackendBufferCreateFlags::ShaderResource;
+            // TODO: Remove this
+            flags |= RenderBackendBufferCreateFlags::UnorderedAccess;
+            return RenderBackendBufferDescription(indexStride, indexCount, flags);
+
+        }
+
+        static RenderBackendBufferDescription CreateConstant(uint64 bytes)
+        {
+            RenderBackendBufferCreateFlags flags = RenderBackendBufferCreateFlags::UniformBuffer | RenderBackendBufferCreateFlags::CpuToGpu;
+            return RenderBackendBufferDescription(4, (uint32)(bytes >> 2), flags);
+        }
+
+        static RenderBackendBufferDescription CreateByteAddress(uint64 bytes, bool dynamic = false)
         {
             auto flags = RenderBackendBufferCreateFlags::UnorderedAccess | RenderBackendBufferCreateFlags::ShaderResource;
             if (dynamic)
             {
                 flags |= RenderBackendBufferCreateFlags::CpuToGpu;
             }
-            return RenderBackendBufferDesc(4, (uint32)(bytes >> 2), flags);
+            return RenderBackendBufferDescription(4, (uint32)(bytes >> 2), flags);
         }
 
-        static RenderBackendBufferDesc CreateStructured(uint32 elementSize, uint32 elementCount)
+        static RenderBackendBufferDescription CreateStructured(uint32 elementSize, uint32 elementCount)
         {
             auto flags = RenderBackendBufferCreateFlags::UnorderedAccess | RenderBackendBufferCreateFlags::ShaderResource;
-            return RenderBackendBufferDesc(elementSize, elementCount, flags);
+            return RenderBackendBufferDescription(elementSize, elementCount, flags);
         }
 
-        static RenderBackendBufferDesc CreateShaderBindingTable(uint64 bytes)
+        static RenderBackendBufferDescription CreateShaderBindingTable(uint64 bytes)
         {
             auto flags = RenderBackendBufferCreateFlags::ShaderBindingTable | RenderBackendBufferCreateFlags::CpuOnly | RenderBackendBufferCreateFlags::CreateMapped;
-            return RenderBackendBufferDesc(4, (uint32)(bytes >> 2), flags);
+            return RenderBackendBufferDescription(4, (uint32)(bytes >> 2), flags);
         }
 
-        static RenderBackendBufferDesc CreateShaderBindingTable(uint64 handleSize, uint32 handleCount)
+        static RenderBackendBufferDescription CreateShaderBindingTable(uint64 handleSize, uint32 handleCount)
         {
             auto flags = RenderBackendBufferCreateFlags::ShaderBindingTable | RenderBackendBufferCreateFlags::CpuOnly | RenderBackendBufferCreateFlags::CreateMapped;
-            return RenderBackendBufferDesc(4, (uint32)((handleSize * handleCount) >> 2), flags);
+            return RenderBackendBufferDescription(4, (uint32)((handleSize * handleCount) >> 2), flags);
         }
 	};
 
@@ -201,6 +402,8 @@ namespace MIKU
 
     struct RenderBackendTextureClearValue
     {
+        bool test = false;
+
         enum class ClearOp
         {
             None,
@@ -236,11 +439,33 @@ namespace MIKU
         static const RenderBackendTextureClearValue DepthOne;
         static const RenderBackendTextureClearValue DepthZero;
 
+        static RenderBackendTextureClearValue CreateColorValueFloat4(float r, float g, float b, float a) 
+        {
+            return RenderBackendTextureClearValue(r, g, b, a);
+        }
+        static RenderBackendTextureClearValue CreateColorValueUnit4(uint32 r, uint32 g, uint32 b, uint32 a)
+        {
+            return RenderBackendTextureClearValue(r, g, b, a);
+        }
+        static RenderBackendTextureClearValue CreateDepthValue(float depth)
+        {
+            return RenderBackendTextureClearValue(depth, 0);
+        }
+        static RenderBackendTextureClearValue CreateDepthStencilValue(float depth, uint32 stencil)
+        {
+            return RenderBackendTextureClearValue(depth, stencil);
+        }
+
         RenderBackendTextureClearValue()
             :clearOp(ClearOp::None)
         {
-            std::memset(&colorValue, 0, sizeof(colorValue));
-            std::memset(&depthStencilValue, 0, sizeof(depthStencilValue));
+            colorValue.float32[0] = 0.0f;
+            colorValue.float32[1] = 0.0f;
+            colorValue.float32[2] = 0.0f;
+            colorValue.float32[3] = 0.0f;
+
+            depthStencilValue.depth = 0.0f;
+            depthStencilValue.stencil = 0;
 
         }
 
@@ -336,40 +561,51 @@ namespace MIKU
         MaximumAnisotropic,
     };
 
-    struct RenderBackendTextureSubresourceRange 
+    struct RenderBackendTextureSubresourceRange
     {
+        static const uint32 RemainingMipLevels;
+        static const uint32 RemainingArrayLayers;
+        static const RenderBackendTextureSubresourceRange All;
+
         RenderBackendTextureSubresourceRange()
-            :firstLevel(0), mipLevels(0xFFFFFFFF), firstLayer(0), arrayLayers(0xFFFFFFFF) {}
+            : firstLevel(0), mipLevels(RemainingMipLevels), firstLayer(0), arrayLayers(RemainingArrayLayers) {
+        }
+
         RenderBackendTextureSubresourceRange(uint32 firstLevel, uint32 mipLevels, uint32 firstLayer, uint32 arrayLayers)
-            : firstLevel(firstLevel), mipLevels(mipLevels), firstLayer(firstLayer), arrayLayers(arrayLayers) {}
+            : firstLevel(firstLevel), mipLevels(mipLevels), firstLayer(firstLayer), arrayLayers(arrayLayers) {
+        }
+
+        bool IsAll() const
+        {
+            return (firstLevel == 0)
+                && (mipLevels == RemainingMipLevels)
+                && (firstLayer == 0)
+                && (arrayLayers == RemainingArrayLayers);
+        }
+
+        bool IsArray() const
+        {
+            return (arrayLayers > 0) && (arrayLayers != RemainingArrayLayers);
+        }
+
+        bool operator==(const RenderBackendTextureSubresourceRange& rhs) const
+        {
+            return (firstLevel == rhs.firstLevel)
+                && (mipLevels == rhs.mipLevels)
+                && (firstLayer == rhs.firstLayer)
+                && (arrayLayers == rhs.arrayLayers);
+        }
 
         uint32 firstLevel;
         uint32 mipLevels;
         uint32 firstLayer;
         uint32 arrayLayers;
-
-        FORCEINLINE bool IsAll() const 
-        {
-            return firstLayer  == 0
-                && mipLevels   == 0xFFFFFFFF
-                && firstLayer  == 0
-                && arrayLayers == 0xFFFFFFFF;
-        }
-
-        FORCEINLINE bool operator==(const RenderBackendTextureSubresourceRange& rhs) const 
-        {
-            return firstLevel == rhs.firstLevel
-                && mipLevels == rhs.mipLevels
-                && firstLayer == rhs.firstLayer
-                && arrayLayers == rhs.arrayLayers;
-        }
-        static const RenderBackendTextureSubresourceRange All;
     };
 
     struct RenderBackendTextureSubresourceLayers 
     {
         uint32 mipLevel;
-        uint32 firstLayers;
+        uint32 firstLayer;
         uint32 arrayLayers;
     };
 
@@ -378,6 +614,17 @@ namespace MIKU
         Graphics,
         Compute,
         RayTracing
+    };
+
+    enum class RenderBackendPrimitiveTopology 
+    {
+        PointList = 0,
+        LineList = 1,
+        LineStrip = 2,
+        TriangleList = 3,
+        TriangleStrip = 4,
+        TriangleFan = 5,
+    
     };
     enum class RenderBackendCompareOp
     {
@@ -392,6 +639,76 @@ namespace MIKU
     };
 
     
+    enum class RenderBackendRasterizationCullMode 
+    {
+        None  = 0,
+        Front = 1,
+        Back  = 2,
+    
+    };
+
+
+    enum class RenderBackendRasterizationFillMode
+    {
+        Wireframe = 0,
+        Solid = 1,
+    };
+
+    enum class RenderBackendStencilOp
+    {
+        Keep = 0,
+        Zero = 1,
+        Replace = 2,
+        IncreaseAndClamp = 3,
+        DecreaseAndClamp = 4,
+        Invert = 5,
+        IncreaseAndWrap = 6,
+        DecreaseAndWrap = 7,
+    };
+
+    enum class RenderBackendBlendOp
+    {
+        Add = 0,
+        Subtract = 1,
+        ReverseSubtract = 2,
+        Min = 3,
+        Max = 4,
+    };
+
+    enum class RenderBackendBlendFactor
+    {
+        Zero = 0,
+        One = 1,
+        SrcColor = 2,
+        OneMinusSrcColor = 3,
+        DstColor = 4,
+        OneMinusDstColor = 5,
+        SrcAlpha = 6,
+        OneMinusSrcAlpha = 7,
+        DstAlpha = 8,
+        OneMinusDstAlpha = 9,
+        ConstantBlendFactor = 10,
+        OneMinusConstantBlendFactor = 11,
+        SrcAlphaSaturate = 12,
+        Src1Color = 13,
+        OneMinusSrc1Color = 14,
+        Src1Alpha = 15,
+        OneMinusSrc1Alpha = 16,
+    };
+
+    enum class RenderBackendColorComponentFlags : uint32 
+    {
+        R = (1 << 0),
+        G = (1 << 1),
+        B = (1 << 2),
+        A = (1 << 3),
+
+        None = 0,
+        RGB  = R | G | B,
+        RGBA = R | G | B | A,
+    };
+    MIKU_ENUM_CLASS_OPERATORS(RenderBackendColorComponentFlags);
+
     struct RenderBackendTextureDesc 
     {
         uint32 width;
@@ -477,6 +794,18 @@ namespace MIKU
             return RenderBackendTextureDesc(width, height, 1, mipLevels, 1, 1, RenderBackendTextureType::Texture2D, format, flags, clearValue, initalState);
         }
     
+        static RenderBackendTextureDesc Create1D(
+            uint32 width,
+            RenderBackendTextureFormat format,
+            RenderBackendTextureCreateFlags flags,
+            RenderBackendTextureClearValue clearValue = RenderBackendTextureClearValue::None,
+            uint32 mipLevels = 1,
+            uint32 samples = 1,
+            RenderBackendResourceState initalState = RenderBackendResourceState::Undefined)
+        {
+            return RenderBackendTextureDesc(width, 1, 1, mipLevels, 1, 1, RenderBackendTextureType::Texture2D, format, flags, clearValue, initalState);
+        }
+
         static RenderBackendTextureDesc Create2D(
             uint32 width,
             uint32 height,
@@ -545,31 +874,36 @@ namespace MIKU
 
     struct RenderBackendTextureSRVDesc 
     {
+        RenderBackendTextureHandle texture;
+        RenderBackendTextureSubresourceRange subresourceRange;
 
-        RenderBackendTextureSRVDesc()
-            : texture()
-            , baseMipLevel(0)
-            , numMipLevels(RENDER_BACKEND_REMAINING_MIP_LEVELS)
-            , baseArrayLayer(0)
-            , numArrayLayers(RENDER_BACKEND_REMAINING_MIP_LEVELS) {}
+        RenderBackendTextureSRVDesc() = default;
 
-        RenderBackendTextureSRVDesc(RenderBackendTextureHandle texture, uint32 baseMipLevel, uint32 numMipLevels, uint32 baseArrayLayer, uint32 numArrayLayers)
-            : texture(texture)
-            , baseMipLevel(baseMipLevel)
-            , numMipLevels(numMipLevels)
-            , baseArrayLayer(baseArrayLayer)
-            , numArrayLayers(numArrayLayers) {}
+        RenderBackendTextureSRVDesc(RenderBackendTextureHandle texture, uint32 baseMipLevel, uint32 mipLevelCount, uint32 baseArrayLayer, uint32 arrayLayerCount)
+            : texture(texture), subresourceRange(baseMipLevel, mipLevelCount, baseArrayLayer, arrayLayerCount) 
+        {
+        }
+
+        static RenderBackendTextureSRVDesc Create(RenderBackendTextureHandle texture) 
+        {
+            return RenderBackendTextureSRVDesc(texture, 0, RenderBackendTextureSubresourceRange::RemainingMipLevels, 0, RenderBackendTextureSubresourceRange::RemainingArrayLayers);
+        }
+
+        static RenderBackendTextureSRVDesc Create(RenderBackendTextureHandle texture, uint32 baseMipLevel, uint32 mipLevelCount, uint32 baseArrayLayer, uint32 arrayLayerCount)
+        {
+            return RenderBackendTextureSRVDesc(texture, baseMipLevel, mipLevelCount, baseArrayLayer, arrayLayerCount);
+        }
+
+        static RenderBackendTextureSRVDesc CreateForMipLevel(RenderBackendTextureHandle texture, uint32 mipLevel, uint32 baseArrayLayer = 0, uint32 arrayLayerCount = 1)
+        {
+            return RenderBackendTextureSRVDesc(texture, mipLevel, 1, baseArrayLayer, arrayLayerCount);
+        }
 
         bool IsValid() const
         {
             return texture.IsValid();
         }
-
-        RenderBackendTextureHandle texture;
-        uint32 baseMipLevel;
-        uint32 numMipLevels;
-        uint32 baseArrayLayer;
-        uint32 numArrayLayers;
+       
 
     };
 
@@ -593,6 +927,67 @@ namespace MIKU
         }
     };
 
+    enum class RenderBackendTextureViewType 
+    {
+        ShaderResourceView,
+        UnorderedAccessView,
+        RenderTargetView,
+        DepthStencilView
+    };
+
+    struct RenderBackendTextureViewDesc 
+    {
+        RenderBackendTextureViewType type;
+        RenderBackendTextureSubresourceRange subresourceRange;
+        
+        RenderBackendTextureViewDesc(
+            RenderBackendTextureViewType type,
+            const RenderBackendTextureSubresourceRange& subresourceRange) 
+            : type(type), subresourceRange(subresourceRange) 
+        {
+        }
+
+        bool IsShaderResourceView() const 
+        {
+            return type == RenderBackendTextureViewType::ShaderResourceView;
+        }
+
+        bool IsUnorderedAccessView() const
+        {
+            return type == RenderBackendTextureViewType::UnorderedAccessView;
+        }
+
+        bool IsRenderTargetView() const
+        {
+            return type == RenderBackendTextureViewType::RenderTargetView;
+        }
+
+        bool IsDepthStencilView() const
+        {
+            return type == RenderBackendTextureViewType::DepthStencilView;
+        }
+
+        static RenderBackendTextureViewDesc CreateShaderResourceView(uint32 firstLevel = 0, uint32 mipLevels = RenderBackendTextureSubresourceRange::RemainingMipLevels, uint32 firstLayer = 0, uint32 arrayLayers = RenderBackendTextureSubresourceRange::RemainingArrayLayers)
+        {
+            return RenderBackendTextureViewDesc(RenderBackendTextureViewType::ShaderResourceView, RenderBackendTextureSubresourceRange(firstLevel, mipLevels, firstLayer, arrayLayers));
+        }
+
+         static RenderBackendTextureViewDesc CreateUnorderedAccessView(uint32 mipLevel, uint32 firstLayer = 0, uint32 arrayLayers = RenderBackendTextureSubresourceRange::RemainingArrayLayers)
+        {
+            return RenderBackendTextureViewDesc(RenderBackendTextureViewType::UnorderedAccessView, RenderBackendTextureSubresourceRange(mipLevel, 1, firstLayer, arrayLayers));
+        }
+
+        static RenderBackendTextureViewDesc CreateRenderTargetView(uint32 mipLevel, uint32 firstLayer = 0, uint32 arrayLayers = RenderBackendTextureSubresourceRange::RemainingArrayLayers)
+        {
+            return RenderBackendTextureViewDesc(RenderBackendTextureViewType::RenderTargetView, RenderBackendTextureSubresourceRange(mipLevel, 1, firstLayer, arrayLayers));
+        }
+
+        static RenderBackendTextureViewDesc CreateDepthStencilView()
+        {
+            return RenderBackendTextureViewDesc(RenderBackendTextureViewType::DepthStencilView, RenderBackendTextureSubresourceRange(0, 1, 0, 1));
+        }
+    
+    };
 
     struct RenderBackendTextureUploadDataDesc 
     {
@@ -772,35 +1167,19 @@ namespace MIKU
     enum class RenderBackendShaderStage : uint8
     {
     
-        Vertex = 0,
-        Pixel = 1,
-        Compute = 2,
-        Task = 8,
-        Mesh = 9,
-        RayGen = 3,
+        Compute = 0,
+        Vertex = 1,
+        Pixel = 2,
+        Amplification = 3,
+        Mesh = 4,
+        RayGen = 5,
         Miss = 6,
-        AnyHit = 4,
-        ClosestHit = 5,
-        Intersection = 7,
+        AnyHit = 7,
+        ClosestHit = 8,
+        Intersection = 9,
         Count = 10,
     };
-
-    enum RenderBackendShaderStageFlags
-    {
-        None = 0,
-        Vertex = (1 << (int)RenderBackendShaderStage::Vertex),
-        Pixel = (1 << (int)RenderBackendShaderStage::Pixel),
-        Compute = (1 << (int)RenderBackendShaderStage::Compute),
-        RayGen = (1 << (int)RenderBackendShaderStage::RayGen),
-        AnyHit = (1 << (int)RenderBackendShaderStage::AnyHit),
-        ClosestHit = (1 << (int)RenderBackendShaderStage::ClosestHit),
-        Miss = (1 << (int)RenderBackendShaderStage::Miss),
-        Intersection = (1 << (int)RenderBackendShaderStage::Intersection),
-        Task = (1 << (int)RenderBackendShaderStage::Task),
-        Mesh = (1 << (int)RenderBackendShaderStage::Mesh),
-        All = 0x7FFFFFFF,
-
-    };
+    static_assert(uint8(RenderBackendShaderStage::Count) == RenderBackendShaderStageCount);
 
     enum class RenderBackendIndexType
     {
@@ -812,8 +1191,10 @@ namespace MIKU
 
     struct RenderBackendShaderDesc
     {
-        std::string entryPoints[RenderBackendMaxNumShaderStages] = {};
-        RenderBackendShaderBlob stages[RenderBackendMaxNumShaderStages] = {};
+        RenderBackendShaderStage stage;
+        const void* code;
+        uint64 codeSize;
+        const char* entryFunctionName;
     };
 
     enum class RenderBackendQueryType
@@ -836,11 +1217,79 @@ namespace MIKU
         RenderBackendOcclusionQueryHeapDesc(uint32 maxQueries) : maxQueries(maxQueries) {}
     };
 
-    struct RenderBackendGraphicsPipelineState 
+    struct RenderBackendRasterizationStateDescription
     {
-        RenderBackendRasterizationState 
-    
+        RenderBackendRasterizationCullMode cullMode = RenderBackendRasterizationCullMode::None;
+        RenderBackendRasterizationFillMode fillMode = RenderBackendRasterizationFillMode::Solid;
+        bool frontFaceCounterClockwise = true;
+        bool depthClampEnable = false;
+        float depthBiasClamp = 0.0f;
+        float depthBiasConstantFactor = 0.0f;
+        float depthBiasSlopeFactor = 0.0f;
+        float lineWidth = 1.0f;
     };
+
+    struct RenderBackendDepthStencilStateDescription
+    {
+        bool depthTestEnable = false;
+        bool depthWriteEnable = false;
+        RenderBackendCompareOp depthCompareFunction = RenderBackendCompareOp::Never;
+        bool stencilTestEnable = false;
+        RenderBackendStencilOp frontFaceStencilPassOp = RenderBackendStencilOp::Keep;
+        RenderBackendStencilOp frontFaceStencilDepthFailOp = RenderBackendStencilOp::Keep;
+        RenderBackendStencilOp frontFaceStencilFailOp = RenderBackendStencilOp::Keep;
+        RenderBackendCompareOp frontFaceStencilCompareFunction = RenderBackendCompareOp::Always;
+        RenderBackendStencilOp backFaceStencilPassOp = RenderBackendStencilOp::Keep;
+        RenderBackendStencilOp backFaceStencilDepthFailOp = RenderBackendStencilOp::Keep;
+        RenderBackendStencilOp backFaceStencilFailOp = RenderBackendStencilOp::Keep;
+        RenderBackendCompareOp backFaceStencilCompareFunction = RenderBackendCompareOp::Always;
+        uint8 stencilReadMask = 0xFF;
+        uint8 stencilWriteMask = 0xFF;
+    };
+
+    struct RenderBackendColorBlendAttachmentState
+    {
+        static const RenderBackendColorBlendAttachmentState Additive;
+        static const RenderBackendColorBlendAttachmentState AdditiveRGB;
+
+        bool blendEnable = false;
+        RenderBackendBlendFactor srcColorBlendFactor = RenderBackendBlendFactor::One;
+        RenderBackendBlendFactor dstColorBlendFactor = RenderBackendBlendFactor::Zero;
+        RenderBackendBlendOp colorBlendOp = RenderBackendBlendOp::Add;
+        RenderBackendBlendFactor srcAlphaBlendFactor = RenderBackendBlendFactor::One;
+        RenderBackendBlendFactor dstAlphaBlendFactor = RenderBackendBlendFactor::Zero;
+        RenderBackendBlendOp alphaBlendOp = RenderBackendBlendOp::Add;
+        RenderBackendColorComponentFlags writeMask = RenderBackendColorComponentFlags::RGBA;
+    };
+
+    enum class RenderBackendRenderPassLoadOperation
+    {
+        Load,
+        Clear,
+        Discard,
+        None
+    };
+
+    enum class RenderBackendRenderPassStoreOperation
+    {
+        Store,
+        Discard,
+        None
+    };
+
+    struct RenderBackendColorBlendStateDescription
+    {
+        RenderBackendColorBlendAttachmentState targetBlends[RenderBackendMaxRenderTargetCount];
+    };
+
+    struct RenderBackendGraphicsPipelineStateDescription
+    {
+        RenderBackendRasterizationStateDescription rasterizationState;
+        RenderBackendDepthStencilStateDescription depthStencilState;
+        RenderBackendColorBlendStateDescription colorBlendState;
+    };
+
+
 
     struct RenderBackendViewport 
     {
@@ -909,7 +1358,7 @@ namespace MIKU
     {
         enum class Type 
         {
-            Memory,
+            Global,
             Texture,
             Buffer,
         };
@@ -924,37 +1373,63 @@ namespace MIKU
                 RenderBackendTextureHandle texture;
                 RenderBackendTextureSubresourceRange textureRange;
             };
+            struct
+            {
+                RenderBackendBufferHandle buffer;
+                RenderBackendBufferSubresourceRange bufferRange;
+            };
         
         };
+
+        RenderBackendBarrier() :type(Type::Global) {}
+        RenderBackendBarrier(RenderBackendTextureHandle texture, RenderBackendTextureSubresourceRange range, RenderBackendResourceState srcState, RenderBackendResourceState dstState)
+            : type(Type::Texture), texture(texture), textureRange(range), stateBefore(srcState), stateAfter(dstState) {
+        }
+        RenderBackendBarrier(RenderBackendBufferHandle buffer, RenderBackendBufferSubresourceRange range, RenderBackendResourceState srcState, RenderBackendResourceState dstState)
+            : type(Type::Buffer), buffer(buffer), bufferRange(range), stateBefore(srcState), stateAfter(dstState) {
+        }
     };
 
-    struct RenderBackendRenderPassInfo 
+    struct alignas(64) RenderBackendRenderPassInfo
     {
-        struct ColorRenderTarget 
+        Rect renderArea;
+        struct
         {
-            RenderBackendTextureHandle texture;
-            uint32 mipLevel;
-            uint32 arrayLayer;
-            RenderBackendRenderTargetLoadOp depthLoadOp;
-            RenderBackendRenderTargetStoreOp storeOp;
-
-        };
-
-        struct DepthStencilRenderTarget 
-        {
-            RenderBackendTextureHandle texture;
-            uint32 mipLevel;
-            uint32 arrayLayer;
-            RenderBackendRenderTargetLoadOp depthLoadOp;
-            RenderBackendRenderTargetStoreOp depthStoreOp;
-            RenderBackendRenderTargetLoadOp stencilLoadOp;
-            RenderBackendRenderTargetStoreOp stencilStoreOp;
-        };
-
-        ColorRenderTarget colorRenderTarget[RenderBackendMaxNumSimultaneousColorRenderTargets];
-        DepthStencilRenderTarget depthStencilRenderTarget;
-        
+            uint32 allowUAVWrites : 1;
+            uint32 unused : 31;
+        } renderPassFlags;
+        static_assert(sizeof(renderPassFlags) == sizeof(uint32));
+        RenderBackendRenderTargetBinding renderTargets[RenderBackendMaxRenderTargetCount];
+        RenderBackendDepthStencilBinding depthStencil;
     
+    };
+
+    enum class RenderBackendRayTracingAccelerationStructureBuildFlags
+    {
+        None = 0,
+        AllowUpdate = 1 << 0,
+        AllowCompaction = 1 << 1,
+        PreferFastTrace = 1 << 2,
+        PreferFastBuild = 1 << 3,
+        MinimizeMemory = 1 << 4,
+    };
+    MIKU_ENUM_CLASS_OPERATORS(RenderBackendRayTracingAccelerationStructureBuildFlags);
+
+
+    struct RenderBackendShaderBindingTable
+    {
+        RenderBackendBufferHandle buffer;
+        uint64 offset;
+        uint64 size;
+        uint64 stride;
+    };
+
+    enum class RenderBackendRayTracingShaderGroupType
+    {
+        RayGen,
+        Miss,
+        TrianglesHitGroup,
+        ProceduralHitGroup,
     };
 
 
@@ -980,5 +1455,238 @@ namespace MIKU
         ClearStencil,
         ClearDepthStencil
     };
+
+
+    struct RenderBackendPushConstantValues 
+    {
+        enum class Type :int8 
+        {
+            SamplerState = 0,
+            TextureSRV = 1,
+            TextureUAV = 2,
+            BufferCBV = 3,
+            BufferSRV = 4,
+            BufferUAV = 5,
+            AccelerationStructure = 6,
+            Scalar = 7,
+            Count = 8
+        };
+
+        struct SlotData 
+        {
+            union 
+            {
+                int descriptorIndex;
+                int scalarTypeInt;
+                unsigned int scalarTypeUint;
+                float scalarTypeFloat;
+            };
+        };
+        static_assert(sizeof(SlotData) == 4);
+
+        SlotData data[RenderBackendPushConstantsSlotCount];
+
+        void BindSamplerState(uint8 slot, int descriptorIndex)
+        {
+            //types[slot] = int8(Type::SamplerState);
+            data[slot].descriptorIndex = descriptorIndex;
+        }
+
+        void BindTextureSRV(uint8 slot, int descriptorIndex)
+        {
+            //types[slot] = int8(Type::TextureSRV);
+            data[slot].descriptorIndex = descriptorIndex;
+        }
+
+        void BindTextureUAV(uint8 slot, int descriptorIndex)
+        {
+            //types[slot] = int8(Type::TextureUAV);
+            data[slot].descriptorIndex = descriptorIndex;
+        }
+
+        void BindBufferCBV(uint8 slot, int descriptorIndex)
+        {
+            //types[slot] = int8(Type::BufferCBV);
+            data[slot].descriptorIndex = descriptorIndex;
+        }
+
+        void BindBufferSRV(uint8 slot, int descriptorIndex)
+        {
+            //types[slot] = int8(Type::BufferSRV);
+            data[slot].descriptorIndex = descriptorIndex;
+        }
+
+        void BindBufferUAV(uint8 slot, int descriptorIndex)
+        {
+            //types[slot] = int8(Type::BufferUAV);
+            data[slot].descriptorIndex = descriptorIndex;
+        }
+
+        void BindAccelerationStructure(uint8 slot, int descriptorIndex)
+        {
+            //types[slot] = int8(Type::RayTracingAccelerationStructure);
+            data[slot].descriptorIndex = descriptorIndex;
+        }
+    
+        void OverrideShaderConstantValue(uint8 slot, int32 value)
+        {
+            //types[slot] = int8(Type::Scalar);
+            data[slot].scalarTypeInt = value;
+        }
+
+        void OverrideShaderConstantValue(uint8 slot, uint32 value)
+        {
+            //types[slot] = int8(Type::Scalar);
+            data[slot].scalarTypeUint = value;
+        }
+
+        void OverrideShaderConstantValue(uint8 slot, float value)
+        {
+            //types[slot] = int8(Type::Scalar);
+            data[slot].scalarTypeFloat = value;
+        }
+    };
+
+    struct RenderBackendRenderTargetBinding 
+    {
+        RenderBackendTextureHandle texture;
+        uint32 mipLevel;
+        RenderBackendRenderPassLoadOperation loadOperation;
+        RenderBackendRenderPassStoreOperation storeOperation;
+        RenderBackendRenderPassLoadOperation depthLoadOperation;
+        RenderBackendRenderPassStoreOperation depthStoreOperation;
+        RenderBackendRenderPassLoadOperation stencilLoadOperation;
+        RenderBackendRenderPassStoreOperation stencilStoreOperation;
+        RenderBackendDepthStencilAccessType depthStencilAccessType;
+    };
+
+    struct RenderBackendDepthStencilBinding 
+    {
+        RenderBackendTextureHandle texture;
+        uint32 mipLevel;
+
+    
+    };
+
+    enum class RenderBackendDepthStencilAccessType 
+    {
+        DepthNoAccess_StencilNoAccess,
+        DepthNoAccess_StencilReadOnly,
+        DepthNoAccess_StencilWrite,
+        DepthReadOnly_StencilNoAccess,
+        DepthReadOnly_StencilWrite,
+        DepthReadOnly_StencilReadOnly,
+        DepthWrite_StencilNoAccess,
+        DepthWrite_StencilReadOnly,
+        DepthWrite_StencilWrite,
+    
+    };
+
+    struct RenderBackendTextureResource 
+    {
+        /** VkImage or ID3D12Resource */
+        void* texture;
+
+        /** vkImageCreateInfo or nullptr */
+        void* info;
+
+        /** vkDeviceMemory or nullptr */
+        void* memory;
+
+        /** VkImageView or nullptr */
+        void* view;
+
+        /** Width in pixels */
+        uint32 width;
+
+        /** Height in pixels */
+        uint32 height;
+
+        /** Number of mip-map levels */
+        uint32 mipLevels;
+
+        /** Number of arrays */
+        uint32 arrayLayers;
+
+        /** Native format */
+        uint32 format;
+
+        /** VkImageLayout or D3D12_RESOURCE_STATES */
+        uint32 state;
+
+        /** VkImageCreateFlags */
+        uint32 flags;
+
+        /** VkImageUsageFlags */
+        uint32 usage;
+
+    
+    };
+
+    struct RenderBackendSwapChainDesc
+    {
+        uint32 width;
+        uint32 height;
+        uint64 windowHandle;
+        uint32 numBuffers;
+        bool vsync;
+        bool fullscreen;
+        RenderBackendTextureFormat format;
+        RenderBackendSwapChainPresentMode presentMode;
+    };
+
+    struct RenderBackendDrawIndirectArguments
+    {
+        uint32 numVertices;
+        uint32 numInstances;
+        uint32 firstVertex;
+        uint32 firstInstance;
+    };
+
+    struct RenderBackendDrawIndexedIndirectArguments
+    {
+        uint32 numIndices;
+        uint32 numInstances;
+        uint32 firstIndex;
+        int32 vertexOffset;
+        uint32 firstInstance;
+    };
+
+    struct RenderBackendDispatchIndirectArguments
+    {
+        uint32 threadGroupCountX;
+        uint32 threadGroupCountY;
+        uint32 threadGroupCountZ;
+    };
+
+    struct RenderBackendDispatchRaysIndirectArguments
+    {
+        uint32 width;
+        uint32 height;
+        uint32 depth;
+    };
+
+    struct RenderBackendDispatchMeshIndirectArguments
+    {
+        uint32 threadGroupCountX;
+        uint32 threadGroupCountY;
+        uint32 threadGroupCountZ;
+    };
+
+    struct RenderBackendDeviceContext
+    {
+        void* device;
+        void* physicalDevice;
+        void* vkGetDeviceProcAddr;
+    };
+
+    typedef bool(*RenderBackendDispatchSuperSamplingCallback) (
+        void* commandList,
+        void* temporalSuperSamplingInterface,
+        const RenderBackendTextureResource& output,
+        const RenderBackendTextureResource& color,
+        const RenderBackendTextureResource& depth,
+        const RenderBackendTextureResource& motionVectors,
+        const RenderBackendTextureResource& exposure);
 
 }

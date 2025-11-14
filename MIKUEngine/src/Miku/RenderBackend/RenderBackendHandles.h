@@ -4,22 +4,19 @@
 namespace MIKU 
 {
 
-	class RenderBackendHandle
+	class RenderBackendHandleBase
 	{
 	public:
-		RenderBackendHandle() = default;
-		RenderBackendHandle(uint64 value) :index((uint32)(value >> 32)), deviceMask((uint32)value) {}
-		RenderBackendHandle(uint32 index, uint32 deviceMask) :index(index), deviceMask(deviceMask) {}
-		FORCEINLINE bool IsValid() const { return index != InvalidIndex; }
-		FORCEINLINE operator bool() const { return IsValid(); }
-		FORCEINLINE bool operator==(const RenderBackendHandle& rhs) const { return ((index == rhs.index) && (deviceMask == rhs.deviceMask)); }
-		FORCEINLINE bool operator!=(const RenderBackendHandle& rhs) const { return ((index != rhs.index) && (deviceMask != rhs.deviceMask)); }
-		FORCEINLINE uint64 ToUnit64() const { return uint64(index) << 32 | uint64(deviceMask); }
-		FORCEINLINE RenderBackendHandle& operator=(const RenderBackendHandle& rhs) = default;
-		FORCEINLINE RenderBackendHandle& operator++() { index++; return *this; }
-		FORCEINLINE RenderBackendHandle& operator--() { index--; return *this; }
-		FORCEINLINE uint32 GetIndex() const { return index; }
-		FORCEINLINE uint32 GetDeviceMask() const { return deviceMask; }
+		RenderBackendHandleBase() = default;
+		explicit RenderBackendHandleBase(uint64 value) :index((uint32)(value >> 32)), deviceMask((uint32)value) {}
+		explicit RenderBackendHandleBase(uint32 index, uint32 deviceMask) :index(index), deviceMask(deviceMask) {}
+		bool IsValid() const { return index != InvalidIndex; }
+		operator bool() const { return IsValid(); }
+		bool operator==(const RenderBackendHandleBase& rhs) const { return ((index == rhs.index) && (deviceMask == rhs.deviceMask)); }
+		bool operator!=(const RenderBackendHandleBase& rhs) const { return ((index != rhs.index) && (deviceMask != rhs.deviceMask)); }
+		uint64 ToUnit64() const { return uint64(index) << 32 | uint64(deviceMask); }
+		uint32 GetIndex() const { return index; }
+		uint32 GetDeviceMask() const { return deviceMask; }
 	private:
 		static const uint32 InvalidIndex = std::numeric_limits<uint32>::max();
 		uint32 index = InvalidIndex;
@@ -28,43 +25,44 @@ namespace MIKU
 	};
 
 	template<typename ObjectType>
-	class RenderBackendHandleTyped :public RenderBackendHandle 
+	class RenderBackendHandle :public RenderBackendHandleBase
 	{
 	public:
-		static const RenderBackendHandleTyped Null;
-		RenderBackendHandleTyped() = default;
-		RenderBackendHandleTyped(uint64 value) :RenderBackendHandle(value) {}
-		RenderBackendHandleTyped(uint32 index, uint32 deviceMask) :RenderBackendHandle(index, deviceMask) {}
+		static const RenderBackendHandle Null;
+		RenderBackendHandle() = default;
+		RenderBackendHandle(uint64 value) :RenderBackendHandleBase(value) {}
+		RenderBackendHandle(uint32 index, uint32 deviceMask) :RenderBackendHandleBase(index, deviceMask) {}
 
 	};
 	
 	template<typename ObjectType>
-	const RenderBackendHandleTyped<ObjectType> RenderBackendHandleTyped<ObjectType>::Null = RenderBackendHandleTyped<ObjectType>();
+	const RenderBackendHandle<ObjectType> RenderBackendHandle<ObjectType>::Null = RenderBackendHandle<ObjectType>();
 
-	class RenderBackendSwapChain;
-	using RenderBackendSwapChainHandle = RenderBackendHandleTyped<RenderBackendSwapChain>;
 
-	class RenderBackendTexture;
-	using RenderBackendTextureHandle = RenderBackendHandleTyped<RenderBackendTexture>;
+	namespace RenderBackendHandleTypes
+	{
+		class Texture;
+		class TextureView;
+		class Buffer;
+		class BufferView;
+		class Sampler;
+		class SwapChain;
+		class TimingQueryHeap;
+		class Shader;
+		class ShaderModule;
+		class RayTracingAccelerationStructure;
+		class RayTracingPipelineState;
+	}
 
-	class RenderBackendTextureSRV;
-	using RenderBackendTextureSRVHandle = RenderBackendHandleTyped<RenderBackendTextureSRV>;
-
-	class RenderBackendTextureUAV;
-	using RenderBackendTextureUAVHandle = RenderBackendHandleTyped<RenderBackendTextureUAV>;
-
-	class RenderBackendBuffer;
-	using RenderBackendBufferHandle = RenderBackendHandleTyped<RenderBackendBuffer>;
-
-	class RenderBackendSampler;
-	using RenderBackendSamplerHandle = RenderBackendHandleTyped<RenderBackendSampler>;
-
-	class RenderBackendShader;
-	using RenderBackendShaderHandle = RenderBackendHandleTyped<RenderBackendShader>;
-
-	class RenderBackendTimingQueryHeap;
-	using RenderBackendTimingQueryHeapHandle = RenderBackendHandleTyped<RenderBackendTimingQueryHeap>;
-
-	class RenderBackendOcclusionQueryHeap;
-	using RenderBackendOcclusionQueryHeapHandle = RenderBackendHandleTyped<RenderBackendOcclusionQueryHeap>;
+	using RenderBackendTextureHandle = RenderBackendHandle<RenderBackendHandleTypes::Texture>;
+	using RenderBackendTextureViewHandle = RenderBackendHandleTypes::TextureView*;
+	using RenderBackendBufferHandle = RenderBackendHandle<RenderBackendHandleTypes::Buffer>;
+	using RenderBackendBufferViewHandle = RenderBackendHandleTypes::BufferView*;
+	using RenderBackendSamplerHandle = RenderBackendHandle<RenderBackendHandleTypes::Sampler>;
+	using RenderBackendSwapChainHandle = RenderBackendHandle<RenderBackendHandleTypes::SwapChain>;
+	using RenderBackendTimingQueryHeapHandle = RenderBackendHandle<RenderBackendHandleTypes::TimingQueryHeap>;
+	using RenderBackendShaderHandle = RenderBackendHandle<RenderBackendHandleTypes::Shader>;
+	using RenderBackendShaderModuleHandle = RenderBackendHandle<RenderBackendHandleTypes::ShaderModule>;
+	using RenderBackendRayTracingAccelerationStructureHandle = RenderBackendHandle<RenderBackendHandleTypes::RayTracingAccelerationStructure>;
+	using RenderBackendRayTracingPipelineStateHandle = RenderBackendHandle<RenderBackendHandleTypes::RayTracingPipelineState>;
 }
