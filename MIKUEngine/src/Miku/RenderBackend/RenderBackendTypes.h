@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "RenderBackendTextureFormat.h"
 #include <Miku/Foundation/FundamentalTypes.h>
-#include<Miku/Foundation/Foundation.h>
+#include <Miku/Foundation/Foundation.h>
 #include <Miku/Foundation/EnumClass.h>
 #include "Miku/RenderBackend/RenderBackendHandles.h"
 #include <Miku/RenderBackend/RenderBackendConfig.h>
@@ -155,11 +155,20 @@ namespace MIKU
         }
     };
 
+    enum class RenderBackendRayTracingShaderGroupType
+    {
+        RayGen,
+        Miss,
+        TrianglesHitGroup,
+        ProceduralHitGroup,
+    };
+
     struct RenderBackendRayTracingShaderGroupDesc
     {
         static const uint32 ShaderUnused = ~0u;
 
         static RenderBackendRayTracingShaderGroupDesc CreateRayGen(uint32 rayGenerationShader)
+
         {
             return RenderBackendRayTracingShaderGroupDesc(
                 RenderBackendRayTracingShaderGroupType::RayGen,
@@ -714,9 +723,9 @@ namespace MIKU
         uint32 width;
         uint32 height;
         uint32 depth;
-        uint32 mipLevels;
-        uint32 arrayLayers;
-        uint32 samples;
+        uint32 mipLevelCount;
+        uint32 arrayLayerCount;
+        uint32 sampleCount;
         RenderBackendTextureType type;
         RenderBackendTextureFormat format;
         RenderBackendTextureCreateFlags flags;
@@ -727,9 +736,9 @@ namespace MIKU
             : width(1)
             , height(1)
             , depth(1)
-            , mipLevels(1)
-            , arrayLayers(1)
-            , samples(1)
+            , mipLevelCount(1)
+            , arrayLayerCount(1)
+            , sampleCount(1)
             , type(RenderBackendTextureType::Texture2D)
             , format(RenderBackendTextureFormat::Unknown)
             , flags(RenderBackendTextureCreateFlags::None)
@@ -754,9 +763,9 @@ namespace MIKU
             : width(width)
             , height(height)
             , depth(depth)
-            , mipLevels(mipLevels)
-            , arrayLayers(arraySize)
-            , samples(samples)
+            , mipLevelCount(mipLevels)
+            , arrayLayerCount(arraySize)
+            , sampleCount(samples)
             , type(type)
             , format(format)
             , flags(flags)
@@ -768,9 +777,9 @@ namespace MIKU
             return width == rhs.width
                 && height == rhs.height
                 && depth == rhs.depth
-                && mipLevels == rhs.mipLevels
-                && arrayLayers == rhs.arrayLayers
-                && samples == rhs.samples
+                && mipLevelCount == rhs.mipLevelCount
+                && arrayLayerCount == rhs.arrayLayerCount
+                && sampleCount == rhs.sampleCount
                 && type == rhs.type
                 && format == rhs.format
                 && flags == rhs.flags
@@ -1390,8 +1399,41 @@ namespace MIKU
         }
     };
 
+    enum class RenderBackendDepthStencilAccessType 
+    {
+        DepthNoAccess_StencilNoAccess,
+        DepthNoAccess_StencilReadOnly,
+        DepthNoAccess_StencilWrite,
+        DepthReadOnly_StencilNoAccess,
+        DepthReadOnly_StencilWrite,
+        DepthReadOnly_StencilReadOnly,
+        DepthWrite_StencilNoAccess,
+        DepthWrite_StencilReadOnly,
+        DepthWrite_StencilWrite,
+    };
+
+    struct RenderBackendDepthStencilBinding 
+    {
+        RenderBackendTextureHandle texture;
+        uint32 mipLevel;
+    };
+
+    struct RenderBackendRenderTargetBinding 
+    {
+        RenderBackendTextureHandle texture;
+        uint32 mipLevel;
+        RenderBackendRenderPassLoadOperation loadOperation;
+        RenderBackendRenderPassStoreOperation storeOperation;
+        RenderBackendRenderPassLoadOperation depthLoadOperation;
+        RenderBackendRenderPassStoreOperation depthStoreOperation;
+        RenderBackendRenderPassLoadOperation stencilLoadOperation;
+        RenderBackendRenderPassStoreOperation stencilStoreOperation;
+        RenderBackendDepthStencilAccessType depthStencilAccessType;
+    };
+
     struct alignas(64) RenderBackendRenderPassInfo
     {
+
         Rect renderArea;
         struct
         {
@@ -1424,13 +1466,6 @@ namespace MIKU
         uint64 stride;
     };
 
-    enum class RenderBackendRayTracingShaderGroupType
-    {
-        RayGen,
-        Miss,
-        TrianglesHitGroup,
-        ProceduralHitGroup,
-    };
 
 
     enum class RenderBackendRenderTargetLoadOp
@@ -1457,11 +1492,13 @@ namespace MIKU
     };
 
 
-    struct RenderBackendPushConstantValues 
+    struct RenderBackendPushConstantValues
+
     {
         enum class Type :int8 
         {
             SamplerState = 0,
+
             TextureSRV = 1,
             TextureUAV = 2,
             BufferCBV = 3,
@@ -1547,40 +1584,8 @@ namespace MIKU
         }
     };
 
-    struct RenderBackendRenderTargetBinding 
-    {
-        RenderBackendTextureHandle texture;
-        uint32 mipLevel;
-        RenderBackendRenderPassLoadOperation loadOperation;
-        RenderBackendRenderPassStoreOperation storeOperation;
-        RenderBackendRenderPassLoadOperation depthLoadOperation;
-        RenderBackendRenderPassStoreOperation depthStoreOperation;
-        RenderBackendRenderPassLoadOperation stencilLoadOperation;
-        RenderBackendRenderPassStoreOperation stencilStoreOperation;
-        RenderBackendDepthStencilAccessType depthStencilAccessType;
-    };
 
-    struct RenderBackendDepthStencilBinding 
-    {
-        RenderBackendTextureHandle texture;
-        uint32 mipLevel;
 
-    
-    };
-
-    enum class RenderBackendDepthStencilAccessType 
-    {
-        DepthNoAccess_StencilNoAccess,
-        DepthNoAccess_StencilReadOnly,
-        DepthNoAccess_StencilWrite,
-        DepthReadOnly_StencilNoAccess,
-        DepthReadOnly_StencilWrite,
-        DepthReadOnly_StencilReadOnly,
-        DepthWrite_StencilNoAccess,
-        DepthWrite_StencilReadOnly,
-        DepthWrite_StencilWrite,
-    
-    };
 
     struct RenderBackendTextureResource 
     {
@@ -1623,19 +1628,8 @@ namespace MIKU
     
     };
 
-    struct RenderBackendSwapChainDesc
-    {
-        uint32 width;
-        uint32 height;
-        uint64 windowHandle;
-        uint32 numBuffers;
-        bool vsync;
-        bool fullscreen;
-        RenderBackendTextureFormat format;
-        RenderBackendSwapChainPresentMode presentMode;
-    };
-
     struct RenderBackendDrawIndirectArguments
+
     {
         uint32 numVertices;
         uint32 numInstances;

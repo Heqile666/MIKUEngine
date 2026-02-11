@@ -10,7 +10,29 @@ namespace MIKU
 #define D3D12_CHECK(function) {HRESULT hr = function; if(FAILED(hr)){ VerifyD3D12Result(hr, #function, __FILE__, __LINE__);} }
 
 
-
+    namespace D3D12Utils 
+    {
+        //宽字符串，解决历史遗留问题
+        inline std::wstring Widen(const std::string& input) 
+        {
+            std::wstring result = {};
+            if (input.length() > 0) 
+            {
+                int length = MultiByteToWideChar(CP_UTF8, 0, input.c_str(), int(input.size()), NULL, 0);
+                if (length > 0) 
+                {
+                    result.resize(length);
+                    MultiByteToWideChar(CP_UTF8, 0, input.c_str(), int(input.size()), result.data(), int(result.size()));
+                }
+            
+            }
+            return result;
+        
+        }
+    
+    
+    
+    }
 
     static inline void VerifyD3D12Result(HRESULT result, const char* function, const char* filename, uint32 line) 
     {
@@ -77,4 +99,617 @@ namespace MIKU
     
         return type;
     }
+
+    static inline D3D12_RESOURCE_DIMENSION GetD3D12ResourceDimension(RenderBackendTextureType type) 
+    {
+        switch (type) 
+        {
+        case RenderBackendTextureType::Texture1D:
+            return D3D12_RESOURCE_DIMENSION_TEXTURE1D;
+        case RenderBackendTextureType::Texture2D:
+            return D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+        case RenderBackendTextureType::TextureCube:
+            return D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+        case RenderBackendTextureType::Texture3D:
+            return D3D12_RESOURCE_DIMENSION_TEXTURE3D;
+        default:
+            std::abort();
+            return D3D12_RESOURCE_DIMENSION_UNKNOWN;
+        }
+    }
+
+    static inline D3D12_FILTER ConvertToD3D12Filter(RenderBackendTextureFilter filter)
+	{
+        switch (filter)
+        {
+        case RenderBackendTextureFilter::MinMagMipPoint:
+            return D3D12_FILTER_MIN_MAG_MIP_POINT;
+        case RenderBackendTextureFilter::MinMagPointMipLinear:
+            return D3D12_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+        case RenderBackendTextureFilter::MinPointMagLinearMipPoint:
+            return D3D12_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+        case RenderBackendTextureFilter::MinPointMagMipLinear:
+            return D3D12_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+        case RenderBackendTextureFilter::MinLinearMagMipPoint:
+            return D3D12_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+        case RenderBackendTextureFilter::MinLinearMagPointMipLinear:
+            return D3D12_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+        case RenderBackendTextureFilter::MinMagLinearMipPoint:
+            return D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+        case RenderBackendTextureFilter::MinMagMipLinear:
+            return D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+        case RenderBackendTextureFilter::Anisotropic:
+            return D3D12_FILTER_ANISOTROPIC;
+        case RenderBackendTextureFilter::ComparisonMinMagMipPoint:
+            return D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+        case RenderBackendTextureFilter::ComparisonMinMagPointMipLinear:
+            return D3D12_FILTER_COMPARISON_MIN_MAG_POINT_MIP_LINEAR;
+        case RenderBackendTextureFilter::ComparisonMinPointMagLinearMipPoint:
+            return D3D12_FILTER_COMPARISON_MIN_POINT_MAG_LINEAR_MIP_POINT;
+        case RenderBackendTextureFilter::ComparisonMinPointMagMipLinear:
+            return D3D12_FILTER_COMPARISON_MIN_POINT_MAG_MIP_LINEAR;
+        case RenderBackendTextureFilter::ComparisonMinLinearMagMipPoint:
+            return D3D12_FILTER_COMPARISON_MIN_LINEAR_MAG_MIP_POINT;
+        case RenderBackendTextureFilter::ComparisonMinLinearMagPointMipLinear:
+            return D3D12_FILTER_COMPARISON_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+        case RenderBackendTextureFilter::ComparisonMinMagLinearMipPoint:
+            return D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+        case RenderBackendTextureFilter::ComparisonMinMagMipLinear:
+            return D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+        case RenderBackendTextureFilter::ComparisonAnisotropic:
+            return D3D12_FILTER_COMPARISON_ANISOTROPIC;
+        case RenderBackendTextureFilter::MinimumMinMagMipPoint:
+            return D3D12_FILTER_MINIMUM_MIN_MAG_MIP_POINT;
+        case RenderBackendTextureFilter::MinimumMinMagPointMipLinear:
+            return D3D12_FILTER_MINIMUM_MIN_MAG_POINT_MIP_LINEAR;
+        case RenderBackendTextureFilter::MinimumMinPointMagLinearMipPoint:
+            return D3D12_FILTER_MINIMUM_MIN_POINT_MAG_LINEAR_MIP_POINT;
+        case RenderBackendTextureFilter::MinimumMinPointMagMipLinear:
+            return D3D12_FILTER_MINIMUM_MIN_POINT_MAG_MIP_LINEAR;
+        case RenderBackendTextureFilter::MinimumMinLinearMagMipPoint:
+            return D3D12_FILTER_MINIMUM_MIN_LINEAR_MAG_MIP_POINT;
+        case RenderBackendTextureFilter::MinimumMinLinearMagPointMipLinear:
+            return D3D12_FILTER_MINIMUM_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+        case RenderBackendTextureFilter::MinimumMinMagLinearMipPoint:
+            return D3D12_FILTER_MINIMUM_MIN_MAG_LINEAR_MIP_POINT;
+        case RenderBackendTextureFilter::MinimumMinMagMipLinear:
+            return D3D12_FILTER_MINIMUM_MIN_MAG_MIP_LINEAR;
+        case RenderBackendTextureFilter::MinimumAnisotropic:
+            return D3D12_FILTER_MINIMUM_ANISOTROPIC;
+        case RenderBackendTextureFilter::MaximumMinMagMipPoint:
+            return D3D12_FILTER_MAXIMUM_MIN_MAG_MIP_POINT;
+        case RenderBackendTextureFilter::MaximumMinMagPointMipLinear:
+            return D3D12_FILTER_MAXIMUM_MIN_MAG_POINT_MIP_LINEAR;
+        case RenderBackendTextureFilter::MaximumMinPointMagLinearMipPoint:
+            return D3D12_FILTER_MAXIMUM_MIN_POINT_MAG_LINEAR_MIP_POINT;
+        case RenderBackendTextureFilter::MaximumMinPointMagMipLinear:
+            return D3D12_FILTER_MAXIMUM_MIN_POINT_MAG_MIP_LINEAR;
+        case RenderBackendTextureFilter::MaximumMinLinearMagMipPoint:
+            return D3D12_FILTER_MAXIMUM_MIN_LINEAR_MAG_MIP_POINT;
+        case RenderBackendTextureFilter::MaximumMinLinearMagPointMipLinear:
+            return D3D12_FILTER_MAXIMUM_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+        case RenderBackendTextureFilter::MaximumMinMagLinearMipPoint:
+            return D3D12_FILTER_MAXIMUM_MIN_MAG_LINEAR_MIP_POINT;
+        case RenderBackendTextureFilter::MaximumMinMagMipLinear:
+            return D3D12_FILTER_MAXIMUM_MIN_MAG_MIP_LINEAR;
+        case RenderBackendTextureFilter::MaximumAnisotropic:
+            return D3D12_FILTER_MAXIMUM_ANISOTROPIC;
+        default:
+            std::abort();
+            return D3D12_FILTER_MIN_MAG_MIP_POINT;
+
+        }
+	}
+
+    static inline D3D12_TEXTURE_ADDRESS_MODE ConvertToD3D12TextureAddressMode(RenderBackendTextureAddressMode mode)
+    {
+        switch (mode)
+        {
+        case RenderBackendTextureAddressMode::Wrap:
+            return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        case RenderBackendTextureAddressMode::Mirror:
+            return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+		case RenderBackendTextureAddressMode::Clamp:
+			return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		case RenderBackendTextureAddressMode::Border:
+			return D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+        default:
+            std::abort();
+            return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+            break;
+        }
+    }
+
+    static inline D3D12_COMPARISON_FUNC ConvertToD3D12ComparisonFunc(RenderBackendCompareOp compareOp) 
+    {
+        switch (compareOp) 
+        {
+            switch (compareOp)
+            {
+            case RenderBackendCompareOp::Never:
+                return D3D12_COMPARISON_FUNC_NEVER;
+            case RenderBackendCompareOp::Less:
+                return D3D12_COMPARISON_FUNC_LESS;
+            case RenderBackendCompareOp::Equal:
+                return D3D12_COMPARISON_FUNC_EQUAL;
+            case RenderBackendCompareOp::LessOrEqual:
+                return D3D12_COMPARISON_FUNC_LESS_EQUAL;
+            case RenderBackendCompareOp::Greater:
+                return D3D12_COMPARISON_FUNC_GREATER;
+            case RenderBackendCompareOp::NotEqual:
+                return D3D12_COMPARISON_FUNC_NOT_EQUAL;
+            case RenderBackendCompareOp::GreaterOrEqual:
+                return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+            case RenderBackendCompareOp::Always:
+                return D3D12_COMPARISON_FUNC_ALWAYS;
+            default:
+                std::abort();
+                return D3D12_COMPARISON_FUNC_NEVER;
+            }
+
+        
+        }
+    
+    
+    }
+
+    static inline DXGI_FORMAT ConvertToDXGIFormat(RenderBackendTextureFormat format) 
+    {
+        switch (format)
+        {
+        case RenderBackendTextureFormat::Unknown:
+            return DXGI_FORMAT_UNKNOWN;
+        case RenderBackendTextureFormat::R8Unorm:
+            return DXGI_FORMAT_R8_UNORM;
+        case RenderBackendTextureFormat::R8Snorm:
+            return DXGI_FORMAT_R8_SNORM;
+        case RenderBackendTextureFormat::R16Unorm:
+            return DXGI_FORMAT_R16_UNORM;
+        case RenderBackendTextureFormat::R16Snorm:
+            return DXGI_FORMAT_R16_SNORM;
+        case RenderBackendTextureFormat::R8G8Unorm:
+            return DXGI_FORMAT_R8G8_UNORM;
+        case RenderBackendTextureFormat::R8G8Snorm:
+            return DXGI_FORMAT_R8G8_SNORM;
+        case RenderBackendTextureFormat::R16G16Unorm:
+            return DXGI_FORMAT_R16G16_UNORM;
+        case RenderBackendTextureFormat::R16G16Snorm:
+            return DXGI_FORMAT_R16G16_SNORM;
+            //case RenderBackendTextureFormat::RGB16Unorm:
+            //  return DXGI_FORMAT_R16G16B16_UNORM;
+            //case RenderBackendTextureFormat::RGB16Snorm:
+            //  return DXGI_FORMAT_R16G16B16_SNORM;
+        case RenderBackendTextureFormat::R8G8B8A8Unorm:
+            return DXGI_FORMAT_R8G8B8A8_UNORM;
+        case RenderBackendTextureFormat::R8G8B8A8UnormSrgb:
+            return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+        case RenderBackendTextureFormat::R8G8B8A8Snorm:
+            return DXGI_FORMAT_R8G8B8A8_SNORM;
+        case RenderBackendTextureFormat::R16G16B16A16Unorm:
+            return DXGI_FORMAT_R16G16B16A16_UNORM;
+        case RenderBackendTextureFormat::R16Float:
+            return DXGI_FORMAT_R16_FLOAT;
+        case RenderBackendTextureFormat::R16G16Float:
+            return DXGI_FORMAT_R16G16_FLOAT;
+            //case RenderBackendTextureFormat::RGB16Float:
+            //    return DXGI_FORMAT_R16G16B16_FLOAT;
+        case RenderBackendTextureFormat::R16G16B16A16Float:
+            return DXGI_FORMAT_R16G16B16A16_FLOAT;
+        case RenderBackendTextureFormat::R32Float:
+            return DXGI_FORMAT_R32_FLOAT;
+        case RenderBackendTextureFormat::R32G32Float:
+            return DXGI_FORMAT_R32G32_FLOAT;
+        case RenderBackendTextureFormat::R32G32B32Float:
+            return DXGI_FORMAT_R32G32B32_FLOAT;
+        case RenderBackendTextureFormat::R32G32B32A32Float:
+            return DXGI_FORMAT_R32G32B32A32_FLOAT;
+        case RenderBackendTextureFormat::R8Int:
+            return DXGI_FORMAT_R8_SINT;
+        case RenderBackendTextureFormat::R8Uint:
+            return DXGI_FORMAT_R8_UINT;
+        case RenderBackendTextureFormat::R16Int:
+            return DXGI_FORMAT_R16_SINT;
+        case RenderBackendTextureFormat::R16Uint:
+            return DXGI_FORMAT_R16_UINT;
+        case RenderBackendTextureFormat::R32Int:
+            return DXGI_FORMAT_R32_SINT;
+        case RenderBackendTextureFormat::R32Uint:
+            return DXGI_FORMAT_R32_UINT;
+        case RenderBackendTextureFormat::R8G8Int:
+            return DXGI_FORMAT_R8G8_SINT;
+        case RenderBackendTextureFormat::R8G8Uint:
+            return DXGI_FORMAT_R8G8_UINT;
+        case RenderBackendTextureFormat::R16G16Int:
+            return DXGI_FORMAT_R16G16_SINT;
+        case RenderBackendTextureFormat::R16G16Uint:
+            return DXGI_FORMAT_R16G16_UINT;
+        case RenderBackendTextureFormat::R32G32Int:
+            return DXGI_FORMAT_R32G32_SINT;
+        case RenderBackendTextureFormat::R32G32Uint:
+            return DXGI_FORMAT_R32G32_UINT;
+            //case RenderBackendTextureFormat::RGB16Int:
+            //    return DXGI_FORMAT_R16G16B16_SINT;
+            //case RenderBackendTextureFormat::RGB16Uint:
+            //    return DXGI_FORMAT_R16G16B16_UINT;
+        case RenderBackendTextureFormat::R32G32B32Int:
+            return DXGI_FORMAT_R32G32B32_SINT;
+        case RenderBackendTextureFormat::R32G32B32Uint:
+            return DXGI_FORMAT_R32G32B32_UINT;
+        case RenderBackendTextureFormat::R8G8B8A8Int:
+            return DXGI_FORMAT_R8G8B8A8_SINT;
+        case RenderBackendTextureFormat::R8G8B8A8Uint:
+            return DXGI_FORMAT_R8G8B8A8_UINT;
+        case RenderBackendTextureFormat::R16G16B16A16Int:
+            return DXGI_FORMAT_R16G16B16A16_SINT;
+        case RenderBackendTextureFormat::R16G16B16A16Uint:
+            return DXGI_FORMAT_R16G16B16A16_UINT;
+        case RenderBackendTextureFormat::R32G32B32A32Int:
+            return DXGI_FORMAT_R32G32B32A32_SINT;
+        case RenderBackendTextureFormat::R32G32B32A32Uint:
+            return DXGI_FORMAT_R32G32B32A32_UINT;
+        case RenderBackendTextureFormat::R11G11B10Float:
+            return DXGI_FORMAT_R11G11B10_FLOAT;
+        case RenderBackendTextureFormat::B8G8R8A8Unorm:
+            return DXGI_FORMAT_B8G8R8A8_UNORM;
+        case RenderBackendTextureFormat::B8G8R8A8UnormSrgb:
+            return DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+        case RenderBackendTextureFormat::D32Float:
+            return DXGI_FORMAT_D32_FLOAT;
+        case RenderBackendTextureFormat::D32FloatS8Uint:
+            return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+        case RenderBackendTextureFormat::D16Unorm:
+            return DXGI_FORMAT_D16_UNORM;
+        case RenderBackendTextureFormat::D24UnormS8Uint:
+            return DXGI_FORMAT_D24_UNORM_S8_UINT;
+        case RenderBackendTextureFormat::R10G10B10A2Unorm:
+            return DXGI_FORMAT_R10G10B10A2_UNORM;
+        case RenderBackendTextureFormat::BC1Unorm:
+            return DXGI_FORMAT_BC1_UNORM;
+        case RenderBackendTextureFormat::BC1UnormSrgb:
+            return DXGI_FORMAT_BC1_UNORM_SRGB;
+        case RenderBackendTextureFormat::BC2Unorm:
+            return DXGI_FORMAT_BC2_UNORM;
+        case RenderBackendTextureFormat::BC2UnormSrgb:
+            return DXGI_FORMAT_BC2_UNORM_SRGB;
+        case RenderBackendTextureFormat::BC3Unorm:
+            return DXGI_FORMAT_BC3_UNORM;
+        case RenderBackendTextureFormat::BC3UnormSrgb:
+            return DXGI_FORMAT_BC3_UNORM_SRGB;
+        case RenderBackendTextureFormat::BC4Unorm:
+            return DXGI_FORMAT_BC4_UNORM;
+        case RenderBackendTextureFormat::BC4Snorm:
+            return DXGI_FORMAT_BC4_SNORM;
+        case RenderBackendTextureFormat::BC5Unorm:
+            return DXGI_FORMAT_BC5_UNORM;
+        case RenderBackendTextureFormat::BC5Snorm:
+            return DXGI_FORMAT_BC5_SNORM;
+        case RenderBackendTextureFormat::BC6HUF:
+            return DXGI_FORMAT_BC6H_UF16;
+        case RenderBackendTextureFormat::BC6HSF:
+            return DXGI_FORMAT_BC6H_SF16;
+        case RenderBackendTextureFormat::BC7Unorm:
+            return DXGI_FORMAT_BC7_UNORM;
+        case RenderBackendTextureFormat::BC7UnormSrgb:
+            return DXGI_FORMAT_BC7_UNORM_SRGB;
+        default:
+            std::abort();
+            return DXGI_FORMAT_UNKNOWN;
+        }
+    }
+
+    inline D3D12_BARRIER_LAYOUT ConvertToD3D12BarrierLayout(RenderBackendResourceState state) 
+    {
+        switch (state)
+        {
+        case RenderBackendResourceState::Undefined:
+            return D3D12_BARRIER_LAYOUT_UNDEFINED;
+        case RenderBackendResourceState::Present:
+            return D3D12_BARRIER_LAYOUT_PRESENT;
+        case RenderBackendResourceState::RenderTarget:
+            return D3D12_BARRIER_LAYOUT_RENDER_TARGET;
+        case RenderBackendResourceState::UnorderedAccess:
+            return D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS;
+        case RenderBackendResourceState::DepthStencil:
+            return D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE; // TODO
+        case RenderBackendResourceState::DepthStencilReadOnly:
+            return D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ;
+        case RenderBackendResourceState::ShaderResource:
+        case RenderBackendResourceState::IndirectArgument:
+            return D3D12_BARRIER_LAYOUT_SHADER_RESOURCE;
+        case RenderBackendResourceState::VertexBuffer:
+            return D3D12_BARRIER_LAYOUT_COMMON;
+        case RenderBackendResourceState::IndexBuffer:
+            return D3D12_BARRIER_LAYOUT_COMMON;
+        case RenderBackendResourceState::CopySrc:
+            return D3D12_BARRIER_LAYOUT_COPY_SOURCE;
+        case RenderBackendResourceState::CopyDst:
+            return D3D12_BARRIER_LAYOUT_COPY_DEST;
+        default:
+            std::abort();
+        }
+    
+    }
+
+    static inline D3D12_BLEND ConvertToD3D12Blend(RenderBackendBlendFactor blend) 
+    {
+        switch (blend)
+        {
+        case RenderBackendBlendFactor::Zero:
+            return D3D12_BLEND_ZERO;
+        case RenderBackendBlendFactor::One:
+            return D3D12_BLEND_ONE;
+        case RenderBackendBlendFactor::SrcColor:
+            return D3D12_BLEND_SRC_COLOR;
+        case RenderBackendBlendFactor::OneMinusSrcColor:
+            return D3D12_BLEND_INV_SRC_COLOR;
+        case RenderBackendBlendFactor::DstColor:
+            return D3D12_BLEND_DEST_COLOR;
+        case RenderBackendBlendFactor::OneMinusDstColor:
+            return D3D12_BLEND_INV_DEST_COLOR;
+        case RenderBackendBlendFactor::SrcAlpha:
+            return D3D12_BLEND_SRC_ALPHA;
+        case RenderBackendBlendFactor::OneMinusSrcAlpha:
+            return D3D12_BLEND_INV_SRC_ALPHA;
+        case RenderBackendBlendFactor::DstAlpha:
+            return D3D12_BLEND_DEST_ALPHA;
+        case RenderBackendBlendFactor::OneMinusDstAlpha:
+            return D3D12_BLEND_INV_DEST_ALPHA;
+        case RenderBackendBlendFactor::ConstantBlendFactor:
+            return D3D12_BLEND_BLEND_FACTOR;
+        case RenderBackendBlendFactor::OneMinusConstantBlendFactor:
+            return D3D12_BLEND_INV_BLEND_FACTOR;
+        case RenderBackendBlendFactor::SrcAlphaSaturate:
+            return D3D12_BLEND_SRC_ALPHA_SAT;
+        case RenderBackendBlendFactor::Src1Color:
+            return D3D12_BLEND_SRC1_COLOR;
+        case RenderBackendBlendFactor::OneMinusSrc1Color:
+            return D3D12_BLEND_INV_SRC1_COLOR;
+        case RenderBackendBlendFactor::Src1Alpha:
+            return D3D12_BLEND_SRC1_ALPHA;
+        case RenderBackendBlendFactor::OneMinusSrc1Alpha:
+            return D3D12_BLEND_INV_SRC1_ALPHA;
+        default:
+            std::abort();
+            return D3D12_BLEND_ZERO;
+        }
+    }
+
+    static inline D3D12_BLEND_OP ConvertToD3D12BlendOp(RenderBackendBlendOp blendOp) 
+    {
+        switch (blendOp)
+        {
+        case RenderBackendBlendOp::Add:
+            return D3D12_BLEND_OP_ADD;
+        case RenderBackendBlendOp::Subtract:
+            return D3D12_BLEND_OP_SUBTRACT;
+        case RenderBackendBlendOp::ReverseSubtract:
+            return D3D12_BLEND_OP_REV_SUBTRACT;
+        case RenderBackendBlendOp::Min:
+            return D3D12_BLEND_OP_MIN;
+        case RenderBackendBlendOp::Max:
+            return D3D12_BLEND_OP_MAX;
+        default:
+            std::abort();
+            return D3D12_BLEND_OP_ADD;
+        }
+    }
+
+    static inline UINT8 ConvertToD3D12RenderTargetWriteMask(RenderBackendColorComponentFlags writeMask) 
+    {
+        UINT8 mask = 0;
+        if (writeMask == RenderBackendColorComponentFlags::RGBA) 
+        {
+            return D3D12_COLOR_WRITE_ENABLE_ALL;
+        }
+        else 
+        {
+            if (EnumClassHasFlags(writeMask, RenderBackendColorComponentFlags::R)) 
+            {
+                mask |= D3D12_COLOR_WRITE_ENABLE_RED;
+            }
+            if(EnumClassHasFlags(writeMask,RenderBackendColorComponentFlags::G))
+            {
+                mask |= D3D12_COLOR_WRITE_ENABLE_GREEN;
+            }
+            if(EnumClassHasFlags(writeMask,RenderBackendColorComponentFlags::B))
+            {
+                mask |= D3D12_COLOR_WRITE_ENABLE_BLUE;
+            }
+            if(EnumClassHasFlags(writeMask,RenderBackendColorComponentFlags::A))
+            {
+                mask |= D3D12_COLOR_WRITE_ENABLE_ALPHA;
+            }
+        }
+        return mask;
+    }
+
+    static inline D3D12_STENCIL_OP ConvertToD3D12StencilOp(RenderBackendStencilOp stencilOp) 
+    {
+        switch (stencilOp)
+        {
+        case RenderBackendStencilOp::Keep: //保存模板缓冲中的旧值
+            return D3D12_STENCIL_OP_KEEP;
+        case RenderBackendStencilOp::Zero: //模板值设置为0
+            return D3D12_STENCIL_OP_ZERO;
+        case RenderBackendStencilOp::Replace: //从参考值替换当前模板缓冲的模板值
+            return D3D12_STENCIL_OP_REPLACE;
+        case RenderBackendStencilOp::IncreaseAndClamp: //值加 1。如果已经是最大值（255），则保持 255 不变（封顶）
+            return D3D12_STENCIL_OP_INCR_SAT;
+        case RenderBackendStencilOp::DecreaseAndClamp: //值减 1。如果已经是 0，则保持 0 不变（到底）。
+            return D3D12_STENCIL_OP_DECR_SAT;
+        case RenderBackendStencilOp::Invert:
+            return D3D12_STENCIL_OP_INVERT; //按位取反
+        case RenderBackendStencilOp::IncreaseAndWrap: //超过最大值变成0
+            return D3D12_STENCIL_OP_INCR;
+        case RenderBackendStencilOp::DecreaseAndWrap:
+            return D3D12_STENCIL_OP_DECR;
+        default:
+            std::abort();
+            return D3D12_STENCIL_OP_KEEP;
+        }
+    }
+
+    static inline D3D12_CULL_MODE ConvertToD3D12CullMode(RenderBackendRasterizationCullMode cullMode) 
+    {
+        switch (cullMode)
+        {
+        case RenderBackendRasterizationCullMode::None:
+            return D3D12_CULL_MODE_NONE;
+        case RenderBackendRasterizationCullMode::Back:
+            return D3D12_CULL_MODE_BACK;
+        case RenderBackendRasterizationCullMode::Front:
+            return D3D12_CULL_MODE_FRONT;
+        default:
+            std::abort();
+            return D3D12_CULL_MODE_NONE;
+        }
+    }
+    static inline D3D12_FILL_MODE ConvertToD3D12FillMode(RenderBackendRasterizationFillMode fillMode) 
+    {
+        switch (fillMode)
+        {
+        case RenderBackendRasterizationFillMode::Wireframe:
+            return D3D12_FILL_MODE_WIREFRAME;
+        case RenderBackendRasterizationFillMode::Solid:
+            return D3D12_FILL_MODE_SOLID;
+        default:
+            std::abort();
+            return D3D12_FILL_MODE_SOLID;
+        }
+    }
+
+    inline void ConvertToD3D12TextureBarrier(
+        RenderBackendResourceState srcState, //贴图资源转换前的状态
+        RenderBackendResourceState dstState, //贴图资源转换后的状态
+        D3D12_BARRIER_SYNC& outSyncBefore, //等待前面的操作执行完在执行当前的屏障操作
+        D3D12_BARRIER_SYNC& outSyncAfter, //阻塞操作，屏障转换完成前阻塞某个操作
+        D3D12_BARRIER_ACCESS& outAccessBefore, //转换前的读写操作
+        D3D12_BARRIER_ACCESS& outAccessAfter,
+        D3D12_BARRIER_LAYOUT& outLayoutBefore,
+        D3D12_BARRIER_LAYOUT& outLayoutAfter,
+        D3D12_TEXTURE_BARRIER_FLAGS& outFlags)
+    {
+        switch (srcState) 
+        {
+        case RenderBackendResourceState::Undefined:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS;
+            outLayoutBefore = D3D12_BARRIER_LAYOUT_UNDEFINED;
+            outFlags |= D3D12_TEXTURE_BARRIER_FLAG_DISCARD;
+            break;
+        case RenderBackendResourceState::VertexBuffer:
+        case RenderBackendResourceState::IndexBuffer:
+        case RenderBackendResourceState::ShaderResource:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_SHADER_RESOURCE;
+            outLayoutBefore = D3D12_BARRIER_LAYOUT_SHADER_RESOURCE;
+            break;
+        case RenderBackendResourceState::Present:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_COMMON;
+            outLayoutBefore = D3D12_BARRIER_LAYOUT_PRESENT;
+            break;
+        case RenderBackendResourceState::RenderTarget:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_RENDER_TARGET;
+            outLayoutBefore = D3D12_BARRIER_LAYOUT_RENDER_TARGET;
+            break;
+        case RenderBackendResourceState::DepthStencilReadOnly:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_DEPTH_STENCIL_READ;
+            outLayoutBefore = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ;
+            break;
+        case RenderBackendResourceState::DepthStencil:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE;
+            outLayoutBefore = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
+            break;
+        case RenderBackendResourceState::CopySrc:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_COPY_SOURCE;
+            outLayoutBefore = D3D12_BARRIER_LAYOUT_COPY_SOURCE;
+            break;
+        case RenderBackendResourceState::CopyDst:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_COPY_DEST;
+            outLayoutBefore = D3D12_BARRIER_LAYOUT_COPY_DEST;
+            break;
+        case RenderBackendResourceState::UnorderedAccess:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_UNORDERED_ACCESS;
+            outLayoutBefore = D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS;
+            break;
+        case RenderBackendResourceState::IndirectArgument:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT;
+            outLayoutBefore = D3D12_BARRIER_LAYOUT_SHADER_RESOURCE;
+            break;
+        default:
+            std::abort();
+            break;
+        
+        }
+
+        switch (dstState) 
+        {
+        case RenderBackendResourceState::Undefined:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_NO_ACCESS;
+            outLayoutAfter = D3D12_BARRIER_LAYOUT_UNDEFINED;
+            break;
+        case RenderBackendResourceState::VertexBuffer:
+        case RenderBackendResourceState::IndexBuffer:
+        case RenderBackendResourceState::ShaderResource:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_SHADER_RESOURCE;
+            outLayoutAfter = D3D12_BARRIER_LAYOUT_SHADER_RESOURCE;
+            break;
+        case RenderBackendResourceState::Present:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_COMMON; //中间状态，没有明确的用途
+            outLayoutAfter = D3D12_BARRIER_LAYOUT_PRESENT;
+            break;
+        case RenderBackendResourceState::RenderTarget:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_RENDER_TARGET;
+            outLayoutAfter = D3D12_BARRIER_LAYOUT_RENDER_TARGET;
+            break;
+        case RenderBackendResourceState::DepthStencilReadOnly:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_DEPTH_STENCIL_READ;
+            outLayoutAfter = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ;
+            break;
+        case RenderBackendResourceState::DepthStencil:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE;
+            outLayoutAfter = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
+            break;
+        case RenderBackendResourceState::CopySrc:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_COPY_SOURCE;
+            outLayoutAfter = D3D12_BARRIER_LAYOUT_COPY_DEST;
+            break;
+        case RenderBackendResourceState::CopyDst:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_COPY_DEST;
+            outLayoutAfter = D3D12_BARRIER_LAYOUT_COPY_DEST;
+            break;
+        case RenderBackendResourceState::UnorderedAccess:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_UNORDERED_ACCESS;
+            outLayoutAfter = D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS;
+            break;
+        case RenderBackendResourceState::IndirectArgument:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT;
+            outLayoutAfter = D3D12_BARRIER_LAYOUT_SHADER_RESOURCE;
+            break;
+        default:
+            std::abort();
+            break;
+        }
+    
+    }
+
+
 }

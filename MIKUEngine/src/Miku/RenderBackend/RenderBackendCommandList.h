@@ -1,11 +1,12 @@
 #pragma once
 #include "Miku/Core/CoreDefinitions.h"
-#include "Miku/Core/Memory/Memory.h"
+#include "Miku/Foundation/Memory/Memory.h"
+#include "Miku/Foundation/Mathematics/MathUtility.h"
 #include "RenderBackendCommands.h"
 #include <vector>
 #include <Miku/RenderBackend/RenderBackendHandles.h>
 #include <Miku/RenderBackend/RenderBackendTypes.h>
-#include <Miku/Core/Math/Math.h>
+
 namespace MIKU 
 {
 	

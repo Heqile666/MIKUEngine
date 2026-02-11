@@ -1,5 +1,4 @@
 #pragma once
-#include <Miku/Core/CoreTypes.h>
 #include <Miku/RenderBackend/RenderBackendTypes.h>
 #include <Miku/RenderBackend/RenderBackendHandles.h>
 
@@ -84,15 +83,8 @@ namespace MIKU
 
 		virtual void SetObjectName(RenderBackendBufferHandle handle, const char* name) = 0;
 
-		void UpdateBuffer(RenderBackendBufferHandle handle, uint64 offset, const void* data, uint64 size)
-		{
-			void* bufferAllocation = nullptr;
-			MapBuffer(handle, &bufferAllocation);
-			memcpy(bufferAllocation, data, size); // TODO: offset
-			UnmapBuffer(handle);
-		}
-
 	};
+
 
 
 	RenderBackend* RenderBackendCreateInstance(const RenderBackendDesc* desc);

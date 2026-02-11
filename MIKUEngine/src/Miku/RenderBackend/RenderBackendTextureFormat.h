@@ -1,5 +1,5 @@
 #pragma once
-#include <Miku/Core/CoreTypes.h>
+#include <Miku/Foundation/FundamentalTypes.h>
 
 
 

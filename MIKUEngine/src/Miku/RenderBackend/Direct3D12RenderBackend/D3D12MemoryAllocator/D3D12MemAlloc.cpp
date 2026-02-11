@@ -20,8 +20,8 @@
 // THE SOFTWARE.
 //
 
+#include "mikupch.h"
 #include "D3D12MemAlloc.h"
-
 #include <combaseapi.h>
 #include <mutex>
 #include <algorithm>

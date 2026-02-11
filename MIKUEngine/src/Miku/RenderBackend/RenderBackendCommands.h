@@ -3,7 +3,6 @@
 #include "RenderBackendConfig.h"
 #include "RenderBackendHandles.h"
 #include "RenderBackendTypes.h"
-#include <Miku/Core/CoreTypes.h>
 
 namespace MIKU
 {

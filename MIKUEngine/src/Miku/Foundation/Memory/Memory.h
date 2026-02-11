@@ -132,6 +132,6 @@ namespace MIKU
 
 	extern LinearArena* GArena;
 
-	void* ArenaRealloc(MemoryArena* arena, void* ptr, uint64 oldSize, uint64 alignment, const char* file, uint32 line);
+	void* ArenaRealloc(MemoryArena* arena, void* ptr, uint64 oldSize, uint64 newSize, uint64 alignment, const char* file, uint32 line);
 
 }

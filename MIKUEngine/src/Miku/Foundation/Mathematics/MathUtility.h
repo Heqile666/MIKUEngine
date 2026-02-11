@@ -1,5 +1,6 @@
 #pragma once
 #include "Miku/Core/CoreDefinitions.h"
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -8,6 +9,7 @@
 #include <glm/gtx/compatibility.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/matrix_major_storage.hpp>
+
 
 #define M_PI                     (3.1415926535897932f)
 #define M_INV_PI                 (0.3183098861837067f)

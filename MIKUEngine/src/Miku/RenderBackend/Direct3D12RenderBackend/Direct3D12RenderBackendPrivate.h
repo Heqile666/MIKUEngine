@@ -29,9 +29,6 @@
 
 #include "D3D12MemoryAllocator/D3D12MemAlloc.h"
 #include "Direct3D12RenderBackendUtility.h"
-
-#include <MIKU/Foundation/FoundationModule.h>
-
 namespace MIKU
 {
 	class D3D12RenderBackend;
@@ -265,7 +262,7 @@ namespace MIKU
 		uint32 width;
 		uint32 height;
 		uint32 depth;
-		uint32 arraySize;
+		uint32 arraySize; //纹理的数量
 		uint32 mipLevels;
 		DXGI_FORMAT format;
 
@@ -575,10 +572,12 @@ namespace MIKU
 				D3D12_CPU_DESCRIPTOR_HANDLE handle = freeList.back();
 				freeList.pop_back();
 				return handle;
-			
 			}
 
-		
+			void Release(D3D12_CPU_DESCRIPTOR_HANDLE index) 
+			{
+				freeList.push_back(index);
+			}
 		};
 
 	
@@ -608,7 +607,6 @@ namespace MIKU
 		std::vector<D3D12Texture*> textures;
 		std::vector<uint32> freeTextures;
 
-
 		std::vector<D3D12Sampler*> samplers;
 		std::vector<uint32> freeSamplers;
 
@@ -637,11 +635,40 @@ namespace MIKU
 		};
 		std::vector<CopyWorkload> copyWorkLoadFreeList;
 
+		D3D12DescriptorAllocator resourceDescriptorAllocator;
+		D3D12DescriptorAllocator samplerDescriptorAllocator;
+		D3D12DescriptorAllocator rtvDescriptorAllocator;
+		D3D12DescriptorAllocator dsvDescriptorAllocator;
+
 		//Bindless
 		D3D12DescriptorHeap* resourceDescriptorHeap;
 		D3D12DescriptorHeap* samplerDescriptorHeap;
 
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
+
+		std::vector<int> freeResourceDescriptorIndices;
+		int AllocateResourceDescriptorIndex() 
+		{
+			if (!freeResourceDescriptorIndices.empty()) 
+			{
+				int index = freeResourceDescriptorIndices.back();
+				freeResourceDescriptorIndices.pop_back();
+				return index;
+			}
+			return -1;
+		}
+
+		std::vector<int> freeSamplerDescriptorIndices;
+		int AllocateSamplerDescriptorIndex() 
+		{
+			if (!freeSamplerDescriptorIndices.empty()) 
+			{
+				int index = freeSamplerDescriptorIndices.back();
+				freeSamplerDescriptorIndices.pop_back();
+				return index;
+			}
+			return -1;
+		}
 
 		ID3D12RootSignature* GetID3D12RootSignature() 
 		{
@@ -657,6 +684,11 @@ namespace MIKU
 			return handleRepresentations[handle];
 		}
 
+		inline bool TryGetRenderBackendHandleRepresentation()
+		{
+		
+		
+		}
 		ID3D12Device* GetID3D12Device()
 		{
 			return device.Get();
@@ -939,13 +971,14 @@ namespace MIKU
 			// 需要调用 Map，把资源映射到CPU地址空间，这样CPU才能访问缓冲区数据
 			if (EnumClassHasFlags(desc->flags, RenderBackendBufferCreateFlags::Readback))
 			{
-				D3D12_CHECK(buffer->resource->Map(0, nullptr, &buffer->mappedData));
+				D3D12_CHECK(buffer->resource->Map(0, nullptr, &buffer->mappedData));//映射,表示CPU只读
 				// mappedData 就是CPU侧对应的映射指针，可以操作其中数据
 			}
 			else if (EnumClassHasFlags(desc->flags, RenderBackendBufferCreateFlags::Upload))
 			{
 				D3D12_RANGE readRange = { 0,0 };
-				D3D12_CHECK(buffer->resource->Map(0, &readRange, &buffer->mappedData));
+				//&buffer->mappedData,返回映射后的cpu地址
+				D3D12_CHECK(buffer->resource->Map(0, &readRange, &buffer->mappedData));//映射操作，CPU只写数据到上传堆不读
 			}
 			else
 			{
@@ -955,18 +988,1185 @@ namespace MIKU
 
 			if (data != nullptr)
 			{
-				if (EnumClassHasFlags(desc->flags, RenderBackendBufferCreateFlags::Upload)) // Copy directly in mapped data
+				if (EnumClassHasFlags(desc->flags, RenderBackendBufferCreateFlags::Upload)) // 如果是上传堆资源，直接copy到上传堆
 				{
 					assert(buffer->mappedData);
-					memcpy(buffer->mappedData, data, buffer->size);
+					memcpy(buffer->mappedData, data, buffer->size);//这里才是写数据到GPU
 				}
 				else // Copy throught upload heap
 				{
+					//将数据写入上传堆在写到默认堆上去
 					CopyWorkload copyWorkload = AllocateCopyWorkload(buffer->size);
+					memcpy(copyWorkload.uploadBuffer->mappedData, data, buffer->size);
+					copyWorkload.commandList->Reset(copyWorkload.commandAllocator.Get(), nullptr);
+
+					{
+						D3D12_BUFFER_BARRIER BufBarriers[] =
+						{
+							CD3DX12_BUFFER_BARRIER(
+								D3D12_BARRIER_SYNC_ALL,
+								D3D12_BARRIER_SYNC_ALL,
+								D3D12_BARRIER_ACCESS_NO_ACCESS,
+								D3D12_BARRIER_ACCESS_COPY_DEST,
+								buffer->GetID3D12Resource()
+							)
+						};
+
+						D3D12_BARRIER_GROUP BufBarrierGroups[] =
+						{
+							CD3DX12_BARRIER_GROUP(1,BufBarriers)
+						};
+						
+						copyWorkload.commandList7->Barrier(1, BufBarrierGroups);
+					}
+
+					copyWorkload.commandList->CopyBufferRegion(
+						buffer->GetID3D12Resource(),
+						0,
+						copyWorkload.uploadBuffer->GetID3D12Resource(),
+						0,
+						buffer->size);
+
+					SubmitCopyWorkload(copyWorkload);
+				}
+			}
+
+			if (EnumClassHasFlags(desc->flags, RenderBackendBufferCreateFlags::UniformBuffer)) 
+			{
+				D3D12_CONSTANT_BUFFER_VIEW_DESC cbcDesc = 
+				{
+					buffer->gpuAddress,
+					UINT(buffer->size)
+				};
+			
+				buffer->descriptor = resourceDescriptorAllocator.Allocate();
+				device->CreateConstantBufferView(&cbcDesc, buffer->descriptor);
+
+				buffer->bindlessResourceDescriptorIndexCBV = AllocateResourceDescriptorIndex();
+				if (buffer->bindlessResourceDescriptorIndexCBV >= 0) 
+				{
+					assert(buffer->bindlessResourceDescriptorIndexCBV < D3D12_RENDER_BACKEND_BINDLESS_MAX_NUM_RESOURCE_DESCRIPTORS);
+					D3D12_CPU_DESCRIPTOR_HANDLE rangeStart = resourceDescriptorHeap->cpuDescriptorHandle;
+					rangeStart.ptr += buffer->bindlessResourceDescriptorIndexCBV * device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					device->CopyDescriptorsSimple(1, rangeStart, buffer->descriptor, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				}
+			}
+
+			if (EnumClassHasFlags(desc->flags, RenderBackendBufferCreateFlags::ShaderResource)) 
+			{
+				bool isStructuredBuffer = EnumClassHasFlags(desc->flags, RenderBackendBufferCreateFlags::StructuredBuffer);
+
+				D3D12_BUFFER_SRV bufferSRV =
+				{
+					0,
+					isStructuredBuffer ? desc->elementCount : uint32(buffer->size / sizeof(uint32)),
+					isStructuredBuffer ? desc->elementSize : 0,
+					isStructuredBuffer ? D3D12_BUFFER_SRV_FLAG_NONE : D3D12_BUFFER_SRV_FLAG_RAW
+				};
+
+				D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc =
+				{
+					isStructuredBuffer ? DXGI_FORMAT_UNKNOWN : DXGI_FORMAT_R32_TYPELESS,
+					D3D12_SRV_DIMENSION_BUFFER,
+					D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+					bufferSRV
+				};
+
+				buffer->descriptor = resourceDescriptorAllocator.Allocate();
+				device->CreateShaderResourceView(buffer->GetID3D12Resource(), &srvDesc, buffer->descriptor);
+
+				buffer->bindlessResourceDescriptorIndexSRV = AllocateResourceDescriptorIndex();
+				if (buffer->bindlessResourceDescriptorIndexSRV >= 0) 
+				{
+					assert(buffer->bindlessResourceDescriptorIndexSRV < D3D12_RENDER_BACKEND_BINDLESS_MAX_NUM_RESOURCE_DESCRIPTORS);
+					D3D12_CPU_DESCRIPTOR_HANDLE rangeStart = resourceDescriptorHeap->cpuDescriptorHandle;
+					rangeStart.ptr += buffer->bindlessResourceDescriptorIndexSRV * device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					device->CopyDescriptorsSimple(1, rangeStart, buffer->descriptor, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);;
+				}
+			}
+
+			if (EnumClassHasFlags(desc->flags, RenderBackendBufferCreateFlags::UnorderedAccess)) 
+			{
+				bool isStructuredBuffer = EnumClassHasFlags(desc->flags,RenderBackendBufferCreateFlags::StructuredBuffer);
+
+				D3D12_BUFFER_UAV bufferUAV =
+				{
+					0,
+					isStructuredBuffer ? desc->elementCount : uint32(buffer->size / sizeof(uint32)),
+					isStructuredBuffer ? desc->elementSize : 0,
+					0,
+					isStructuredBuffer ? D3D12_BUFFER_UAV_FLAG_NONE : D3D12_BUFFER_UAV_FLAG_RAW
+				};
+
+				//创建描述符所需要的结构体
+				D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc =
+				{
+					isStructuredBuffer ? DXGI_FORMAT_UNKNOWN : DXGI_FORMAT_R32_TYPELESS,
+					D3D12_UAV_DIMENSION_BUFFER,
+					bufferUAV
+				};
+			
+				buffer->descriptor = resourceDescriptorAllocator.Allocate();
+				device->CreateUnorderedAccessView(buffer->GetID3D12Resource(),nullptr,&uavDesc,buffer->descriptor);
+
+				buffer->bindlessResourceDescriptorIndexUAV = AllocateResourceDescriptorIndex();
+				if(buffer->bindlessResourceDescriptorIndexUAV >= 0)
+				{
+					assert(buffer->bindlessResourceDescriptorIndexUAV < D3D12_RENDER_BACKEND_BINDLESS_MAX_NUM_RESOURCE_DESCRIPTORS);
+					D3D12_CPU_DESCRIPTOR_HANDLE rangeStart = resourceDescriptorHeap->cpuDescriptorHandle;
+					rangeStart.ptr += buffer->bindlessResourceDescriptorIndexUAV * device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					device->CopyDescriptorsSimple(1,rangeStart,buffer->descriptor,D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				}
+			}
+
+			return index;
+		}
+
+		void ResizeD3D12Buffer(uint32 index, uint64 size) 
+		{
+			D3D12Buffer* buffer = buffers[index];
+			D3D12MA::ALLOCATION_DESC allocationDesc = {
+				D3D12MA::ALLOCATION_FLAG_NONE,
+				GetD3D12HeapType(buffer->flags),
+				D3D12_HEAP_FLAG_NONE,
+				nullptr,
+				nullptr
+			};
+
+			buffer->resourceDesc.Width = size;
+
+
+			//通过D3D12MA创建GPU资源
+			D3D12_CHECK(allocator->CreateResource3(
+				&allocationDesc,
+				&buffer->resourceDesc,
+				buffer->initialLayout,
+				nullptr,
+				0,
+				nullptr,
+				&buffer->allocation,
+				IID_PPV_ARGS(&buffer->resource)));
+
+			D3D12_CHECK(buffer->resource->SetName(UTF8ToUTF16(buffer->debugName).c_str()));
+			buffer->gpuAddress = buffer->resource->GetGPUVirtualAddress();
+			buffer->size = size;
+			buffer->bindlessResourceDescriptorIndexCBV = -1;
+			buffer->bindlessResourceDescriptorIndexSRV = -1;
+			buffer->bindlessResourceDescriptorIndexUAV = -1;
+
+			if (EnumClassHasFlags(buffer->flags, RenderBackendBufferCreateFlags::Readback)) 
+			{
+				D3D12_CHECK(buffer->resource->Map(0,nullptr,&buffer->mappedData));
+			}
+			else if (EnumClassHasFlags(buffer->flags, RenderBackendBufferCreateFlags::Upload)) 
+			{
+				D3D12_RANGE readRange = {
+					0,
+					0
+				};
+				D3D12_CHECK(buffer->resource->Map(0,&readRange,&buffer->mappedData));
+			}
+			else 
+			{
+				buffer->mappedData = nullptr;
+			}
+			
+
+			//TODO:
+			RenderBackendBufferDescription* desc = &buffer->desc;
+			desc->elementCount = uint32(size / desc->elementSize);
+
+
+			if (EnumClassHasFlags(desc->flags, RenderBackendBufferCreateFlags::UniformBuffer))
+			{
+
+				//创建描述符结构体
+				D3D12_CONSTANT_BUFFER_VIEW_DESC cbcDesc =
+				{
+					buffer->gpuAddress,
+					UINT(buffer->size)
+				};
+
+				//从描述符对中获取句柄
+				buffer->descriptor = resourceDescriptorAllocator.Allocate();
+				//创建描述符
+				device->CreateConstantBufferView(&cbcDesc,buffer->descriptor);
+
+
+				//将创建的资源复制到bindless中
+				buffer->bindlessResourceDescriptorIndexCBV = AllocateResourceDescriptorIndex();
+				if (buffer->bindlessResourceDescriptorIndexCBV >= 0)
+				{
+					assert(buffer->bindlessResourceDescriptorIndexCBV < D3D12_RENDER_BACKEND_BINDLESS_MAX_NUM_RESOURCE_DESCRIPTORS);
+					D3D12_CPU_DESCRIPTOR_HANDLE rangeStart = resourceDescriptorHeap->cpuDescriptorHandle;
+					rangeStart.ptr += buffer->bindlessResourceDescriptorIndexCBV * device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					device->CopyDescriptorsSimple(1,rangeStart,buffer->descriptor,D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				}
+			}
+
+			if (EnumClassHasFlags(desc->flags, RenderBackendBufferCreateFlags::ShaderResource)) 
+			{
+				bool isStructureBuffer = EnumClassHasFlags(desc->flags, RenderBackendBufferCreateFlags::StructuredBuffer);
+				D3D12_BUFFER_SRV bufferSRV =
+				{
+					0,
+					isStructureBuffer ? desc->elementCount:uint32(buffer->size/sizeof(uint32)),
+					isStructureBuffer ? desc->elementSize:0,
+					isStructureBuffer ? D3D12_BUFFER_SRV_FLAG_NONE:D3D12_BUFFER_SRV_FLAG_RAW
+				};
+
+				D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc =
+				{
+					isStructureBuffer ? DXGI_FORMAT_UNKNOWN : DXGI_FORMAT_R32_TYPELESS,
+					D3D12_SRV_DIMENSION_BUFFER,
+					D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+					bufferSRV
+				};
+
+				buffer->descriptor = resourceDescriptorAllocator.Allocate();
+				device->CreateShaderResourceView(buffer->GetID3D12Resource(), &srvDesc, buffer->descriptor);
+
+				buffer->bindlessResourceDescriptorIndexSRV = AllocateResourceDescriptorIndex();
+				if (buffer->bindlessResourceDescriptorIndexSRV >= 0) 
+				{
+					assert(buffer->bindlessResourceDescriptorIndexSRV < D3D12_RENDER_BACKEND_BINDLESS_MAX_NUM_RESOURCE_DESCRIPTORS);
+					D3D12_CPU_DESCRIPTOR_HANDLE rangeStart = resourceDescriptorHeap->cpuDescriptorHandle;
+					rangeStart.ptr += buffer->bindlessResourceDescriptorIndexSRV * device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					device->CopyDescriptorsSimple(1,rangeStart,buffer->descriptor,D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				}
+			}
+			if (EnumClassHasFlags(desc->flags, RenderBackendBufferCreateFlags::UnorderedAccess)) 
+			{
+				bool isStructureBuffer = EnumClassHasFlags(desc->flags, RenderBackendBufferCreateFlags::StructuredBuffer);
+				D3D12_BUFFER_UAV bufferUAV =
+				{
+					0,
+					isStructureBuffer ? desc->elementCount : uint32(buffer->size / sizeof(uint32)),
+					isStructureBuffer ? desc->elementSize : 0,
+					0,
+					isStructureBuffer ? D3D12_BUFFER_UAV_FLAG_NONE : D3D12_BUFFER_UAV_FLAG_RAW
+				};
+
+				D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc =
+				{
+					isStructureBuffer ? DXGI_FORMAT_UNKNOWN : DXGI_FORMAT_R32_TYPELESS,
+					D3D12_UAV_DIMENSION_BUFFER,
+					bufferUAV
+				};
+
+				buffer->descriptor = resourceDescriptorAllocator.Allocate();
+				device->CreateUnorderedAccessView(buffer->GetID3D12Resource(),nullptr,&uavDesc,buffer->descriptor);
+
+				buffer->bindlessResourceDescriptorIndexUAV = AllocateResourceDescriptorIndex();
+				if (buffer->bindlessResourceDescriptorIndexUAV >= 0) 
+				{
+					assert(buffer->bindlessResourceDescriptorIndexUAV < D3D12_RENDER_BACKEND_BINDLESS_MAX_NUM_RESOURCE_DESCRIPTORS);
+					D3D12_CPU_DESCRIPTOR_HANDLE rangeStart = resourceDescriptorHeap->cpuDescriptorHandle;
+					rangeStart.ptr += buffer->bindlessResourceDescriptorIndexUAV * device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+					device->CopyDescriptorsSimple(1, rangeStart, buffer->descriptor, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 				}
 			}
 		}
 
+		uint32 AllocateTexture() 
+		{
+			uint32 textureIndex = 0;
+			if(!freeTextures.empty())
+			{
+				textureIndex = freeTextures.back();
+				freeTextures.pop_back();
+			}
+			else 
+			{
+				textureIndex = (uint32)textures.size();
+				textures.emplace_back(new D3D12Texture());
+			}
+			return textureIndex;
+			
+		}
+
+		uint32 CreateD3D12Texture(const RenderBackendTextureDesc* desc, const void* data,const char* name) 
+		{
+			uint32 index = AllocateTexture();
+			D3D12Texture* texture = textures[index];
+
+			D3D12_RESOURCE_DESC1 resourceDesc =
+			{
+				GetD3D12ResourceDimension(desc->type),
+				0,
+				desc->width,
+				desc->height,
+				(UINT16)((desc->type == RenderBackendTextureType::Texture3D) ? desc->depth : desc->arrayLayerCount),
+				(UINT16)desc->mipLevelCount,
+				ConvertToDXGIFormat(desc->format),
+				{1,0},
+				D3D12_TEXTURE_LAYOUT_UNKNOWN,
+				GetD3D12ResourceFlags(desc->flags)
+
+			};
+
+			//默认堆
+			D3D12MA::ALLOCATION_DESC allocationDesc =
+			{
+				D3D12MA::ALLOCATION_FLAG_NONE,
+				D3D12_HEAP_TYPE_DEFAULT,
+				D3D12_HEAP_FLAG_NONE,
+				nullptr,
+				nullptr
+			};
+
+			// D3D12的资源屏障Barrier机制，描述该资源的用途
+			D3D12_BARRIER_LAYOUT initialLayout = ConvertToD3D12BarrierLayout(desc->initialState);
+			D3D12_CLEAR_VALUE optimizedClearValue = {};
+			optimizedClearValue.Color[0] = desc->clearValue.colorValue.float32[0];
+			optimizedClearValue.Color[1] = desc->clearValue.colorValue.float32[1];
+			optimizedClearValue.Color[2] = desc->clearValue.colorValue.float32[2];
+			optimizedClearValue.Color[3] = desc->clearValue.colorValue.float32[3];
+			optimizedClearValue.DepthStencil.Depth = desc->clearValue.depthStencilValue.depth;
+			optimizedClearValue.DepthStencil.Stencil = desc->clearValue.depthStencilValue.stencil; // TODO
+			optimizedClearValue.Format = resourceDesc.Format;
+			bool useClearValue = EnumClassHasFlags(desc->flags,RenderBackendTextureCreateFlags::RenderTarget)|| EnumClassHasFlags(desc->flags,RenderBackendTextureCreateFlags::DepthStencil);
+
+			D3D12_CHECK(allocator->CreateResource3(
+				&allocationDesc,
+				&resourceDesc,
+				initialLayout,
+				useClearValue ? &optimizedClearValue : nullptr,
+				0,
+				nullptr,
+				&texture->allocation,
+				IID_PPV_ARGS(&texture->resource)
+				));
+			D3D12_CHECK(texture->resource->SetName(UTF8ToUTF16(name).c_str()));
+
+			texture->width = desc->width;
+			texture->height = desc->height;
+			texture->depth = desc->depth;
+			texture->mipLevels = desc->mipLevelCount;
+			texture->arraySize = desc->arrayLayerCount;
+			texture->format = resourceDesc.Format;
+			texture->initialState = desc->initialState;
+			texture->isSwapChainBuffer = false;
+			texture->clearValue = optimizedClearValue;
+
+			texture->t = desc->type;
+
+			texture->debugName = name;
+
+
+			//2D纹理的资源总数 = 纹理个数*单个纹理的mipmap数
+			uint32 numSubresource = desc->arrayLayerCount * std::max(1u, desc->mipLevelCount);
+			texture->totalSize = 0;
+			texture->footprints.resize(numSubresource);
+			texture->rowSizesInBytes.resize(numSubresource);
+			texture->numRows.reserve(numSubresource);
+
+			//获取纹理的GPU布局信息到texture中的各种vector中
+			device10->GetCopyableFootprints1(
+				&resourceDesc,
+				0,
+				numSubresource,
+				0,
+				texture->footprints.data(),
+				texture->numRows.data(),
+				texture->rowSizesInBytes.data(),
+				&texture->totalSize
+			);
+
+			if(data != nullptr)
+			{
+#if 0
+				std::vector<D3D12_SUBRESOURCE_DATA> subresourceData(texture->footprints.size());
+				for (uint32 i = 0; i < numSubresources; i++)
+				{
+					subresourceData[i] = {};
+					subresourceData[i].pData = data;
+					subresourceData[i].RowPitch = texture->width * RenderBackendGetTextureFormatDesc(desc->format).bytes;
+					if (desc->type == RenderBackendTextureType::Texture3D)
+					{
+						//subresourceData[i].SlicePitch = texture->height * subresourceData[i].RowPitch;
+					}
+				}
+
+				CopyWorkload copyWorkload = AllocateCopyWorkload(texture->totalSize);
+				copyWorkload.commandList->Reset(copyWorkload.commandAllocator.Get(), nullptr);
+
+				void* mappedData = copyWorkload.uploadBuffer->mappedData;
+				for (uint32 subresourceIndex = 0; subresourceIndex < numSubresources; subresourceIndex++)
+				{
+					D3D12_MEMCPY_DEST memcpyDest = {
+						.pData = (void*)((UINT64)mappedData + texture->footprints[subresourceIndex].Offset),
+						.RowPitch = (SIZE_T)texture->footprints[subresourceIndex].Footprint.RowPitch,
+						.SlicePitch = (SIZE_T)texture->footprints[subresourceIndex].Footprint.RowPitch * (SIZE_T)texture->numRows[subresourceIndex],
+					};
+					MemcpySubresource(&memcpyDest, &subresourceData[subresourceIndex], (SIZE_T)texture->rowSizesInBytes[subresourceIndex], texture->numRows[subresourceIndex], texture->footprints[subresourceIndex].Footprint.Depth);
+
+					CD3DX12_TEXTURE_COPY_LOCATION dstTextureCopyLocation(texture->GetID3D12Resource(), subresourceIndex);
+					CD3DX12_TEXTURE_COPY_LOCATION srcTextureCopyLocation(copyWorkload.uploadBuffer->GetID3D12Resource(), texture->footprints[subresourceIndex]);
+					copyWorkload.commandList->CopyTextureRegion(
+						&dstTextureCopyLocation,
+						0,
+						0,
+						0,
+						&srcTextureCopyLocation,
+						nullptr);
+				}
+				SubmitCopyWorkload(copyWorkload);
+#else
+				//上传数据在CPU上的布局信息
+				std::vector<D3D12_SUBRESOURCE_DATA> subresourceData(1);
+				for (uint32 i = 0; i < 1; i++) 
+				{
+					subresourceData[i] = {};
+					subresourceData[i].pData = data;
+					subresourceData[i].RowPitch = texture->width * RenderBackendGetTextureFormatDesc(desc->format).bytes;
+					if (desc->type == RenderBackendTextureType::Texture3D)
+					{
+						//subresourceData[i].SlicePitch = texture->height * subresourceData[i].RowPitch;
+					}
+
+				}
+
+				//获取一个CopyWorkload,用于上传数据，CopyWorkload里面提供的是上传堆资源
+				CopyWorkload copyWorkload = AllocateCopyWorkload(std::max(texture->totalSize, UINT64(4)));
+				copyWorkload.commandList->Reset(copyWorkload.commandAllocator.Get(), nullptr);
+				
+
+				//在上传数据前，需要对资源进行转换
+				{
+					D3D12_TEXTURE_BARRIER TexBarriers[] =
+					{
+						//D3D12 辅助库（d3dx12.h）中的一个辅助类，用于简化 Enhanced Barriers（增强屏障，D3D12.1 + ）中子资源范围的指定
+						CD3DX12_TEXTURE_BARRIER(
+							D3D12_BARRIER_SYNC_ALL,
+							D3D12_BARRIER_SYNC_ALL,
+							D3D12_BARRIER_ACCESS_NO_ACCESS,
+							D3D12_BARRIER_ACCESS_COPY_DEST,
+							D3D12_BARRIER_LAYOUT_UNDEFINED,
+							D3D12_BARRIER_LAYOUT_COPY_DEST,
+							texture->GetID3D12Resource(),
+							CD3DX12_BARRIER_SUBRESOURCE_RANGE(0xffffffff),//D3D12 辅助库（d3dx12.h）中的一个辅助类，用于简化 Enhanced Barriers（增强屏障，D3D12.1 + ）中子资源范围的指定
+							D3D12_TEXTURE_BARRIER_FLAG_DISCARD //放弃纹理中的全部数据
+						)
+
+					};
+
+					D3D12_BARRIER_GROUP TexBarrierGroups[] =
+					{
+						CD3DX12_BARRIER_GROUP(1,TexBarriers)
+					};
+				
+					//todo Need a buffer barrier ?
+				
+					copyWorkload.commandList7->Barrier(1, TexBarrierGroups);
+
+				}
+
+				void* mappedData = copyWorkload.uploadBuffer->mappedData;
+				for (uint32 subresourceIndex = 0; subresourceIndex < 1; subresourceIndex++)
+				{
+					D3D12_MEMCPY_DEST memcpyDest =
+					{
+						(void*)((UINT64)mappedData + texture->footprints[subresourceIndex].Offset),
+						(SIZE_T)texture->footprints[subresourceIndex].Footprint.RowPitch,
+						(SIZE_T)texture->footprints[subresourceIndex].Footprint.RowPitch * (SIZE_T)texture->numRows[subresourceIndex]
+					};
+					
+					//复制纹理数据到上传堆
+					MemcpySubresource(&memcpyDest,&subresourceData[subresourceIndex],(SIZE_T)texture->rowSizesInBytes[subresourceIndex],texture->numRows[subresourceIndex],texture->footprints[subresourceIndex].Footprint.Depth);
+
+					CD3DX12_TEXTURE_COPY_LOCATION dstTextureCopyLocation(texture->GetID3D12Resource(), subresourceIndex);
+					CD3DX12_TEXTURE_COPY_LOCATION srcTextureCopyLocation(copyWorkload.uploadBuffer->GetID3D12Resource(), texture->footprints[subresourceIndex]);
+					
+					//复制纹理数据到默认堆
+					copyWorkload.commandList->CopyTextureRegion(
+						&dstTextureCopyLocation,
+						0,
+						0,
+						0,
+						&srcTextureCopyLocation,
+						nullptr
+					);
+
+				}
+				
+				{
+					CD3DX12_TEXTURE_BARRIER TexBarries[] =
+					{
+						CD3DX12_TEXTURE_BARRIER(
+							D3D12_BARRIER_SYNC_ALL,
+							D3D12_BARRIER_SYNC_ALL,
+							D3D12_BARRIER_ACCESS_COPY_DEST,
+							D3D12_BARRIER_ACCESS_SHADER_RESOURCE,
+							D3D12_BARRIER_LAYOUT_COPY_DEST,
+							D3D12_BARRIER_LAYOUT_SHADER_RESOURCE,
+							texture->GetID3D12Resource(),
+							CD3DX12_BARRIER_SUBRESOURCE_RANGE(0xffffffff),//所有子资源
+							D3D12_TEXTURE_BARRIER_FLAG_NONE
+						)
+					};
+
+					D3D12_BARRIER_GROUP TexBarrierGroups[] =
+					{
+						CD3DX12_BARRIER_GROUP(1,TexBarries)
+					};
+
+					copyWorkload.commandList7->Barrier(1, TexBarrierGroups);
+				
+				}
+
+				SubmitCopyWorkload(copyWorkload);	
+#endif
+			}
+
+			//创建资源描述符的DESC
+			if (EnumClassHasFlags(desc->flags, RenderBackendTextureCreateFlags::ShaderResource)) 
+			{
+				D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+				srvDesc.Format = texture->format;
+				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				
+				switch (srvDesc.Format) 
+				{
+				case DXGI_FORMAT_D16_UNORM:
+					srvDesc.Format = DXGI_FORMAT_R16_UNORM;
+					break;
+				case DXGI_FORMAT_D32_FLOAT:
+					srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+					break;
+				case DXGI_FORMAT_D24_UNORM_S8_UINT:
+					srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+					break;
+				case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+					srvDesc.Format = DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
+					break;
+
+				}
+				switch (desc->type) 
+				{
+				case RenderBackendTextureType::Texture1D:
+				{
+					if (texture->arraySize == 1)
+					{
+						srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
+						srvDesc.Texture1D.MostDetailedMip = 0;
+						srvDesc.Texture1D.MipLevels = texture->mipLevels;
+						srvDesc.Texture1D.ResourceMinLODClamp = 0.0f;
+					}
+					else
+					{
+						srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1DARRAY;
+						srvDesc.Texture1DArray.FirstArraySlice = 0;
+						srvDesc.Texture1DArray.ArraySize = texture->arraySize;
+						srvDesc.Texture1DArray.MostDetailedMip = 0;
+						srvDesc.Texture1DArray.MipLevels = texture->mipLevels;
+						srvDesc.Texture1DArray.ResourceMinLODClamp = 0.0f;
+					}
+				}break;
+				case RenderBackendTextureType::Texture2D: 
+				{
+					uint32 planeSlice = 0;
+					if (texture->arraySize == 1)
+					{
+						srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+						srvDesc.Texture2D.MostDetailedMip = 0; //从mipmap0开始访问
+						srvDesc.Texture2D.MipLevels = texture->mipLevels;
+						srvDesc.Texture2D.PlaneSlice = planeSlice; //如果是深度-模板缓冲，0表示访问的是深度数据，1表示的是访问模板数据
+						srvDesc.Texture2D.ResourceMinLODClamp = 0.0f; //shader能访问的mipmap级别，0.0f表示能访问所有mipmap级别， 2.0f表示只能访问2以及以上的mipmap级别
+					}
+					else
+					{
+						srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+						srvDesc.Texture2DArray.FirstArraySlice = 0; //指从纹理数组的哪个纹理开始访问
+						srvDesc.Texture2DArray.ArraySize = texture->arraySize;
+						srvDesc.Texture2DArray.MostDetailedMip = 0;
+						srvDesc.Texture2DArray.MipLevels = texture->mipLevels;
+						srvDesc.Texture2DArray.PlaneSlice = planeSlice;
+						srvDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
+					}
+				}break;
+				case RenderBackendTextureType::Texture3D:
+				{
+					srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE3D;
+					srvDesc.Texture3D.MostDetailedMip = 0;
+					srvDesc.Texture3D.MipLevels = texture->mipLevels;
+					srvDesc.Texture3D.ResourceMinLODClamp = 0.0f;
+				}break;
+				case RenderBackendTextureType::TextureCube:
+				{
+					if (texture->arraySize == 6)
+					{
+						srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+						srvDesc.TextureCube.MostDetailedMip = 0;
+						srvDesc.TextureCube.MipLevels = texture->mipLevels;
+						srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+					}
+					else
+					{
+						srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
+						srvDesc.TextureCubeArray.MostDetailedMip = 0;
+						srvDesc.TextureCubeArray.MipLevels = texture->mipLevels;
+						srvDesc.TextureCubeArray.First2DArrayFace = 0;//从第一个立方体贴图的第一个面开始读取数据
+						srvDesc.TextureCubeArray.NumCubes = texture->arraySize / 6;
+						srvDesc.TextureCubeArray.ResourceMinLODClamp = 0.0f;
+					}
+				}break;
+				}
+				
+				{
+					//创建资源描述符
+					texture->shaderResourceView = new D3D12ShaderResourceView();
+					//先临时分配一个资源描述符句柄
+					texture->shaderResourceView->descriptor = resourceDescriptorAllocator.Allocate();
+					device->CreateShaderResourceView(texture->GetID3D12Resource(), &srvDesc, texture->shaderResourceView->descriptor);
+					//获取bindless index
+					texture->shaderResourceView->bindlessIndex = AllocateResourceDescriptorIndex();
+					if (texture->shaderResourceView->bindlessIndex >= 0)
+					{
+						assert(texture->shaderResourceView->bindlessIndex < D3D12_RENDER_BACKEND_BINDLESS_MAX_NUM_RESOURCE_DESCRIPTORS);
+						D3D12_CPU_DESCRIPTOR_HANDLE rangeStart = resourceDescriptorHeap->cpuDescriptorHandle;
+						rangeStart.ptr += texture->shaderResourceView->bindlessIndex * device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+						//将获取的临时资源描述符句柄拷贝到bindless句柄中
+						device->CopyDescriptorsSimple(1, rangeStart, texture->shaderResourceView->descriptor, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					}
+				}
+
+				//给每个mipmap生成描述符
+				texture->shaderResourceViews.resize(texture->mipLevels);
+				for (uint32 mipLevel = 0; mipLevel < texture->mipLevels; mipLevel++)
+				{
+					switch (desc->type)
+					{
+					case RenderBackendTextureType::Texture1D:
+					{
+						if (texture->arraySize == 1)
+						{
+							srvDesc.Texture1D.MostDetailedMip = mipLevel;
+							srvDesc.Texture1D.MipLevels = 1;
+						}
+						else
+						{
+							srvDesc.Texture1DArray.MostDetailedMip = mipLevel;
+							srvDesc.Texture1D.MipLevels = 1;
+						}
+					}break;
+					case RenderBackendTextureType::Texture2D:
+					{
+						uint32 planeSlice = 0;
+						if (texture->arraySize == 1)
+						{
+							srvDesc.Texture2D.MostDetailedMip = mipLevel;
+							srvDesc.Texture2D.MipLevels = 1;
+						}
+						else
+						{
+							srvDesc.Texture2DArray.MostDetailedMip = mipLevel;
+							srvDesc.Texture2DArray.MipLevels = 1;
+						}
+					}break;
+					case RenderBackendTextureType::Texture3D:
+					{
+						srvDesc.Texture3D.MostDetailedMip = mipLevel;
+						srvDesc.Texture3D.MipLevels = 1;
+					}break;
+					case RenderBackendTextureType::TextureCube:
+					{
+						if (texture->arraySize == 6)
+						{
+							srvDesc.TextureCube.MostDetailedMip = mipLevel;
+							srvDesc.TextureCube.MipLevels = 1;
+						}
+						else
+						{
+							srvDesc.TextureCubeArray.MostDetailedMip = mipLevel;
+							srvDesc.TextureCubeArray.MipLevels = 1;
+						}
+					}break;
+					}
+
+					texture->shaderResourceViews[mipLevel] = new D3D12ShaderResourceView();
+					//先临时分配一个资源描述符句柄
+					texture->shaderResourceViews[mipLevel]->descriptor = resourceDescriptorAllocator.Allocate();
+					device->CreateShaderResourceView(texture->GetID3D12Resource(), &srvDesc, texture->shaderResourceViews[mipLevel]->descriptor);
+
+					texture->shaderResourceViews[mipLevel]->bindlessIndex = AllocateResourceDescriptorIndex();
+					if (texture->shaderResourceViews[mipLevel]->bindlessIndex >= 0) 
+					{
+						assert(texture->shaderResourceViews[mipLevel]->bindlessIndex < D3D12_RENDER_BACKEND_BINDLESS_MAX_NUM_RESOURCE_DESCRIPTORS);
+						D3D12_CPU_DESCRIPTOR_HANDLE rangeStart = resourceDescriptorHeap->cpuDescriptorHandle;
+						rangeStart.ptr += texture->shaderResourceViews[mipLevel]->bindlessIndex * device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+						device->CopyDescriptorsSimple(1, rangeStart, texture->shaderResourceViews[mipLevel]->descriptor, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					}
+
+				}
+			}
+
+			if (EnumClassHasFlags(desc->flags, RenderBackendTextureCreateFlags::RenderTarget))
+			{
+				D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+                rtvDesc.Format = texture->format;
+				
+                texture->renderTargetViews.resize(texture->mipLevels);
+				for (uint32 mipSlice = 0; mipSlice < texture->mipLevels; mipSlice++) 
+				{
+					{
+						switch (desc->type) 
+						{
+						case RenderBackendTextureType::Texture1D:
+						{
+							if (texture->arraySize == 1)
+							{
+								rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE1D;
+								rtvDesc.Texture1D.MipSlice = mipSlice;
+							}
+							else
+							{
+								rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE1DARRAY;
+								rtvDesc.Texture1DArray.FirstArraySlice = 0;
+								rtvDesc.Texture1DArray.ArraySize = texture->arraySize;
+								rtvDesc.Texture1DArray.MipSlice = mipSlice;
+							}
+						}break;
+						case RenderBackendTextureType::Texture2D: 
+						{
+							if (texture->arraySize == 1)
+							{
+								rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+								rtvDesc.Texture2D.MipSlice = mipSlice;
+								rtvDesc.Texture2D.PlaneSlice = 0;
+							}
+							else
+							{
+								rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+								rtvDesc.Texture2DArray.FirstArraySlice = 0;
+								rtvDesc.Texture2DArray.ArraySize = texture->arraySize;
+								rtvDesc.Texture2DArray.MipSlice = mipSlice;
+								rtvDesc.Texture2DArray.PlaneSlice = 0;
+
+							}
+						}break;
+						case RenderBackendTextureType::Texture3D: 
+						{
+							rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE3D;
+							rtvDesc.Texture3D.MipSlice = mipSlice;
+							rtvDesc.Texture3D.FirstWSlice = 0;
+							rtvDesc.Texture3D.WSize = -1;
+
+						}break;
+						}
+
+						uint32 rtvIndex = mipSlice;
+						texture->renderTargetViews[rtvIndex] = new D3D12RenderTargetView();
+						texture->renderTargetViews[rtvIndex]->descriptor = rtvDescriptorAllocator.Allocate();
+						device->CreateRenderTargetView(texture->GetID3D12Resource(), &rtvDesc, texture->renderTargetViews[rtvIndex]->descriptor);
+					}
+				}
+			}
+
+			if (EnumClassHasFlags(desc->flags, RenderBackendTextureCreateFlags::DepthStencil)) 
+			{
+				D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+				dsvDesc.Format = texture->format;
+				dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+				
+				switch (desc->type) 
+				{
+				case RenderBackendTextureType::Texture1D:
+				{
+					if (texture->arraySize == 1)
+					{
+						dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE1D;
+						dsvDesc.Texture1D.MipSlice = 0;
+					}
+					else
+					{
+						dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE1DARRAY;
+						dsvDesc.Texture1DArray.FirstArraySlice = 0;
+						dsvDesc.Texture1DArray.ArraySize = texture->arraySize;
+						dsvDesc.Texture1DArray.MipSlice = 0;
+					}
+				}break;
+				case RenderBackendTextureType::Texture2D:
+				{
+					if (texture->arraySize == 1)
+					{
+						dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+						dsvDesc.Texture2D.MipSlice = 0;
+					}
+					else
+					{
+						dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
+						dsvDesc.Texture2DArray.FirstArraySlice = 0;
+						dsvDesc.Texture2DArray.ArraySize = texture->arraySize;
+						dsvDesc.Texture2DArray.MipSlice = 0;
+					}
+				}break;
+				}
+
+				texture->depthStencilViews[0] = new D3D12DepthStencilView();
+				texture->depthStencilViews[0]->descriptor = dsvDescriptorAllocator.Allocate();
+				dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+				device->CreateDepthStencilView(texture->GetID3D12Resource(), &dsvDesc, texture->depthStencilViews[0]->descriptor);
+
+				texture->depthStencilViews[1] = new D3D12DepthStencilView();
+				texture->depthStencilViews[1]->descriptor = dsvDescriptorAllocator.Allocate();
+				dsvDesc.Flags = D3D12_DSV_FLAG_READ_ONLY_DEPTH;
+				device->CreateDepthStencilView(texture->GetID3D12Resource(), &dsvDesc, texture->depthStencilViews[1]->descriptor);
+			
+				const bool hasStencil = false;
+				if (hasStencil)
+				{
+					texture->depthStencilViews[2] = new D3D12DepthStencilView();
+					texture->depthStencilViews[2]->descriptor = dsvDescriptorAllocator.Allocate();
+					dsvDesc.Flags = D3D12_DSV_FLAG_READ_ONLY_STENCIL;
+					device->CreateDepthStencilView(texture->GetID3D12Resource(), &dsvDesc, texture->depthStencilViews[2]->descriptor);
+
+					texture->depthStencilViews[3] = new D3D12DepthStencilView();
+					texture->depthStencilViews[3]->descriptor = dsvDescriptorAllocator.Allocate();
+					dsvDesc.Flags = D3D12_DSV_FLAG_READ_ONLY_DEPTH | D3D12_DSV_FLAG_READ_ONLY_STENCIL;
+					device->CreateDepthStencilView(texture->GetID3D12Resource(), &dsvDesc, texture->depthStencilViews[3]->descriptor);
+				}
+			}
+
+			if (EnumClassHasFlags(desc->flags, RenderBackendTextureCreateFlags::UnorderedAccess)) 
+			{
+				D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+				uavDesc.Format = texture->format;
+			
+				texture->unorderedAccessViews.resize(texture->mipLevels);
+				for (uint32 mipSlice = 0; mipSlice < texture->mipLevels; mipSlice++) 
+				{
+					switch (desc->type) 
+					{
+					case RenderBackendTextureType::Texture1D: 
+					{
+						if (texture->arraySize == 1)
+						{
+							uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1D;
+							uavDesc.Texture1D.MipSlice = mipSlice;
+						}
+						else
+						{
+							uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1DARRAY;
+							uavDesc.Texture1DArray.FirstArraySlice = 0;
+							uavDesc.Texture1DArray.ArraySize = texture->arraySize;
+							uavDesc.Texture1DArray.MipSlice = mipSlice;
+
+						}
+
+					}break;
+					case RenderBackendTextureType::Texture2D:
+					case RenderBackendTextureType::TextureCube:
+					{
+						if (texture->arraySize == 1)
+						{
+							uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+							uavDesc.Texture2D.MipSlice = mipSlice;
+							uavDesc.Texture2D.PlaneSlice = 0;
+						}
+						else
+						{
+							uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+							uavDesc.Texture2DArray.FirstArraySlice = 0;
+							uavDesc.Texture2DArray.ArraySize = texture->arraySize;
+							uavDesc.Texture2DArray.MipSlice = mipSlice;
+							uavDesc.Texture2DArray.PlaneSlice = 0;
+
+						}
+					}break;
+					case RenderBackendTextureType::Texture3D:
+					{
+                        uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
+                        uavDesc.Texture3D.MipSlice = mipSlice;//使用的mipmap级别
+                        uavDesc.Texture3D.FirstWSlice = 0;//从第0个深度切片开始读取数据
+                        uavDesc.Texture3D.WSize = -1;//使用所有深度切片
+					}break;
+					}
+
+					texture->unorderedAccessViews[mipSlice] = new D3D12UnorderedAccessView();
+					texture->unorderedAccessViews[mipSlice]->descriptor = resourceDescriptorAllocator.Allocate();
+					device->CreateUnorderedAccessView(texture->GetID3D12Resource(), nullptr, &uavDesc, texture->unorderedAccessViews[mipSlice]->descriptor);
+					
+					texture->unorderedAccessViews[mipSlice]->bindlessIndex = AllocateResourceDescriptorIndex();
+					if (texture->unorderedAccessViews[mipSlice]->bindlessIndex >= 0)
+					{
+						assert(texture->unorderedAccessViews[mipSlice]->bindlessIndex < D3D12_RENDER_BACKEND_BINDLESS_MAX_NUM_RESOURCE_DESCRIPTORS);
+						D3D12_CPU_DESCRIPTOR_HANDLE rangeStart = resourceDescriptorHeap->cpuDescriptorHandle;
+						rangeStart.ptr += texture->unorderedAccessViews[mipSlice]->bindlessIndex * device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+						device->CopyDescriptorsSimple(1, rangeStart, texture->unorderedAccessViews[mipSlice]->descriptor, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					}
+				}
+			}
+			return index;
+		}
+
+		uint32 AllocateSampler()
+		{
+			uint32 samplerIndex = 0;
+			if (!freeSamplers.empty()) 
+			{
+				samplerIndex = freeSamplers.back();
+				freeSamplers.pop_back();
+			}
+			else 
+			{
+				samplerIndex = (uint32)samplers.size();
+                samplers.emplace_back(new D3D12Sampler());
+            
+            }
+            return samplerIndex;
+		}
+
+		uint32 AllocateRayTracingAccelerationStructure()
+		{
+			uint32 index = 0;
+			if (!freeAccelerationStructures.empty())
+			{
+				index = freeAccelerationStructures.back();
+				freeAccelerationStructures.pop_back();
+			}
+			else
+			{
+				index = (uint32)accelerationStructures.size();
+				accelerationStructures.emplace_back(new D3D12RayTracingAccelerationStructure());
+			}
+			return index;
+		}
+
+		uint32 AllocateShader() 
+		{
+			uint32 shaderIndex = 0;
+			if (!freeShaders.empty())
+			{
+				shaderIndex = freeShaders.back();
+				freeShaders.pop_back();	
+			}
+			else 
+			{
+				shaderIndex = (uint32)shaders.size();
+				shaders.emplace_back(new D3D12Shader());
+			}
+			return shaderIndex;
+		}
+
+		uint32 CreateD3D12Sampler(const RenderBackendSamplerDesc* desc, const char* name)
+		{
+			uint32 index = AllocateSampler();
+			D3D12Sampler* sampler = samplers[index];
+			
+			D3D12_SAMPLER_DESC samplerDesc = 
+			{
+				ConvertToD3D12Filter(desc->filter),
+				ConvertToD3D12TextureAddressMode(desc->addressModeU),
+				ConvertToD3D12TextureAddressMode(desc->addressModeV),
+				ConvertToD3D12TextureAddressMode(desc->addressModeW),
+				desc->mipLodBias,
+				desc->maxAnisotropy,
+				ConvertToD3D12ComparisonFunc(desc->compareOp),
+				{0.0f, 0.0f, 0.0f, 0.0f},
+				desc->minLod,
+				desc->maxLod
+			};
+
+			sampler->descriptor = samplerDescriptorAllocator.Allocate();
+            device->CreateSampler(&samplerDesc, sampler->descriptor);
+			
+			sampler->bindlessIndex = AllocateSamplerDescriptorIndex();
+			if (sampler->bindlessIndex >= 0)
+			{
+				assert(sampler->bindlessIndex < D3D12_RENDER_BACKEND_BINDLESS_MAX_NUM_SAMPLER_DESCRIPTORS);
+				D3D12_CPU_DESCRIPTOR_HANDLE rangeStart = samplerDescriptorHeap->cpuDescriptorHandle;
+				rangeStart.ptr += sampler->bindlessIndex * device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+				device->CopyDescriptorsSimple(1, rangeStart, sampler->descriptor, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+			}
+
+
+			return index;
+		}
+
+		inline void AllocateUAVBuffer(
+			ID3D12Device* pDevice,
+			UINT64 bufferSize,
+			ID3D12Resource** ppResource,
+			D3D12_RESOURCE_STATES initialResourceState = D3D12_RESOURCE_STATE_COMMON,
+			const wchar_t* resourceName = nullptr)
+		{
+			auto uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+			auto bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize,D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS | D3D12_RESOURCE_FLAG_RAYTRACING_ACCELERATION_STRUCTURE);
+
+			pDevice->CreateCommittedResource(
+				&uploadHeapProperties,
+				D3D12_HEAP_FLAG_NONE,
+				&bufferDesc,
+				initialResourceState,
+				nullptr,
+				IID_PPV_ARGS(ppResource)
+			);
+			if (resourceName) 
+			{
+                (*ppResource)->SetName(resourceName);
+			}
+		}
+
+		inline void AllocateUploadBuffer(
+			ID3D12Device* pDevice,
+			void* pData,
+			UINT64 dataSize,
+			ID3D12Resource** ppResource,
+			const wchar_t* resourceName = nullptr
+		) 
+		{
+			auto uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			auto bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(dataSize);
+			//上传堆的资源位于cpu中
+			pDevice->CreateCommittedResource(
+				&uploadHeapProperties,
+				D3D12_HEAP_FLAG_NONE,//堆类型
+				&bufferDesc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,//初始状态，决定GPU如何访问此资源
+				nullptr,
+				IID_PPV_ARGS(ppResource)
+			);
+            if (resourceName)
+            {
+                (*ppResource)->SetName(resourceName);
+            }
+			void* pMappedData = nullptr;
+
+			// 明确表示不读取（更规范）
+			//D3D12_RANGE readRange = { 0, 0 };  // 读取0字节
+
+			(*ppResource)->Map(
+				0, // 子资源索引（缓冲区只有一个，填0）
+				nullptr, // 读取范围（nullptr = 不读取）
+				&pMappedData// 输出：CPU可写的指针
+			);
+			
+			memcpy(pMappedData, pData, dataSize);
+			
+			// 明确写入范围（优化）
+			//D3D12_RANGE writeRange = { 0, dataSize };
+			(*ppResource)->Unmap(
+				0,   // 子资源索引
+				nullptr // 写入范围（nullptr = 全部）
+			);
+		}
+		
+		//todo
+		//uint32 CreateD3D12RayTracingBottomLevelAccelerationStructure(const RenderBackendRayTracingBottomLevelAccelerationStructureDesc* desc, const char* name)
+
+		void InitD3D12BlendDesc(const RenderBackendColorBlendStateDescription& blendState, uint32 numRenderTargets, D3D12_BLEND_DESC& dstBlendState)
+		{
+			dstBlendState = {};
+			dstBlendState.AlphaToCoverageEnable = FALSE; //AlphaToCoverageEnable是一种多重采样抗锯齿（MSAA）技术，用于半透明物体的边缘平滑。
+			dstBlendState.IndependentBlendEnable = TRUE; //控制是否允许每个渲染目标（Render Target）使用不同的混合设置。
+			
+			for (uint32 i = 0; i < numRenderTargets; i++) 
+			{
+				dstBlendState.RenderTarget[i].BlendEnable = blendState.targetBlends->blendEnable;
+				dstBlendState.RenderTarget[i].LogicOpEnable = FALSE;
+				dstBlendState.RenderTarget[i].SrcBlend = ConvertToD3D12Blend(blendState.targetBlends->srcColorBlendFactor);
+				dstBlendState.RenderTarget[i].DestBlend = ConvertToD3D12Blend(blendState.targetBlends->dstColorBlendFactor);
+				dstBlendState.RenderTarget[i].BlendOp = ConvertToD3D12BlendOp(blendState.targetBlends->colorBlendOp);
+				dstBlendState.RenderTarget[i].SrcBlendAlpha = ConvertToD3D12Blend(blendState.targetBlends->srcAlphaBlendFactor);
+				dstBlendState.RenderTarget[i].DestBlendAlpha = ConvertToD3D12Blend(blendState.targetBlends->dstAlphaBlendFactor);
+				dstBlendState.RenderTarget[i].BlendOpAlpha = ConvertToD3D12BlendOp(blendState.targetBlends->alphaBlendOp);
+				dstBlendState.RenderTarget[i].LogicOp = D3D12_LOGIC_OP_CLEAR;
+				dstBlendState.RenderTarget[i].RenderTargetWriteMask = ConvertToD3D12RenderTargetWriteMask(blendState.targetBlends->writeMask);
+			}
+		}
+
+		void InitD3D12RasterizerDesc(const RenderBackendRasterizationStateDescription& rasterizationState, D3D12_RASTERIZER_DESC& dstRasterizationState)
+		{
+			dstRasterizationState = {};
+			dstRasterizationState.FillMode = ConvertToD3D12FillMode(rasterizationState.fillMode);
+			dstRasterizationState.CullMode = ConvertToD3D12CullMode(rasterizationState.cullMode);
+			dstRasterizationState.FrontCounterClockwise = rasterizationState.frontFaceCounterClockwise; //正面定义，默认顺时针是正面,True - 逆时针为正面，False - 顺时针为正面
+			//深度偏移
+			/**
+			最终偏移 = depthBiasConstantFactor × r + depthBiasSlopeFactor × maxSlope
+			r = 深度缓冲区能表示的最小差值
+			maxSlope = max(|dz/dx|, |dz/dy|)
+			其中：
+			dz/dx = 深度值在屏幕X方向的变化率
+			dz/dy = 深度值在屏幕Y方向的变化率
+			**/
+			dstRasterizationState.DepthBias = (int32)rasterizationState.depthBiasConstantFactor; //深度偏移常量系数，
+			dstRasterizationState.DepthBiasClamp = rasterizationState.depthBiasClamp; //深度偏移限制在[-depthBiasClamp,depthBiasClamp]
+			dstRasterizationState.SlopeScaledDepthBias = rasterizationState.depthBiasSlopeFactor; //深度斜面偏移系数
+			
+			dstRasterizationState.DepthClipEnable = !rasterizationState.depthClampEnable;//深度裁剪，如果为true,超过深度范围的[0,1.0]的直接丢弃，如果为false,映射到0-1.0
+			dstRasterizationState.MultisampleEnable = FALSE;//是否开启多重采样
+			dstRasterizationState.AntialiasedLineEnable = FALSE;//是否开启线条抗锯齿
+			dstRasterizationState.ForcedSampleCount = 0;//为0时,光栅化采样数 = Rendertarget的采样数，不为0时，光栅化采样数等于设置的数值
+			dstRasterizationState.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF; //保守光栅化：只要三角形触及到像素就光栅化，标准光栅化，像素的中心点在三角形内部才光栅化
+
+		}
+
+		void InitD3D12DepthStencilDesc(const RenderBackendDepthStencilStateDescription& depthStencilState, D3D12_DEPTH_STENCIL_DESC& dstDepthStencilState) 
+		{
+			dstDepthStencilState = {};
+			dstDepthStencilState.DepthEnable = depthStencilState.depthTestEnable;
+			dstDepthStencilState.DepthWriteMask = depthStencilState.depthWriteEnable ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
+			dstDepthStencilState.DepthFunc = ConvertToD3D12ComparisonFunc(depthStencilState.depthCompareFunction);
+			dstDepthStencilState.StencilEnable = depthStencilState.stencilTestEnable;
+			dstDepthStencilState.StencilReadMask = (UINT8)depthStencilState.stencilReadMask;
+			dstDepthStencilState.StencilWriteMask = (UINT8)depthStencilState.stencilWriteMask;
+			
+			dstDepthStencilState.FrontFace.StencilFailOp = ConvertToD3D12StencilOp(depthStencilState.frontFaceStencilFailOp);
+			dstDepthStencilState.FrontFace.StencilDepthFailOp = ConvertToD3D12StencilOp(depthStencilState.frontFaceStencilDepthFailOp);
+			dstDepthStencilState.FrontFace.StencilPassOp = ConvertToD3D12StencilOp(depthStencilState.frontFaceStencilPassOp);
+			dstDepthStencilState.FrontFace.StencilFunc = ConvertToD3D12ComparisonFunc(depthStencilState.frontFaceStencilCompareFunction);
+
+			dstDepthStencilState.BackFace.StencilFailOp = ConvertToD3D12StencilOp(depthStencilState.backFaceStencilFailOp);
+			dstDepthStencilState.BackFace.StencilDepthFailOp = ConvertToD3D12StencilOp(depthStencilState.backFaceStencilDepthFailOp);
+			dstDepthStencilState.BackFace.StencilPassOp = ConvertToD3D12StencilOp(depthStencilState.backFaceStencilPassOp);
+			dstDepthStencilState.BackFace.StencilFunc = ConvertToD3D12ComparisonFunc(depthStencilState.backFaceStencilCompareFunction);
+		
+		}
+
+		uint32 CreateD3D12Shader(const RenderBackendShaderDesc* desc, const char* name) 
+		{
+			uint32 index = AllocateShader();
+
+			D3D12Shader* shader = shaders[index];
+
+			shader->bytecode.pShaderBytecode = desc->code;
+			shader->bytecode.BytecodeLength = desc->codeSize;
+			shader->entryFunctionName = D3D12Utils::Widen(desc->entryFunctionName);
+			shader->hash = CRC32(desc->code, desc->codeSize);
+			
+			return index;
+		}
+
+		void Tick() 
+		{
+			//这里为什么用指针的引用？应为可以直接修改原指针的指向的地址
+			//如果不加引用，那么就是简单复制一个指向相同的地址的指针而已
+			//这个时候workload = nullptr 只是将复制的指针置空
+			for (D3D12SubmissionWorkload*& workload : workloads) 
+			{
+				if (workload->commandQueue->fence->GetCompletedValue() >= workload->completionFenceValue)
+				{
+					for (D3D12CommandAllocator* commandAllocator : workload->commandAllocatorsToRelease) 
+					{
+						ReleaseCommandAllocator(commandAllocator);
+					}
+					delete workload;
+					workload = nullptr;
+
+				}
+			
+			}
+			workloads.erase(std::remove(workloads.begin(), workloads.end(), nullptr), workloads.end());
+		}
+
+		bool Init(D3D12RenderBackend* backend, D3D12Adapter* adapter);
+		void Exit();
+	
+
+		//用于将数据上传到上传堆，在从上传堆复制到默认堆
 		CopyWorkload AllocateCopyWorkload(uint64 bufferSize)
 		{
 			CopyWorkload workload;
@@ -1040,7 +2240,6 @@ namespace MIKU
 			GetCommandQueue(D3D12CommandQueueType::Direct)->GetID3D12CommandQueue()->ExecuteCommandLists(1, commandlists);
 
 			WaitIdle();
-
 
 			copyWorkLoadFreeList.push_back(workload);
 		}

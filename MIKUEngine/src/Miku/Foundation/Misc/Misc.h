@@ -58,4 +58,6 @@ namespace MIKU
         }
     };
 
+    uint32 CRC32(const void* data, uint64 size, uint32 crc = 0);
+
 }

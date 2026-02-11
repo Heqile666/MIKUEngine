@@ -49,8 +49,8 @@ namespace MIKU {
 
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		
-		m_Context = new DX12Context(m_Window);
-		m_Context->Init();
+		//m_Context = new DX12Context(m_Window);
+		//m_Context->Init();
 
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
@@ -155,7 +155,7 @@ namespace MIKU {
 	void WindowsWindow::OnUpdate()
 	{
 		glfwPollEvents();
-		m_Context->SwapBuffer();
+		//m_Context->SwapBuffer();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)

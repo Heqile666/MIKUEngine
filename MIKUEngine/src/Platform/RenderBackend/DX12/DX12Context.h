@@ -1,16 +1,15 @@
 #pragma once
-#include "Miku/RenderBackend/GraphicsContext.h"
 
 struct GLFWwindow;
 
 namespace MIKU{
 
-	class DX12Context :public GraphicsContext {
+	class DX12Context {
 	public:
 		DX12Context(GLFWwindow* windowHandle);
 
-		void Init() override;
-		void SwapBuffer() override;
+		void Init();
+		void SwapBuffer();
 
 	private:
 		GLFWwindow* m_WindowHandle;

@@ -1,7 +1,6 @@
 #pragma once
 #include "Miku/Window.h"
 #include <GLFW/glfw3.h>
-#include "Miku/RenderBackend/GraphicsContext.h"
 
 
 
@@ -29,7 +28,7 @@ namespace MIKU {
 		virtual void Shutdown();
 	private:
 			GLFWwindow* m_Window;
-			GraphicsContext* m_Context;
+			//GraphicsContext* m_Context;
 			struct WindowData {
 				std::string Title;
 				unsigned int Width, Height;
