@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Direct3D12RenderBackendCommon.h"
 
 #include <d3dx12.h>
@@ -10,31 +10,28 @@ namespace MIKU
 #define D3D12_CHECK(function) {HRESULT hr = function; if(FAILED(hr)){ VerifyD3D12Result(hr, #function, __FILE__, __LINE__);} }
 
 
-    namespace D3D12Utils 
+    namespace D3D12Utils
     {
         //宽字符串，解决历史遗留问题
-        inline std::wstring Widen(const std::string& input) 
+        inline std::wstring Widen(const std::string& input)
         {
             std::wstring result = {};
-            if (input.length() > 0) 
+            if (input.length() > 0)
             {
                 int length = MultiByteToWideChar(CP_UTF8, 0, input.c_str(), int(input.size()), NULL, 0);
-                if (length > 0) 
+                if (length > 0)
                 {
                     result.resize(length);
                     MultiByteToWideChar(CP_UTF8, 0, input.c_str(), int(input.size()), result.data(), int(result.size()));
                 }
-            
+
             }
             return result;
-        
+
         }
-    
-    
-    
     }
 
-    static inline void VerifyD3D12Result(HRESULT result, const char* function, const char* filename, uint32 line) 
+    static inline void VerifyD3D12Result(HRESULT result, const char* function, const char* filename, uint32 line)
     {
         MIKU_CORE_ERROR("D3D12 function returns a runtime error. Code: 0x{0:X}. Function: {1}. File: {2}. Line: {3}.", (uint32)result, function, filename, line);
     }
@@ -43,7 +40,7 @@ namespace MIKU
     static inline D3D12_RESOURCE_FLAGS GetD3D12ResourceFlags(RenderBackendBufferCreateFlags flags)
     {
         D3D12_RESOURCE_FLAGS result = D3D12_RESOURCE_FLAG_NONE;
-        if (EnumClassHasFlags(flags, RenderBackendBufferCreateFlags::UnorderedAccess)) 
+        if (EnumClassHasFlags(flags, RenderBackendBufferCreateFlags::UnorderedAccess))
         {
             result |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
         }
@@ -59,13 +56,13 @@ namespace MIKU
     }
 
 
-	static inline D3D12_RESOURCE_FLAGS GetD3D12ResourceFlags(RenderBackendTextureCreateFlags flags) 
-	{
-		D3D12_RESOURCE_FLAGS result = D3D12_RESOURCE_FLAG_NONE;
-		if (EnumClassHasFlags(flags, RenderBackendTextureCreateFlags::UnorderedAccess))
-		{
-			result |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-		}
+    static inline D3D12_RESOURCE_FLAGS GetD3D12ResourceFlags(RenderBackendTextureCreateFlags flags)
+    {
+        D3D12_RESOURCE_FLAGS result = D3D12_RESOURCE_FLAG_NONE;
+        if (EnumClassHasFlags(flags, RenderBackendTextureCreateFlags::UnorderedAccess))
+        {
+            result |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+        }
         if (!EnumClassHasFlags(flags, RenderBackendTextureCreateFlags::ShaderResource))
         {
             result |= D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
@@ -79,30 +76,30 @@ namespace MIKU
             result |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
         }
         return result;
-	}
+    }
 
-    static inline D3D12_HEAP_TYPE GetD3D12HeapType(RenderBackendBufferCreateFlags flags) 
+    static inline D3D12_HEAP_TYPE GetD3D12HeapType(RenderBackendBufferCreateFlags flags)
     {
         D3D12_HEAP_TYPE type = D3D12_HEAP_TYPE_DEFAULT;
-        if (EnumClassHasFlags(flags, RenderBackendBufferCreateFlags::Upload)) 
+        if (EnumClassHasFlags(flags, RenderBackendBufferCreateFlags::Upload))
         {
             type = D3D12_HEAP_TYPE_UPLOAD;
         }
-        else if (EnumClassHasFlags(flags,RenderBackendBufferCreateFlags::Readback)) 
+        else if (EnumClassHasFlags(flags, RenderBackendBufferCreateFlags::Readback))
         {
             type = D3D12_HEAP_TYPE_READBACK;
         }
-        else if (EnumClassHasFlags(flags,RenderBackendBufferCreateFlags::CpuOnly)) 
+        else if (EnumClassHasFlags(flags, RenderBackendBufferCreateFlags::CpuOnly))
         {
             type = D3D12_HEAP_TYPE_UPLOAD;
         }
-    
+
         return type;
     }
 
-    static inline D3D12_RESOURCE_DIMENSION GetD3D12ResourceDimension(RenderBackendTextureType type) 
+    static inline D3D12_RESOURCE_DIMENSION GetD3D12ResourceDimension(RenderBackendTextureType type)
     {
-        switch (type) 
+        switch (type)
         {
         case RenderBackendTextureType::Texture1D:
             return D3D12_RESOURCE_DIMENSION_TEXTURE1D;
@@ -119,7 +116,7 @@ namespace MIKU
     }
 
     static inline D3D12_FILTER ConvertToD3D12Filter(RenderBackendTextureFilter filter)
-	{
+    {
         switch (filter)
         {
         case RenderBackendTextureFilter::MinMagMipPoint:
@@ -199,7 +196,7 @@ namespace MIKU
             return D3D12_FILTER_MIN_MAG_MIP_POINT;
 
         }
-	}
+    }
 
     static inline D3D12_TEXTURE_ADDRESS_MODE ConvertToD3D12TextureAddressMode(RenderBackendTextureAddressMode mode)
     {
@@ -209,10 +206,10 @@ namespace MIKU
             return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
         case RenderBackendTextureAddressMode::Mirror:
             return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-		case RenderBackendTextureAddressMode::Clamp:
-			return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-		case RenderBackendTextureAddressMode::Border:
-			return D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+        case RenderBackendTextureAddressMode::Clamp:
+            return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        case RenderBackendTextureAddressMode::Border:
+            return D3D12_TEXTURE_ADDRESS_MODE_BORDER;
         default:
             std::abort();
             return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -220,9 +217,9 @@ namespace MIKU
         }
     }
 
-    static inline D3D12_COMPARISON_FUNC ConvertToD3D12ComparisonFunc(RenderBackendCompareOp compareOp) 
+    static inline D3D12_COMPARISON_FUNC ConvertToD3D12ComparisonFunc(RenderBackendCompareOp compareOp)
     {
-        switch (compareOp) 
+        switch (compareOp)
         {
             switch (compareOp)
             {
@@ -247,13 +244,13 @@ namespace MIKU
                 return D3D12_COMPARISON_FUNC_NEVER;
             }
 
-        
+
         }
-    
-    
+
+
     }
 
-    static inline DXGI_FORMAT ConvertToDXGIFormat(RenderBackendTextureFormat format) 
+    static inline DXGI_FORMAT ConvertToDXGIFormat(RenderBackendTextureFormat format)
     {
         switch (format)
         {
@@ -397,6 +394,51 @@ namespace MIKU
         }
     }
 
+
+    static inline D3D_PRIMITIVE_TOPOLOGY ConvertToD3D12PrimitiveTopology(RenderBackendPrimitiveTopology topology) 
+    {
+        switch (topology) 
+        {
+        case RenderBackendPrimitiveTopology::PointList:
+            return D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+        case RenderBackendPrimitiveTopology::LineList:
+            return D3D_PRIMITIVE_TOPOLOGY_LINELIST;
+        case RenderBackendPrimitiveTopology::LineStrip:
+            return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
+        case RenderBackendPrimitiveTopology::TriangleList:
+            return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+        case RenderBackendPrimitiveTopology::TriangleStrip:
+            return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+        case RenderBackendPrimitiveTopology::TriangleFan:
+            return D3D_PRIMITIVE_TOPOLOGY_TRIANGLEFAN;
+        default:
+            std::abort();
+            return D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
+        }
+    }
+
+    static inline D3D12_PRIMITIVE_TOPOLOGY_TYPE ConvertToD3D12PrimitiveTopologyType(RenderBackendPrimitiveTopology topology)
+    {
+        switch (topology)
+        {
+        case RenderBackendPrimitiveTopology::PointList:
+            return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+        case RenderBackendPrimitiveTopology::LineList:
+            return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+        case RenderBackendPrimitiveTopology::LineStrip:
+            return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+        case RenderBackendPrimitiveTopology::TriangleList:
+            return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        case RenderBackendPrimitiveTopology::TriangleStrip:
+            return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        case RenderBackendPrimitiveTopology::TriangleFan:
+            return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        default:
+            std::abort();
+            return D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED;
+        }
+    }
+
     inline D3D12_BARRIER_LAYOUT ConvertToD3D12BarrierLayout(RenderBackendResourceState state) 
     {
         switch (state)
@@ -428,6 +470,77 @@ namespace MIKU
             std::abort();
         }
     
+    }
+
+    inline void ConvertToD3D12BufferBarrier(
+        RenderBackendResourceState srcState,
+        RenderBackendResourceState dstState,
+        D3D12_BARRIER_SYNC& outSyncBefore,
+        D3D12_BARRIER_SYNC& outSyncAfter,
+        D3D12_BARRIER_ACCESS& outAccessBefore,
+        D3D12_BARRIER_ACCESS& outAccessAfter)
+    {
+        switch (srcState)
+        {
+        case RenderBackendResourceState::Undefined:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS;
+            break;
+        case RenderBackendResourceState::VertexBuffer:
+        case RenderBackendResourceState::IndexBuffer:
+        case RenderBackendResourceState::ShaderResource:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_SHADER_RESOURCE;
+            break;
+        case RenderBackendResourceState::CopySrc:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_COPY_SOURCE;
+            break;
+        case RenderBackendResourceState::CopyDst:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_COPY_DEST;
+            break;
+        case RenderBackendResourceState::UnorderedAccess:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_UNORDERED_ACCESS;
+            break;
+        case RenderBackendResourceState::IndirectArgument:
+            outSyncBefore = D3D12_BARRIER_SYNC_ALL;
+            outAccessBefore = D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT;
+            break;
+        default: std::abort(); break;
+        }
+
+        switch (dstState)
+        {
+        case RenderBackendResourceState::Undefined:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_NO_ACCESS;
+            break;
+        case RenderBackendResourceState::VertexBuffer:
+        case RenderBackendResourceState::IndexBuffer:
+        case RenderBackendResourceState::ShaderResource:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_SHADER_RESOURCE;
+            break;
+        case RenderBackendResourceState::CopySrc:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_COPY_SOURCE;
+            break;
+        case RenderBackendResourceState::CopyDst:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_COPY_DEST;
+            break;
+        case RenderBackendResourceState::UnorderedAccess:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_UNORDERED_ACCESS;
+            break;
+        case RenderBackendResourceState::IndirectArgument:
+            outSyncAfter = D3D12_BARRIER_SYNC_ALL;
+            outAccessAfter = D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT;
+            break;
+        default: std::abort(); break;
+        }
     }
 
     static inline D3D12_BLEND ConvertToD3D12Blend(RenderBackendBlendFactor blend) 

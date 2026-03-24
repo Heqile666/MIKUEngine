@@ -1,4 +1,4 @@
-#include "mikupch.h"
+﻿#include "mikupch.h"
 #include <Miku/RenderBackend/RenderBackendInterface.h>
 #include "Direct3D12RenderBackend/Direct3D12RenderBackend.h"
 
@@ -50,7 +50,7 @@ namespace MIKU
 		{
 			//backend = RenderBackendCreateVulkan(desc);
 		}
-		else if(desc->type == RenderBackendType::D3D12)
+		else if(desc->type == RenderBackendType::Direct3D12)
 		{
 			backend = RenderBackendCreateDirect3D12(desc);
 		}

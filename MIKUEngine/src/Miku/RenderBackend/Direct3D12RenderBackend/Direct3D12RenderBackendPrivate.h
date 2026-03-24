@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Direct3D12RenderBackendCommon.h"
 
@@ -383,9 +383,20 @@ namespace MIKU
 
 	struct D3D12ComputePipelineState 
 	{
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> state;
+
+		ID3D12PipelineState* GetID3D12PipelineState() 
+		{
+			return state.Get();
+		}
+	};
+
+
+	struct D3D12GraphicsPipelineStateDesc 
+	{
 		D3D12_BLEND_DESC blendState;
 		D3D12_RASTERIZER_DESC rasterizerState;
-	
+		D3D12_DEPTH_STENCIL_DESC depthStencilState;
 	};
 
 	struct D3D12GraphicsPipelineState
@@ -623,7 +634,7 @@ namespace MIKU
 
 		Microsoft::WRL::ComPtr<D3D12MA::Allocator> allocator;
 
-		std::vector<D3D12TimingQueryHeap*> queryHeaps;
+		std::vector<D3D12TimingQueryHeap*> queryHeaps;//用来测量 GPU 上某段操作花了多少时间。
 
 		struct CopyWorkload
 		{
@@ -684,11 +695,26 @@ namespace MIKU
 			return handleRepresentations[handle];
 		}
 
-		inline bool TryGetRenderBackendHandleRepresentation()
+		inline bool TryGetRenderBackendHandleRepresentation(uint32 handle,uint32* outValue)
 		{
-		
+			if (handleRepresentations.find(handle) == handleRepresentations.end()) 
+			{
+				return false;
+			}
+			*outValue = handleRepresentations[handle];
+			return true;
 		
 		}
+		inline void SetRenderBackendHandleRepresentation(uint32 handle,uint32 value) 
+		{
+			handleRepresentations[handle] = value;
+		}
+
+		inline bool RemoveRenderBackendHandleRepresentation(uint32 handle) 
+		{
+			return handleRepresentations.erase(handle);
+		}
+
 		ID3D12Device* GetID3D12Device()
 		{
 			return device.Get();
@@ -697,6 +723,11 @@ namespace MIKU
 		ID3D12Device5* GetDXRDevice()
 		{
 			return device5.Get();
+		}
+
+		D3D12CommandQueue* GetCOmmandQueue(D3D12CommandQueueType type) 
+		{
+			return commandQueues[(uint32)type];
 		}
 
 		ID3D12CommandSignature* GetDispatchIndirectCommandSignature()
@@ -728,6 +759,7 @@ namespace MIKU
 		D3D12Buffer* GetBuffer(RenderBackendBufferHandle handle)
 		{
 			uint32 index = GetRenderBackendHandleRepresentation(handle.GetIndex());
+			return buffers[index];
 		}
 
 		D3D12RayTracingAccelerationStructure* GetRayTracingAccelerationStructure(RenderBackendRayTracingAccelerationStructureHandle handle)
@@ -2244,10 +2276,335 @@ namespace MIKU
 			copyWorkLoadFreeList.push_back(workload);
 		}
 		
+		D3D12ComputePipelineState* FindOrCreateComputePipelineState(D3D12Shader* shader) 
+		{
+			uint32 shaderHash = shader->hash;
+			uint64 pipelineStateHash = shaderHash;
+			if (computePipelineStateMap.find(pipelineStateHash) != computePipelineStateMap.end()) 
+			{
+				return computePipelineStateMap[pipelineStateHash];
+			}
+			
+			D3D12ComputePipelineState* newComputePipelineState = new D3D12ComputePipelineState();
 
+			D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineStateDesc =
+			{
+				rootSignature.Get(),
+				shader->bytecode,
+				mask.Get(), //节点掩码,指定在哪个节点上创建Pso
+                nullptr, //CachedPSO,缓存的Pso ,nullptr表示不使用缓存
+				D3D12_PIPELINE_STATE_FLAG_NONE /**D3D12_PIPELINE_STATE_FLAG_NONE:无特殊标志（最常用）                        
+											   D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG:启用工具调试支持**/
+			};
 
+			
+			D3D12_CHECK(device->CreateComputePipelineState(&computePipelineStateDesc,IID_PPV_ARGS(&newComputePipelineState->state)));
+			computePipelineStateMap.emplace(pipelineStateHash, newComputePipelineState);
+			return computePipelineStateMap[pipelineStateHash];
+		}
+
+		D3D12GraphicsPipelineState* FindOrCreateGraphicsPipelineState(
+			D3D12Shader* vertexShader,
+			D3D12Shader* pixelShader,
+			D3D12Shader* amplificationShader,
+			D3D12Shader* meshShader,
+			const RenderBackendGraphicsPipelineStateDescription& pipelineState,
+			D3D12RenderPass* renderPass,
+			RenderBackendPrimitiveTopology topology
+		)
+		{
+			bool useMeshShader = meshShader != nullptr;
+
+			D3D12GraphicsPipelineStateDesc pipelineStateDesc = {};
+			InitD3D12RasterizerDesc(pipelineState.rasterizationState, pipelineStateDesc.rasterizerState);
+			InitD3D12DepthStencilDesc(pipelineState.depthStencilState, pipelineStateDesc.depthStencilState);
+			InitD3D12BlendDesc(pipelineState.colorBlendState, renderPass->numRenderTargets, pipelineStateDesc.blendState);
+
+			uint64 pipelineStateDescHash = CRC32(&pipelineStateDesc, sizeof(pipelineStateDesc));
+			uint32 renderPassHash = CRC32(renderPass, sizeof(D3D12RenderPass));
+
+			uint32 vertexShaderHash = vertexShader ? vertexShader->hash : 0;
+			uint32 pixelShaderHash = pixelShader ? pixelShader->hash : 0;
+			uint32 amplificationShaderHash = amplificationShader ? amplificationShader->hash : 0;
+			uint32 meshShaderHash = meshShader ? meshShader->hash : 0;
+
+			uint64 values[] = { uint64(vertexShaderHash), uint64(pixelShaderHash), uint64(amplificationShaderHash), uint64(meshShaderHash), uint64(topology), pipelineStateDescHash };
+			uint32 psoHash = CRC32(values, ArraySize(values) * sizeof(UINT64));
+
+			uint64 pipelineStateHash = (uint64(psoHash) << 32) | uint64(renderPass);
+
+			if (graphicsPipelineStateMap.find(pipelineStateHash) != graphicsPipelineStateMap.end())
+			{
+                return graphicsPipelineStateMap[pipelineStateHash];
+				
+			}
+
+			D3D12GraphicsPipelineState* newGraphicsPipelineState = new D3D12GraphicsPipelineState();
+
+			D3D12_INPUT_LAYOUT_DESC nullInputLayout = { nullptr, 0 };
+
+			D3D12_PRIMITIVE_TOPOLOGY_TYPE primitiveTopologyType = ConvertToD3D12PrimitiveTopologyType(topology);
+
+			newGraphicsPipelineState->primitiveTopologyType = primitiveTopologyType;
+
+			DXGI_SAMPLE_DESC dxgiSampleDesc =
+			{
+				1,//每个像素的采样数
+				0 //质量级别，质量级别越高，采样点分布越均匀
+			};
+
+			if (useMeshShader) 
+			{
+				ID3D12Device2* device2 = nullptr;
+				assert(SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&device2))));//查询是否支持device2
+
+				D3DX12_MESH_SHADER_PIPELINE_STATE_DESC meshShaderPipelineStateDesc =
+				{
+					rootSignature.Get(),
+					amplificationShader ? amplificationShader->bytecode : D3D12_SHADER_BYTECODE{},//放大着色器用于指派MS
+					meshShader->bytecode, /**网格着色器 替代VS + HS(曲面细分的控制阶段，决定"细分多少"和"怎么细分") + 
+					DS(对 Tessellator 生成的每个新顶点计算最终位置（相当于细分后的"顶点着色器"）) + 
+                    GS(几何着色器，用于处理图元并生成新的图元)
+					**/
+					pixelShader->bytecode,
+					pipelineStateDesc.blendState,
+					0xFFFFFFFF,//控制 MSAA 中哪些采样点参与渲染,0xFFFFFFFF = 所有 32 位都是 1 = 所有采样点都启用
+					pipelineStateDesc.rasterizerState,
+					pipelineStateDesc.depthStencilState,
+					primitiveTopologyType,
+					renderPass->numRenderTargets,
+					{},
+					renderPass->hasDepthStencil ? renderPass->depthStencilViewFormat : DXGI_FORMAT_UNKNOWN,
+					dxgiSampleDesc,
+					mask.Get(),//GPU掩码，指定使用哪个GPU
+                    nullptr,
+					D3D12_PIPELINE_STATE_FLAG_NONE
+
+				};
+				
+				for (uint32 i = 0; i < renderPass->numRenderTargets; i++) 
+				{
+					meshShaderPipelineStateDesc.RTVFormats[i] = renderPass->renderTargetFormats[i];
+				}
+			
+				CD3DX12_PIPELINE_MESH_STATE_STREAM psoStream = CD3DX12_PIPELINE_MESH_STATE_STREAM(meshShaderPipelineStateDesc);
+				D3D12_PIPELINE_STATE_STREAM_DESC streamDesc =
+				{
+					sizeof(psoStream),
+					&psoStream
+				};
+
+				D3D12_CHECK(device2->CreatePipelineState(&streamDesc, IID_PPV_ARGS(&newGraphicsPipelineState->stateObject)));
+			}
+			else
+			{
+				D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc =
+				{
+					rootSignature.Get(),
+					vertexShader->bytecode,
+					pixelShader->bytecode,
+					{},
+					{},
+					{},
+					{},
+					pipelineStateDesc.blendState,
+					0xFFFFFFFF,//控制 MSAA 中哪些采样点参与渲染,0xFFFFFFFF = 所有 32 位都是 1 = 所有采样点都启用
+					pipelineStateDesc.rasterizerState,
+					pipelineStateDesc.depthStencilState,
+					nullInputLayout,
+					D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED,//将三角带切分
+					primitiveTopologyType,
+					renderPass->numRenderTargets,
+					{},
+					renderPass->hasDepthStencil ? renderPass->depthStencilViewFormat : DXGI_FORMAT_UNKNOWN,
+					dxgiSampleDesc,
+					mask.Get(),
+					nullptr,
+					D3D12_PIPELINE_STATE_FLAG_NONE //调试相关
+				};
+
+				for (uint32 i = 0; i < renderPass->numRenderTargets; i++)
+				{
+					graphicsPipelineStateDesc.RTVFormats[i] = renderPass->renderTargetFormats[i];
+				}
+
+				D3D12_CHECK(device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&newGraphicsPipelineState->stateObject)));
+					
+			}
+
+			graphicsPipelineStateMap.emplace(pipelineStateHash, newGraphicsPipelineState);
+			return graphicsPipelineStateMap[pipelineStateHash];
+
+		}
+
+		//todo 
+		//uint32 CreateD3D12RayTracingPipelineState(const RenderBackendRayTracingPipelineStateDesc* desc, const char* name)
+		//D3D12RayTracingPipelineStateObject* GetRayTracingPipelineStateObject(RenderBackendRayTracingPipelineStateHandle handle)
 
 
 	};
+
+
+	class D3D12RenderBackend : public RenderBackend 
+	{
+	public:
+		RenderBackendType GetType() const override 
+		{
+			return RenderBackendType::Direct3D12;
+		}
+	
+		bool Init(const RenderBackendDesc* desc);
+		void Exit();
+		void Tick() override;
+		void CreateRenderDevices(PhysicalDeviceID* physicalDeviceIDs, uint32 numDevices, uint32* outDeviceMasks) override;
+		void DestroyRenderDevices() override;
+		void FlushRenderDevices() override;
+		RenderBackendDeviceContext GetNativeDevice() override;
+		RenderBackendSwapChainHandle CreateSwapChain(const RenderBackendSwapChainDesc* desc)override;
+		void DestroySwapChain(RenderBackendSwapChainHandle swapChain) override;
+		void ResizeSwapChain(RenderBackendSwapChainHandle swapChain, uint32* width, uint32* height) override;
+		bool PresentSwapChain(RenderBackendSwapChainHandle swapChain) override;
+		RenderBackendTextureHandle GetActiveSwapChainBuffer(RenderBackendSwapChainHandle swapChain) override;
+		RenderBackendBufferHandle CreateBuffer(const RenderBackendBufferDescription* desc, const void* data, const char* name) override;
+		void ResizeBuffer(RenderBackendBufferHandle buffer, uint64 size) override;
+		void MapBuffer(RenderBackendBufferHandle buffer, void** data) override;
+		void UnmapBuffer(RenderBackendBufferHandle buffer) override;
+		void DestroyBuffer(RenderBackendBufferHandle buffer) override;
+		RenderBackendTextureHandle CreateTexture(const RenderBackendTextureDesc* desc, const void* data, const char* name) override;
+		void DestroyTexture(RenderBackendTextureHandle texture) override;
+		void UploadTexture(RenderBackendTextureHandle handle, const RenderBackendTextureUploadDataDesc& data) override;
+		void GetTextureReadbackData(RenderBackendTextureHandle texture, void** data) override;
+		RenderBackendTextureViewHandle CreateTextureView(RenderBackendTextureHandle textureHandle, const RenderBackendTextureViewDesc* desc, int32* descriptor) override;
+		//RenderBackendTextureSRVHandle CreateTextureSRV(const RenderBackendTextureSRVDesc* desc, const char* name) override;
+		//RenderBackendTextureUAVHandle CreateTextureUAV(const RenderBackendTextureUAVDesc* desc, const char* name) override;
+		int32 GetTextureSRVBindlessResourceDescriptorIndex(RenderBackendTextureHandle srv) override;
+		int32 GetTextureSRVBindlessResourceDescriptorIndex(RenderBackendTextureHandle srv, uint32 mipLevel) override;
+		int32 GetTextureUAVBindlessResourceDescriptorIndex(RenderBackendTextureHandle uav, uint32 mipLevel) override;
+		int32 GetBufferCBVBindlessResourceDescriptorIndex(RenderBackendBufferHandle uav) override;
+		int32 GetBufferSRVBindlessResourceDescriptorIndex(RenderBackendBufferHandle uav) override;
+		int32 GetBufferUAVBindlessResourceDescriptorIndex(RenderBackendBufferHandle uav) override;
+		//int32 GetAccelerationStructureSRVBindlessResourceDescriptorIndex(RenderBackendRayTracingAccelerationStructureHandle accelerationStructure) override;
+
+		RenderBackendSamplerHandle CreateSampler(const RenderBackendSamplerDesc* desc, const char* name) override;
+		void DestroySampler(RenderBackendSamplerHandle sampler) override;
+		RenderBackendShaderHandle CreateShader(const RenderBackendShaderDesc* desc, const char* name) override;
+		void DestroyShader(RenderBackendShaderHandle shader) override;
+
+		RenderBackendTimingQueryHeapHandle CreateTimingQueryHeap(const RenderBackendTimingQueryHeapDesc* desc, const char* name) override;
+		void DestroyTimingQueryHeap(RenderBackendTimingQueryHeapHandle timingQueryHeap) override;
+		void SubmitCommandLists(RenderBackendCommandList** commandLists, uint32 numCommandLists, RenderBackendSwapChainHandle swapChain) override;
+		/*RenderBackendRayTracingAccelerationStructureHandle CreateRayTracingBottomLevelAccelerationStructure(const RenderBackendRayTracingBottomLevelAccelerationStructureDesc* desc, const char* name) override;
+		RenderBackendRayTracingAccelerationStructureHandle CreateRayTracingTopLevelAccelerationStructure(const RenderBackendRayTracingTopLevelAccelerationStructureDesc* desc, const char* name) override;
+		RenderBackendRayTracingPipelineStateHandle CreateRayTracingPipelineState(const RenderBackendRayTracingPipelineStateDesc* desc, const char* name) override;
+		RenderBackendBufferHandle CreateRayTracingShaderBindingTable(const RenderBackendRayTracingShaderBindingTableDesc* desc, const char* name) override;*/
+
+		void SetObjectName(RenderBackendTextureHandle handle, const char* name) override 
+		{
+			D3D12Texture* texture = devices[0]->GetTexture(handle);
+			texture->GetID3D12Resource()->SetName(D3D12Utils::Widen(name).c_str());
+		}
+
+		void SetObjectName(RenderBackendBufferHandle handle, const char* name) override
+		{
+			D3D12Buffer* buffer = devices[0]->GetBuffer(handle);
+			buffer->GetID3D12Resource()->SetName(D3D12Utils::Widen(name).c_str());
+		}
+
+		bool IsTearingSupported() const
+		{
+			return tearingSupported;
+		}
+
+		IDXGIFactory6* GetIDXGIFactory()
+		{
+			return dxgiFactory.Get();
+		}
+		bool useDebugLayers;
+		bool useGPUBasedValidation;
+		bool enableHardwareRayTracing;
+		D3D12RenderBackendHandleManager handleManager;
+	private:
+		Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory;
+		uint32 numAdapters;
+		std::vector<D3D12Adapter*> adapters;
+
+		uint32 numDevices;
+		D3D12Device* devices[RenderBackendMaxDeviceCount];
+		Microsoft::WRL::ComPtr<ID3D12Device> d3d12Devices[RenderBackendMaxDeviceCount];
+		bool tearingSupported; //允许不等待垂直同步就呈现画面
+		HMODULE dxgiLibraryHandle = NULL;
+	};
+
+	class D3D12RenderBackendCommandListContext 
+	{
+	public:
+		D3D12RenderBackendCommandListContext(D3D12Device* device, D3D12CommandQueueType family, D3D12CommandList* commandList) 
+			: device(device)
+			, queueType(family)
+			, activeComputePipeline(nullptr)
+			, activeGraphicsPipeline(nullptr)
+			//, activeRayTracingPipeline(nullptr)
+			, insideRenderPass(false) {}
+		virtual ~D3D12RenderBackendCommandListContext() = default;
+
+		inline D3D12CommandQueueType GetQueueFamily() const{ return queueType; }
+		inline D3D12CommandList* GetCommandList() const { return commandList; }
+		bool IsAsynchronousComputeContext() const
+		{
+			return queueType == D3D12CommandQueueType::Compute;
+		}
+
+		bool CompileRenderBackendCommands(const RenderBackendCommandContainer& container);
+		bool CompileRenderBackendCommandsAsynchronous(const RenderBackendCommandContainer& container);
+		bool CompileRenderBackendCommand(const RenderBackendCommandCopyBuffer& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandCopyTexture& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandUpdateBuffer& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandUpdateTexture& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandClearBufferUAV& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandClearTextureUAV& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandBarriers& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandBeginTimingQuery& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandEndTimingQuery& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandResolveTimingQueryResults& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandDispatch& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandDispatchIndirect& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandSetViewport& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandSetScissor& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandSetStencilReference& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandBeginRenderPass& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandEndRenderPass& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandDraw& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandDrawIndirect& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandDispatchMesh& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandDispatchMeshIndirect& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandBeginDebugLabel& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandEndDebugLabel& command);
+		//bool CompileRenderBackendCommand(const RenderBackendCommandBuildRayTracingBottomLevelAccelerationStructure& command);
+		//bool CompileRenderBackendCommand(const RenderBackendCommandBuildRayTracingTopLevelAccelerationStructure& command);
+		//bool CompileRenderBackendCommand(const RenderBackendCommandDispatchRays& command);
+		bool CompileRenderBackendCommand(const RenderBackendCommandDispatchSuperSampling& command);
+
+	private:
+		bool PrepareForDispatch(RenderBackendShaderHandle computeShader, const RenderBackendPushConstantValues& pushConstantValues);
+		bool PreapareForDraw(
+			RenderBackendShaderHandle vertexShader,
+			RenderBackendShaderHandle pixleShader,
+			const RenderBackendGraphicsPipelineStateDescription& pipelineState,
+			RenderBackendPrimitiveTopology topology,
+			RenderBackendBufferHandle indexBuffer,
+			const RenderBackendPushConstantValues& pushConstantValues);
+
+		D3D12Device* device;
+		D3D12CommandQueueType queueType;
+		D3D12CommandList* commandList;
+		D3D12RenderPass activeRenderPass;
+		ID3D12PipelineState* activeComputePipeline;
+		ID3D12PipelineState* activeGraphicsPipeline;
+		//ID3D12StateObject* activeRayTracingPipeline;
+		bool insideRenderPass;
+
+	
+	};
+	
 
 }

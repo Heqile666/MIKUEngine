@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <Miku/RenderBackend/RenderBackendTypes.h>
 #include <Miku/RenderBackend/RenderBackendHandles.h>
 
@@ -12,8 +12,8 @@ namespace MIKU
 
 	enum class RenderBackendType 
 	{
-		UnKnown,
-		D3D12,
+		Unknown,
+		Direct3D12,
 		Vulkan,
 	};
 
@@ -38,56 +38,233 @@ namespace MIKU
 	class RenderBackend 
 	{
 	public:
-		virtual RenderBackendType GetType() const { return RenderBackendType::UnKnown; }
-		virtual void Tick() = 0;
-		virtual void CreateRenderDevices(PhysicalDeviceID* physicalDeviceIDs, uint32 numDevices, uint32* outDeviceMasks) = 0;
-		virtual void DestroyRenderDevices() = 0;
-		virtual void FlushRenderDevices() = 0;
-		
-		virtual RenderBackendSwapChainHandle CreateSwapChain(uint32 deviceMask,const RenderBackendSwapChainDesc) = 0;
-		virtual void DestorySwapChain(RenderBackendSwapChainHandle swapChain) = 0;
-		virtual void ResizeSwapChain(RenderBackendSwapChainHandle swapChain) = 0;
-		virtual bool PresentSwapChain(RenderBackendSwapChainHandle swapChain) = 0;
-		virtual RenderBackendTextureHandle GetActiveSwapChainBuffer(RenderBackendSwapChainHandle swapChain) = 0;
-		
-		virtual RenderBackendBufferHandle CreateBuffer(uint32 deviceMask, const RenderBackendBufferDescription* desc, const void* data, const char* name) = 0;
-		virtual void ResizeBuffer(RenderBackendBufferHandle buffer, uint64 size) = 0;
-		virtual void MapBuffer(RenderBackendBufferHandle buffer, void** data) = 0;
-		virtual void UnmapBuffer(RenderBackendBufferHandle buffer) = 0;
-		virtual void UpdateBuffer(RenderBackendBufferHandle buffer, uint64 offset, const void* data, uint64 size) = 0;
-		virtual void DestoryBuffer(RenderBackendBufferHandle buffer) = 0;
+        /**
+        * TBD.
+        */
+        virtual RenderBackendType GetType() const { return RenderBackendType::Unknown; }
 
-		virtual RenderBackendTextureHandle CreateTexture(uint32 deviceMask, const RenderBackendTextureDesc* desc, const void* data, const char* name) = 0;
-		virtual void DestroyTexture(RenderBackendTextureHandle texture) = 0;
-		virtual void UploadTexture(RenderBackendTextureHandle handle, const RenderBackendTextureUploadDataDesc& data) = 0;
-		virtual void GetTextureReadbackData(RenderBackendTextureHandle texture, void** data) = 0;
+        /**
+         * TBD.
+         */
+        virtual void Tick() = 0;
 
-		//virtual RenderBackendTextureSRVHandle CreateTextureSRV(uint32 deviceMask, const RenderBackendTextureSRVDesc* desc, const char* name) = 0;
-		//virtual RenderBackendTextureUAVHandle CreateTextureUAV(uint32 deviceMask, const RenderBackendTextureUAVDesc* desc, const char* name) = 0;
-		virtual int32 GetTextureSRVDescriptorIndex(uint32 deviceMask, RenderBackendTextureHandle srv) = 0;
-		virtual int32 GetTextureUAVDescriptorIndex(uint32 deviceMask, RenderBackendTextureHandle uav) = 0;
-		virtual int32 GetBufferUAVDescriptorIndex(uint32 deviceMask, RenderBackendBufferHandle uav) = 0;
+        /**
+         * TBD.
+         */
+        virtual void CreateRenderDevices(PhysicalDeviceID* physicalDeviceIDs, uint32 numDevices, uint32* outDeviceMasks) = 0;
 
-		virtual RenderBackendSamplerHandle CreateSampler(uint32 deviceMask, const RenderBackendSamplerDesc* desc, const char* name) = 0;
-		virtual void DestroySampler(RenderBackendSamplerHandle sampler) = 0;
+        /**
+         * TBD.
+         */
+        virtual void DestroyRenderDevices() = 0;
 
-		virtual RenderBackendShaderHandle CreateShader(uint32 deviceMask, const RenderBackendShaderDesc* desc, const char* name) = 0;
-		virtual void DestroyShader(RenderBackendShaderHandle shader) = 0;
+        /**
+         * TBD.
+         */
+        virtual void FlushRenderDevices() = 0;
 
-		virtual RenderBackendTimingQueryHeapHandle CreateTimingQueryHeap(uint32 deviceMask, const RenderBackendTimingQueryHeapDesc* desc, const char* name) = 0;
-		virtual void DestroyTimingQueryHeap(RenderBackendTimingQueryHeapHandle timingQueryHeap) = 0;
+        /**
+         * TBD.
+         */
+        virtual RenderBackendDeviceContext GetNativeDevice() = 0;
 
-		virtual void SubmitCommandList(RenderBackendCommandList** commandLists, uint32 numCommandLists, RenderBackendSwapChainHandle swapChain) = 0;
+        //virtual void GetRenderBackendVulkanInfo(RenderBackendVulkanInfo* vulkanInfo) {}
 
-		virtual void SetObjectName(RenderBackendTextureHandle handle, const char* name) = 0;
+        /**
+         * TBD.
+         */
+        virtual RenderBackendSwapChainHandle CreateSwapChain(const RenderBackendSwapChainDesc* desc) = 0;
 
-		virtual void SetObjectName(RenderBackendBufferHandle handle, const char* name) = 0;
+        /**
+         * TBD.
+         */
+        virtual void DestroySwapChain(RenderBackendSwapChainHandle swapChain) = 0;
 
-	};
+        /**
+         * TBD.
+         */
+        virtual void ResizeSwapChain(RenderBackendSwapChainHandle swapChain, uint32* width, uint32* height) = 0;
 
+        /**
+         * TBD.
+         */
+        virtual bool PresentSwapChain(RenderBackendSwapChainHandle swapChain) = 0;
 
+        /**
+         * TBD.
+         */
+        virtual RenderBackendTextureHandle GetActiveSwapChainBuffer(RenderBackendSwapChainHandle swapChain) = 0;
 
-	RenderBackend* RenderBackendCreateInstance(const RenderBackendDesc* desc);
+        /**
+         * TBD.
+         */
+        virtual RenderBackendBufferHandle CreateBuffer(const RenderBackendBufferDescription* desc, const void* data, const char* name) = 0;
 
-	void RenderBackendDestroyInstance(RenderBackend* backend);
-}
+        /**
+         * TBD.
+         */
+        virtual void DestroyBuffer(RenderBackendBufferHandle buffer) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual void ResizeBuffer(RenderBackendBufferHandle buffer, uint64 size) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual void MapBuffer(RenderBackendBufferHandle buffer, void** data) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual void UnmapBuffer(RenderBackendBufferHandle buffer) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual RenderBackendTextureHandle CreateTexture(const RenderBackendTextureDesc* desc, const void* data, const char* name) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual void DestroyTexture(RenderBackendTextureHandle texture) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual void UploadTexture(RenderBackendTextureHandle handle, const RenderBackendTextureUploadDataDesc& data) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual void GetTextureReadbackData(RenderBackendTextureHandle texture, void** data) = 0;
+
+        /** TODO: Do we need to create SRV/UAV explicitly? */
+        //virtual RenderBackendTextureSRVHandle CreateTextureSRV(const RenderBackendTextureSRVDesc* desc, const char* name) = 0;
+        //virtual RenderBackendTextureUAVHandle CreateTextureUAV(const RenderBackendTextureUAVDesc* desc, const char* name) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual int32 GetTextureSRVBindlessResourceDescriptorIndex(RenderBackendTextureHandle handle) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual int32 GetTextureSRVBindlessResourceDescriptorIndex(RenderBackendTextureHandle handle, uint32 mipLevel) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual int32 GetTextureUAVBindlessResourceDescriptorIndex(RenderBackendTextureHandle handle, uint32 mipLevel) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual int32 GetBufferCBVBindlessResourceDescriptorIndex(RenderBackendBufferHandle buffer) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual int32 GetBufferSRVBindlessResourceDescriptorIndex(RenderBackendBufferHandle buffer) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual int32 GetBufferUAVBindlessResourceDescriptorIndex(RenderBackendBufferHandle buffer) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual int32 GetAccelerationStructureSRVBindlessResourceDescriptorIndex(RenderBackendRayTracingAccelerationStructureHandle accelerationStructure) = 0;
+
+        virtual RenderBackendTextureViewHandle CreateTextureView(RenderBackendTextureHandle textureHandle, const RenderBackendTextureViewDesc* desc, int32* descriptor) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual RenderBackendSamplerHandle CreateSampler(const RenderBackendSamplerDesc* desc, const char* name) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual void DestroySampler(RenderBackendSamplerHandle sampler) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual RenderBackendShaderHandle CreateShader(const RenderBackendShaderDesc* desc, const char* name) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual void DestroyShader(RenderBackendShaderHandle shader) = 0;
+
+#if 0
+        /**
+         * Experimental.
+         */
+        virtual RenderBackendShaderModuleHandle CreateShaderModule(const RenderBackendShaderDesc* desc, const char* name) = 0;
+
+        /**
+         * Experimental.
+         */
+        virtual void DestroyShaderModule(RenderBackendShaderModuleHandle shaderModule) = 0;
+#endif
+
+        /**
+         * TBD.
+         */
+        virtual RenderBackendTimingQueryHeapHandle CreateTimingQueryHeap(const RenderBackendTimingQueryHeapDesc* desc, const char* name) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual void DestroyTimingQueryHeap(RenderBackendTimingQueryHeapHandle timingQueryHeap) = 0;
+        //virtual bool GetTimingQueryHeapResults(RenderBackendTimingQueryHeapHandle timingQueryHeap, uint32 regionStart, uint32 regionCount, void* results) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual void SubmitCommandLists(RenderBackendCommandList** commandLists, uint32 numCommandLists, RenderBackendSwapChainHandle swapChain) = 0;
+
+        /**
+         * TBD.
+         */
+        //virtual RenderBackendRayTracingAccelerationStructureHandle CreateRayTracingBottomLevelAccelerationStructure(const RenderBackendRayTracingBottomLevelAccelerationStructureDesc* desc, const char* name) = 0;
+
+        /**
+         * TBD.
+         */
+        //virtual RenderBackendRayTracingAccelerationStructureHandle CreateRayTracingTopLevelAccelerationStructure(const RenderBackendRayTracingTopLevelAccelerationStructureDesc* desc, const char* name) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual RenderBackendRayTracingPipelineStateHandle CreateRayTracingPipelineState(const RenderBackendRayTracingPipelineStateDesc* desc, const char* name) = 0;
+
+        /**
+         * TBD.
+         */
+        virtual RenderBackendBufferHandle CreateRayTracingShaderBindingTable(const RenderBackendRayTracingShaderBindingTableDesc* desc, const char* name) = 0;
+
+        virtual void SetObjectName(RenderBackendTextureHandle handle, const char* name) = 0;
+
+        virtual void SetObjectName(RenderBackendBufferHandle handle, const char* name) = 0;
+
+        void UpdateBuffer(RenderBackendBufferHandle handle, uint64 offset, const void* data, uint64 size)
+        {
+            void* bufferAllocation = nullptr;
+            MapBuffer(handle, &bufferAllocation);
+            memcpy(bufferAllocation, data, size); // TODO: offset
+            UnmapBuffer(handle);
+        }
+    };
+
+    RenderBackend* RenderBackendCreateInstance(const RenderBackendDesc* desc);
+
+    void RenderBackendDestroyInstance(RenderBackend* backend);
+
+};
+

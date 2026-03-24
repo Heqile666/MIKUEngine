@@ -1,8 +1,14 @@
-#pragma once
+﻿#pragma once
 #include "FundamentalTypes.h"
-
+#include "MIKU/Core/CoreDefinitions.h"
 namespace MIKU
 {
+
+	template <typename T, uint64 N>
+	FORCEINLINE constexpr uint64 ArraySize(T(&array)[N])
+	{
+		return N;
+	}
 
 	struct Extent2D
 	{

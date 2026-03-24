@@ -1629,7 +1629,6 @@ namespace MIKU
     };
 
     struct RenderBackendDrawIndirectArguments
-
     {
         uint32 numVertices;
         uint32 numInstances;
