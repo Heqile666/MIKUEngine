@@ -2174,7 +2174,7 @@ namespace MIKU
 
 		void Tick() 
 		{
-			//这里为什么用指针的引用？应为可以直接修改原指针的指向的地址
+			//这里为什么用指针的引用？因为可以直接修改原指针的指向的地址
 			//如果不加引用，那么就是简单复制一个指向相同的地址的指针而已
 			//这个时候workload = nullptr 只是将复制的指针置空
 			for (D3D12SubmissionWorkload*& workload : workloads) 
@@ -2331,7 +2331,7 @@ namespace MIKU
 			uint64 values[] = { uint64(vertexShaderHash), uint64(pixelShaderHash), uint64(amplificationShaderHash), uint64(meshShaderHash), uint64(topology), pipelineStateDescHash };
 			uint32 psoHash = CRC32(values, ArraySize(values) * sizeof(UINT64));
 
-			uint64 pipelineStateHash = (uint64(psoHash) << 32) | uint64(renderPass);
+			uint64 pipelineStateHash = (uint64(psoHash) << 32) | uint64(renderPassHash);
 
 			if (graphicsPipelineStateMap.find(pipelineStateHash) != graphicsPipelineStateMap.end())
 			{
