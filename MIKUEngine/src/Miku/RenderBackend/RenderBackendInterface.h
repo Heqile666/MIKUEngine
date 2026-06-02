@@ -177,7 +177,7 @@ namespace MIKU
         /**
          * TBD.
          */
-        virtual int32 GetAccelerationStructureSRVBindlessResourceDescriptorIndex(RenderBackendRayTracingAccelerationStructureHandle accelerationStructure) = 0;
+        //virtual int32 GetAccelerationStructureSRVBindlessResourceDescriptorIndex(RenderBackendRayTracingAccelerationStructureHandle accelerationStructure) = 0;
 
         virtual RenderBackendTextureViewHandle CreateTextureView(RenderBackendTextureHandle textureHandle, const RenderBackendTextureViewDesc* desc, int32* descriptor) = 0;
 
@@ -242,12 +242,12 @@ namespace MIKU
         /**
          * TBD.
          */
-        virtual RenderBackendRayTracingPipelineStateHandle CreateRayTracingPipelineState(const RenderBackendRayTracingPipelineStateDesc* desc, const char* name) = 0;
+        //virtual RenderBackendRayTracingPipelineStateHandle CreateRayTracingPipelineState(const RenderBackendRayTracingPipelineStateDesc* desc, const char* name) = 0;
 
         /**
          * TBD.
          */
-        virtual RenderBackendBufferHandle CreateRayTracingShaderBindingTable(const RenderBackendRayTracingShaderBindingTableDesc* desc, const char* name) = 0;
+        //virtual RenderBackendBufferHandle CreateRayTracingShaderBindingTable(const RenderBackendRayTracingShaderBindingTableDesc* desc, const char* name) = 0;
 
         virtual void SetObjectName(RenderBackendTextureHandle handle, const char* name) = 0;
 

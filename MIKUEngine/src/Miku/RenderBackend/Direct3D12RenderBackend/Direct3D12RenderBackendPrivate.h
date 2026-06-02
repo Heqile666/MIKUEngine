@@ -440,7 +440,7 @@ namespace MIKU
 		bool vsyncEnabled;
 
 		uint32 numBuffers;
-		RenderBackendTextureHandle buffer[RenderBackendMaxSwapChainBufferCount];
+		RenderBackendTextureHandle buffers[RenderBackendMaxSwapChainBufferCount];
 		Microsoft::WRL::ComPtr<ID3D12Fence> frameFences[RenderBackendMaxSwapChainBufferCount];
 
 		IDXGISwapChain1* GetIDXGISwapChain1() 
@@ -498,7 +498,7 @@ namespace MIKU
 				nextIndex++;
 				index = nextIndex;
 			}
-			Handle handle = HandleType(index, deviceMask);
+			HandleType handle = HandleType(index, deviceMask);
 			return handle;
 		}
 
@@ -725,7 +725,7 @@ namespace MIKU
 			return device5.Get();
 		}
 
-		D3D12CommandQueue* GetCOmmandQueue(D3D12CommandQueueType type) 
+		D3D12CommandQueue* GetCommandQueue(D3D12CommandQueueType type) 
 		{
 			return commandQueues[(uint32)type];
 		}
@@ -824,7 +824,7 @@ namespace MIKU
 			commandAllocatorPool.push_back(allocator);
 		}
 
-		D3D12CommandList* AllocatorCommandList(D3D12CommandAllocator* commandAllocator) 
+		D3D12CommandList* AllocateCommandList(D3D12CommandAllocator* commandAllocator)
 		{
 			D3D12CommandQueueType queueType = commandAllocator->queueType;
 			D3D12CommandList* commandList = nullptr;
@@ -2238,23 +2238,24 @@ namespace MIKU
 #if 1
 			Microsoft::WRL::ComPtr<ID3D12Fence> fence;
 
-			//创建围栏
+			//创建围栏，fence是GPU和CPU都能访问到的地方
 			D3D12_CHECK(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
-			//设置围栏初始值
+			//CPU端将围栏fence设置为0
 			D3D12_CHECK(fence->Signal(0));
 			for (const auto& commandQueue : commandQueues)
 			{
 				if (commandQueue)
 				{
-					//向命令队列添加Sigal命令，设置fence的值为1(这个命令在GPU中执行),CPU中fence的值还是0
+					//向命令队列添加Signal GPU命令,将fence的值设置为1
 					D3D12_CHECK(commandQueue->GetID3D12CommandQueue()->Signal(fence.Get(), 1));
-					//在CPU侧检测值是不是小于1
+					
+					//cpu端查询fence的值是不是小于1
 					if (fence->GetCompletedValue() < 1)
 					{
-						//如果小于则开始等待，直到fence的值为1，并设置fence的值为1
+						//阻塞当前 CPU 线程，直到 fence 值达到 1
 						D3D12_CHECK(fence->SetEventOnCompletion(1, NULL));
 					}
-					//设置fence的值为1
+				//重置fence值为0
 					D3D12_CHECK(fence->Signal(0));
 				}
 
@@ -2541,6 +2542,7 @@ namespace MIKU
 		D3D12RenderBackendCommandListContext(D3D12Device* device, D3D12CommandQueueType family, D3D12CommandList* commandList) 
 			: device(device)
 			, queueType(family)
+			, commandList(commandList)
 			, activeComputePipeline(nullptr)
 			, activeGraphicsPipeline(nullptr)
 			//, activeRayTracingPipeline(nullptr)
@@ -2586,7 +2588,7 @@ namespace MIKU
 
 	private:
 		bool PrepareForDispatch(RenderBackendShaderHandle computeShader, const RenderBackendPushConstantValues& pushConstantValues);
-		bool PreapareForDraw(
+		bool PrepareForDraw(
 			RenderBackendShaderHandle vertexShader,
 			RenderBackendShaderHandle pixleShader,
 			const RenderBackendGraphicsPipelineStateDescription& pipelineState,

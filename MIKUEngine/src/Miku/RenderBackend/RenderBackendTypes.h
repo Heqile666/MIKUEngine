@@ -1116,6 +1116,20 @@ namespace MIKU
                 RenderBackendCompareOp::Never);
         }
 
+        static RenderBackendSamplerDesc CreateLinearMirror(float mipLodBias, float minLod, float maxLod, uint32 maxAnisotropy)
+        {
+            return RenderBackendSamplerDesc(
+                RenderBackendTextureFilter::MinMagMipLinear,
+                RenderBackendTextureAddressMode::Mirror,
+                RenderBackendTextureAddressMode::Mirror,
+                RenderBackendTextureAddressMode::Mirror,
+                mipLodBias,
+                minLod,
+                maxLod,
+                maxAnisotropy,
+                RenderBackendCompareOp::Never);
+        }
+
         static RenderBackendSamplerDesc CreatePointWarp(float mipLodBias, float minLod, float maxLod, uint32 maxAnisotropy)
         {
             return RenderBackendSamplerDesc(
@@ -1416,6 +1430,11 @@ namespace MIKU
     {
         RenderBackendTextureHandle texture;
         uint32 mipLevel;
+        RenderBackendRenderPassLoadOperation depthLoadOperation;
+        RenderBackendRenderPassStoreOperation depthStoreOperation;
+        RenderBackendRenderPassLoadOperation stencilLoadOperation;
+        RenderBackendRenderPassStoreOperation stencilStoreOperation;
+        RenderBackendDepthStencilAccessType depthStencilAccessType;
     };
 
     struct RenderBackendRenderTargetBinding 
@@ -1424,11 +1443,6 @@ namespace MIKU
         uint32 mipLevel;
         RenderBackendRenderPassLoadOperation loadOperation;
         RenderBackendRenderPassStoreOperation storeOperation;
-        RenderBackendRenderPassLoadOperation depthLoadOperation;
-        RenderBackendRenderPassStoreOperation depthStoreOperation;
-        RenderBackendRenderPassLoadOperation stencilLoadOperation;
-        RenderBackendRenderPassStoreOperation stencilStoreOperation;
-        RenderBackendDepthStencilAccessType depthStencilAccessType;
     };
 
     struct alignas(64) RenderBackendRenderPassInfo

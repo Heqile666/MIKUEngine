@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
+#include <vector>
 #include "Miku/Core/CoreDefinitions.h"
 #include "Miku/Foundation/Memory/Memory.h"
 #include "Miku/Foundation/Mathematics/MathUtility.h"
 #include "RenderBackendCommands.h"
-#include <vector>
 #include <Miku/RenderBackend/RenderBackendHandles.h>
 #include <Miku/RenderBackend/RenderBackendTypes.h>
 

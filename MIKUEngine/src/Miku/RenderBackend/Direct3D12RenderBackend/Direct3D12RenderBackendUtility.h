@@ -36,6 +36,74 @@ namespace MIKU
         MIKU_CORE_ERROR("D3D12 function returns a runtime error. Code: 0x{0:X}. Function: {1}. File: {2}. Line: {3}.", (uint32)result, function, filename, line);
     }
 
+    static inline const char* GetD3DFeatureLevel(D3D_FEATURE_LEVEL featureLevel)
+    {
+        switch (featureLevel)
+        {
+        case D3D_FEATURE_LEVEL_11_0:
+            return "D3D_FEATURE_LEVEL_11_0";
+        case D3D_FEATURE_LEVEL_11_1:
+            return "D3D_FEATURE_LEVEL_11_1";
+        case D3D_FEATURE_LEVEL_12_0:
+            return "D3D_FEATURE_LEVEL_12_0";
+        case D3D_FEATURE_LEVEL_12_1:
+            return "D3D_FEATURE_LEVEL_12_1";
+        case D3D_FEATURE_LEVEL_12_2:
+            return "D3D_FEATURE_LEVEL_12_2";
+        default:
+            std::abort();
+            break;
+        }
+        return "D3D_FEATURE_LEVEL_INVALID";
+    }
+
+    static inline const char* GetD3DShaderModel(D3D_SHADER_MODEL shaderModel) 
+    {
+        switch (shaderModel)
+        {
+        case D3D_SHADER_MODEL_6_8:
+            return "D3D_SHADER_MODEL_6_8";
+        case D3D_SHADER_MODEL_6_7:
+            return "D3D_SHADER_MODEL_6_7";
+        case D3D_SHADER_MODEL_6_6:
+            return "D3D_SHADER_MODEL_6_6";
+        case D3D_SHADER_MODEL_6_5:
+            return "D3D_SHADER_MODEL_6_5";
+        case D3D_SHADER_MODEL_6_4:
+            return "D3D_SHADER_MODEL_6_4)";
+        case D3D_SHADER_MODEL_6_3:
+            return "D3D_SHADER_MODEL_6_3";
+        case D3D_SHADER_MODEL_6_2:
+            return "D3D_SHADER_MODEL_6_2";
+        case D3D_SHADER_MODEL_6_1:
+            return "D3D_SHADER_MODEL_6_1";
+        case D3D_SHADER_MODEL_6_0:
+            return "D3D_SHADER_MODEL_6_0";
+        default:
+            std::abort();
+            break;
+        }
+        return "D3D_SHADER_MODEL_INVALID";
+    
+    }
+
+    static inline const char* GetD3D12RenderPassesTierName(D3D12_RENDER_PASS_TIER tier) 
+    {
+        switch (tier)
+        {
+        case D3D12_RENDER_PASS_TIER_0:
+            return "D3D12_RENDER_PASS_TIER_0";
+        case D3D12_RENDER_PASS_TIER_1:
+            return "D3D12_RENDER_PASS_TIER_1";
+        case D3D12_RENDER_PASS_TIER_2:
+            return "D3D12_RENDER_PASS_TIER_2";
+        default:
+            std::abort();
+            break;
+        }
+        return "Unknown";
+    
+    }
 
     static inline D3D12_RESOURCE_FLAGS GetD3D12ResourceFlags(RenderBackendBufferCreateFlags flags)
     {
@@ -219,35 +287,70 @@ namespace MIKU
 
     static inline D3D12_COMPARISON_FUNC ConvertToD3D12ComparisonFunc(RenderBackendCompareOp compareOp)
     {
-        switch (compareOp)
+       
+       switch (compareOp)
+       {
+       case RenderBackendCompareOp::Never:
+           return D3D12_COMPARISON_FUNC_NEVER;
+       case RenderBackendCompareOp::Less:
+           return D3D12_COMPARISON_FUNC_LESS;
+       case RenderBackendCompareOp::Equal:
+           return D3D12_COMPARISON_FUNC_EQUAL;
+       case RenderBackendCompareOp::LessOrEqual:
+           return D3D12_COMPARISON_FUNC_LESS_EQUAL;
+       case RenderBackendCompareOp::Greater:
+           return D3D12_COMPARISON_FUNC_GREATER;
+       case RenderBackendCompareOp::NotEqual:
+           return D3D12_COMPARISON_FUNC_NOT_EQUAL;
+       case RenderBackendCompareOp::GreaterOrEqual:
+           return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+       case RenderBackendCompareOp::Always:
+           return D3D12_COMPARISON_FUNC_ALWAYS;
+       default:
+           std::abort();
+           return D3D12_COMPARISON_FUNC_NEVER;
+       }
+
+
+       
+
+
+    }
+
+    static inline D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE ConvertToD3D12RenderPassBeginningAccessType(RenderBackendRenderPassLoadOperation accessType) 
+    {
+        switch (accessType) 
         {
-            switch (compareOp)
-            {
-            case RenderBackendCompareOp::Never:
-                return D3D12_COMPARISON_FUNC_NEVER;
-            case RenderBackendCompareOp::Less:
-                return D3D12_COMPARISON_FUNC_LESS;
-            case RenderBackendCompareOp::Equal:
-                return D3D12_COMPARISON_FUNC_EQUAL;
-            case RenderBackendCompareOp::LessOrEqual:
-                return D3D12_COMPARISON_FUNC_LESS_EQUAL;
-            case RenderBackendCompareOp::Greater:
-                return D3D12_COMPARISON_FUNC_GREATER;
-            case RenderBackendCompareOp::NotEqual:
-                return D3D12_COMPARISON_FUNC_NOT_EQUAL;
-            case RenderBackendCompareOp::GreaterOrEqual:
-                return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
-            case RenderBackendCompareOp::Always:
-                return D3D12_COMPARISON_FUNC_ALWAYS;
-            default:
-                std::abort();
-                return D3D12_COMPARISON_FUNC_NEVER;
-            }
-
-
+        case RenderBackendRenderPassLoadOperation::Discard:
+            return D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_DISCARD;
+        case RenderBackendRenderPassLoadOperation::Load:
+            return D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_PRESERVE;
+        case RenderBackendRenderPassLoadOperation::Clear:
+            return D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_CLEAR;
+        case RenderBackendRenderPassLoadOperation::None:
+            return D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_NO_ACCESS;
+        default:
+            std::abort();
+            return D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_DISCARD;      
         }
+    
+    }
 
-
+    static inline D3D12_RENDER_PASS_ENDING_ACCESS_TYPE ConvertToD3D12RenderPassEndingAccessType(RenderBackendRenderPassStoreOperation accessType) 
+    {
+        switch (accessType)
+        {
+        case RenderBackendRenderPassStoreOperation::Store:
+            return D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_PRESERVE;
+        case RenderBackendRenderPassStoreOperation::Discard:
+            return D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_DISCARD;
+        case RenderBackendRenderPassStoreOperation::None:
+            return D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_NO_ACCESS;
+        default:
+            std::abort();
+            return D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_DISCARD;
+        }
+    
     }
 
     static inline DXGI_FORMAT ConvertToDXGIFormat(RenderBackendTextureFormat format)
