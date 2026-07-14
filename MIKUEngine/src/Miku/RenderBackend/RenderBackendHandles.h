@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Miku/Core/CoreDefinitions.h"
 #include <limits>
 namespace MIKU 

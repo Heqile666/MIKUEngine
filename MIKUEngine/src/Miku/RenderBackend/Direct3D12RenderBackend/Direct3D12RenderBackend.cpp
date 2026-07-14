@@ -1256,7 +1256,7 @@ namespace MIKU
 
         DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
         swapChain->width = desc->width;
-        swapChain->height = desc->width;
+        swapChain->height = desc->height;
         swapChainDesc.Format = ConvertToDXGIFormat(desc->format);
         swapChainDesc.Stereo = false; //是否支持立体3D(VR)
         swapChainDesc.SampleDesc.Count = 1; //MSAA采样次数
@@ -1936,7 +1936,7 @@ namespace MIKU
             device 被创建时：
             refCount = 1     （创建者持有一个引用）
         */
-        HRESULT hr = D3D12CreateDevice(adapter->GetIDXGIApdater(), minimumFeatureLevel, IID_PPV_ARGS(&device));
+        HRESULT hr = D3D12CreateDevice(adapter->GetIDXGIAdapter(), minimumFeatureLevel, IID_PPV_ARGS(&device));
         if (FAILED(hr)) 
         {
             MIKU_CORE_ERROR("Error: Failed to create D3D12 device.");

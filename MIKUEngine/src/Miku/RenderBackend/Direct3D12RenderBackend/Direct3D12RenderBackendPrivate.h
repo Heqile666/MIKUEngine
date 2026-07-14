@@ -92,7 +92,7 @@ namespace MIKU
 
 		DXGI_ADAPTER_DESC1 desc;
 
-		IDXGIAdapter* GetIDXGIApdater()
+		IDXGIAdapter* GetIDXGIAdapter()
 		{
 			return dxgiAdapter.Get();
 
