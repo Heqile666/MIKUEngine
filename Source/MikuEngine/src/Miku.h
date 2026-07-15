@@ -1,15 +1,6 @@
 #pragma once
 
-//For use by MIKUEngine application
-
-#include "Miku/Engine/Application.h"
+// 引擎对外聚合头：把引擎当“库”使用时可包含
 #include "Miku/Engine/Log.h"
-#include "Miku/Engine/Layer.h"
-
-#include "Miku/Input/Input.h"
-#include "Miku/Input/KeyCodes.h"
-#include "Miku/Input/MouseButtonCodes.h"
-
-//---------Entry Point------------
-#include"Miku/Engine/EntryPoint.h"
-//--------------------------------
+#include "Miku/Engine/Window.h"
+#include "Miku/Engine/RenderContext.h"

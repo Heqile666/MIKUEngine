@@ -1,8 +1,5 @@
 #include "mikupch.h"
 #include "Miku/Engine/GlfwWindow.h"
-#include "Miku/Engine/Events/ApplicationEvent.h"
-#include "Miku/Engine/Events/MouseEvent.h"
-#include "Miku/Engine/Events/KeyEvent.h"
 #include <GLFW/glfw3.h>
 
 namespace MIKU {
@@ -52,62 +49,12 @@ namespace MIKU {
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 
+		// 仅同步窗口尺寸到 m_Data（不再派发 Hazel 事件）
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				data.Width = width;
 				data.Height = height;
-				WindowResizeEvent event(width, height);
-				data.EventCallback(event);
-			});
-
-		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				WindowCloseEvent event;
-				data.EventCallback(event);
-			});
-
-		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				switch (action)
-				{
-				case GLFW_PRESS:   { KeyPressedEvent event(key, scancode, 0); data.EventCallback(event); break; }
-				case GLFW_RELEASE: { KeyReleasedEvent event(key, scancode);   data.EventCallback(event); break; }
-				case GLFW_REPEAT:  { KeyPressedEvent event(key, scancode, 1); data.EventCallback(event); break; }
-				}
-			});
-
-		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int keycode)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				KeyTypedEvent event(keycode, 0);
-				data.EventCallback(event);
-			});
-
-		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				switch (action)
-				{
-				case GLFW_PRESS:   { MouseButtonPressedEvent event(button);  data.EventCallback(event); break; }
-				case GLFW_RELEASE: { MouseButtonReleasedEvent event(button); data.EventCallback(event); break; }
-				}
-			});
-
-		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				MouseScrolledEvent event((float)xOffset, (float)yOffset);
-				data.EventCallback(event);
-			});
-
-		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				MouseMovedEvent event((float)xPos, (float)yPos);
-				data.EventCallback(event);
 			});
 	}
 
@@ -119,6 +66,11 @@ namespace MIKU {
 	void GlfwWindow::OnUpdate()
 	{
 		glfwPollEvents();
+	}
+
+	bool GlfwWindow::ShouldClose() const
+	{
+		return glfwWindowShouldClose(m_Window) != 0;
 	}
 
 	void GlfwWindow::SetVSync(bool enabled)

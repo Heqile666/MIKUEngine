@@ -1,27 +1,60 @@
 #include "Framework/MikuEditor.h"
 
-#include "Miku/Engine/Application.h"
+#include "Miku/Engine/Window.h"
+#include "Miku/Engine/RenderContext.h"
 #include "Miku/Engine/Log.h"
 
-namespace MIKU
-{
-    // 编辑器应用壳：目前仅继承引擎 Application，后续可扩展编辑器 UI / 面板
-    class MikuEditorApp : public Application
-    {
-    public:
-        MikuEditorApp() = default;
-        ~MikuEditorApp() override = default;
-    };
+namespace MIKU {
+
+	MikuEditor::MikuEditor() = default;
+	MikuEditor::~MikuEditor() = default;
+
+	bool MikuEditor::Init(int argc, char** argv)
+	{
+		Log::Init();
+		MIKU_CORE_WARN("MikuEditor starting...");
+
+		// 引擎作为库提供 Window / RenderContext
+		m_Window = std::unique_ptr<Window>(Window::Create());
+
+		m_RenderContext = std::make_unique<RenderContext>();
+		m_RenderContext->Init(m_Window.get());
+
+		return true;
+	}
+
+	int MikuEditor::Run()
+	{
+		// Horizon 风格主循环：轮询窗口状态直到请求关闭
+		while (!m_Window->ShouldClose())
+		{
+			Tick();
+		}
+		return 0;
+	}
+
+	void MikuEditor::Tick()
+	{
+		m_RenderContext->BeginFrame();
+		m_RenderContext->EndFrame();
+		m_Window->OnUpdate();
+	}
+
+	void MikuEditor::Exit()
+	{
+		if (m_RenderContext)
+			m_RenderContext->Shutdown();
+	}
+
 }
 
 int MikuEditorMain(int argc, char** argv)
 {
-    MIKU::Log::Init();
-    MIKU_CORE_WARN("MikuEditor starting...");
+	MIKU::MikuEditor editor;
+	if (!editor.Init(argc, argv))
+		return -1;
 
-    MIKU::Application* app = new MIKU::MikuEditorApp();
-    app->Run();
-    delete app;
-
-    return 0;
+	int code = editor.Run();
+	editor.Exit();
+	return code;
 }

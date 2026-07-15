@@ -5,7 +5,7 @@ struct GLFWwindow;
 
 namespace MIKU {
 
-	// 引擎内置的 GLFW 窗口实现（脱离旧 Platform 目录）
+	// 引擎内置的 GLFW 窗口实现（精简版，无 Hazel 事件系统）
 	class GlfwWindow : public Window
 	{
 	public:
@@ -13,11 +13,10 @@ namespace MIKU {
 		virtual ~GlfwWindow();
 
 		void OnUpdate() override;
+		bool ShouldClose() const override;
 
 		inline unsigned int GetWidth() const override { return m_Data.Width; }
 		inline unsigned int GetHeight() const override { return m_Data.Height; }
-
-		inline void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
 		inline void* GetNativeWindow() const override { return m_Window; }
@@ -32,7 +31,6 @@ namespace MIKU {
 			std::string Title;
 			unsigned int Width = 0, Height = 0;
 			bool VSync = false;
-			EventCallbackFn EventCallback;
 		};
 		WindowData m_Data;
 	};
