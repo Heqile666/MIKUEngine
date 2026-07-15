@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/MIKUEngine/vender/GLFW" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/MIKUEngine/vender/glm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/MIKUEngine/vender/imgui" vcs="Git" />
+  </component>
+</project>

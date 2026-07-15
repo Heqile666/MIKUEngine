@@ -1,0 +1,363 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ThirdParty">
+      <UniqueIdentifier>{107145F9-FC28-8746-6530-60A251072237}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\GLFW">
+      <UniqueIdentifier>{4F56214C-BBE1-8E10-C4F2-110530FDEA10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\GLFW\src">
+      <UniqueIdentifier>{E6A38D8E-5205-6B9C-DB72-B14E47D3A15B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\imgui">
+      <UniqueIdentifier>{7A0AC6D2-6603-E524-8F35-CAA97B8DC430}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Miku">
+      <UniqueIdentifier>{123522CF-FE01-7DDA-271B-6B821347B268}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Miku\Core">
+      <UniqueIdentifier>{AA544163-1615-BD99-DF4F-06174BCF0176}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Miku\Events">
+      <UniqueIdentifier>{B6380B3E-22C4-7802-2BD5-FBF697DFD402}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Miku\Foundation">
+      <UniqueIdentifier>{18922EC0-84F3-0BCE-0D61-528079C1428D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Miku\Foundation\Mathematics">
+      <UniqueIdentifier>{37C24EE2-A3A5-5D22-ACA8-8B5E180B2473}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Miku\Foundation\Memory">
+      <UniqueIdentifier>{80FEF18E-6C0E-9E5F-D5C7-027EC1F68CF8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Miku\Foundation\Misc">
+      <UniqueIdentifier>{D32794D9-BF4C-E359-E897-C8E9D41BE277}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Miku\ImGui">
+      <UniqueIdentifier>{BCAFD6CB-A87D-CAD1-9111-3BF87D7EA636}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Miku\RenderBackend">
+      <UniqueIdentifier>{89090453-7503-2DA5-5E70-C3B54A099311}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Miku\RenderBackend\Direct3D12RenderBackend">
+      <UniqueIdentifier>{B50C098E-A18A-5927-8A82-17BF769F9B4F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Miku\RenderBackend\Direct3D12RenderBackend\D3D12MemoryAllocator">
+      <UniqueIdentifier>{7CB566B9-E81E-FC1B-7162-AAC6DDCAAC60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Miku\RenderGraph">
+      <UniqueIdentifier>{53966EE5-3F25-F8AE-E843-0CAAD4B10855}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform">
+      <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform\RenderBackend">
+      <UniqueIdentifier>{D8CCF454-C4DC-A025-2D96-054419C58FBE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform\RenderBackend\DX12">
+      <UniqueIdentifier>{26DA2765-92BD-36A5-9BC0-64E10723FDF5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Platform\Windows">
+      <UniqueIdentifier>{5B054582-4794-CE4B-F0B2-E246DC20DFF1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Miku.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Application.h">
+      <Filter>src\Miku</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Core\CoreDefinitions.h">
+      <Filter>src\Miku\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\EntryPoint.h">
+      <Filter>src\Miku</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Events\ApplicationEvent.h">
+      <Filter>src\Miku\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Events\Event.h">
+      <Filter>src\Miku\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Events\KeyEvent.h">
+      <Filter>src\Miku\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Events\MouseEvent.h">
+      <Filter>src\Miku\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Foundation\EnumClass.h">
+      <Filter>src\Miku\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Foundation\Foundation.h">
+      <Filter>src\Miku\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Foundation\FoundationModule.h">
+      <Filter>src\Miku\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Foundation\FundamentalTypes.h">
+      <Filter>src\Miku\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Foundation\Mathematics\MathUtility.h">
+      <Filter>src\Miku\Foundation\Mathematics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Foundation\Mathematics\MathematicsModule.h">
+      <Filter>src\Miku\Foundation\Mathematics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Foundation\Memory\Memory.h">
+      <Filter>src\Miku\Foundation\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Foundation\Misc\Misc.h">
+      <Filter>src\Miku\Foundation\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\ImGui\ImGuiLayer.h">
+      <Filter>src\Miku\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Input.h">
+      <Filter>src\Miku</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\KeyCodes.h">
+      <Filter>src\Miku</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Layer.h">
+      <Filter>src\Miku</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\LayerStack.h">
+      <Filter>src\Miku</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Log.h">
+      <Filter>src\Miku</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\MouseButtonCodes.h">
+      <Filter>src\Miku</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\Direct3D12RenderBackend\D3D12MemoryAllocator\D3D12MemAlloc.h">
+      <Filter>src\Miku\RenderBackend\Direct3D12RenderBackend\D3D12MemoryAllocator</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\Direct3D12RenderBackend\Direct3D12RenderBackend.h">
+      <Filter>src\Miku\RenderBackend\Direct3D12RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\Direct3D12RenderBackend\Direct3D12RenderBackendCommon.h">
+      <Filter>src\Miku\RenderBackend\Direct3D12RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\Direct3D12RenderBackend\Direct3D12RenderBackendDefinitions.h">
+      <Filter>src\Miku\RenderBackend\Direct3D12RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\Direct3D12RenderBackend\Direct3D12RenderBackendPrivate.h">
+      <Filter>src\Miku\RenderBackend\Direct3D12RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\Direct3D12RenderBackend\Direct3D12RenderBackendUtility.h">
+      <Filter>src\Miku\RenderBackend\Direct3D12RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommandList.h">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommands.h">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommon.h">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendConfig.h">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendGPUProfiler.h">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendHandles.h">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendInterface.h">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendModule.h">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendTextureFormat.h">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendTypes.h">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\RenderGraph\RenderGraphCommon.h">
+      <Filter>src\Miku\RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Miku\Window.h">
+      <Filter>src\Miku</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\RenderBackend\DX12\DX12Context.h">
+      <Filter>src\Platform\RenderBackend\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\RenderBackend\DX12\DX12Temp.h">
+      <Filter>src\Platform\RenderBackend\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\RenderBackend\DX12\DxException.h">
+      <Filter>src\Platform\RenderBackend\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\RenderBackend\DX12\ImGuiDX12Renderer.h">
+      <Filter>src\Platform\RenderBackend\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\RenderBackend\DX12\ImGuiGLFW.h">
+      <Filter>src\Platform\RenderBackend\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Windows\WindowsInput.h">
+      <Filter>src\Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Windows\WindowsWindow.h">
+      <Filter>src\Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mikupch.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\context.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\egl_context.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\init.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\input.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\monitor.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\null_init.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\null_joystick.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\null_monitor.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\null_window.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\osmesa_context.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\platform.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\vulkan.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\wgl_context.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\win32_init.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\win32_joystick.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\win32_module.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\win32_monitor.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\win32_thread.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\win32_time.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\win32_window.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\GLFW\src\window.c">
+      <Filter>ThirdParty\GLFW\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\imgui\imgui.cpp">
+      <Filter>ThirdParty\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\imgui\imgui_demo.cpp">
+      <Filter>ThirdParty\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\imgui\imgui_draw.cpp">
+      <Filter>ThirdParty\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\imgui\imgui_tables.cpp">
+      <Filter>ThirdParty\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ThirdParty\imgui\imgui_widgets.cpp">
+      <Filter>ThirdParty\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\Application.cpp">
+      <Filter>src\Miku</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\Foundation\Memory\MemoryArena.cpp">
+      <Filter>src\Miku\Foundation\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\Foundation\Misc\CRC.cpp">
+      <Filter>src\Miku\Foundation\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\ImGui\ImGuiBuild.cpp">
+      <Filter>src\Miku\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\ImGui\ImGuiLayer.cpp">
+      <Filter>src\Miku\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\Layer.cpp">
+      <Filter>src\Miku</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\LayerStack.cpp">
+      <Filter>src\Miku</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\Log.cpp">
+      <Filter>src\Miku</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\RenderBackend\Direct3D12RenderBackend\D3D12MemoryAllocator\D3D12MemAlloc.cpp">
+      <Filter>src\Miku\RenderBackend\Direct3D12RenderBackend\D3D12MemoryAllocator</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\RenderBackend\Direct3D12RenderBackend\Direct3D12RenderBackend.cpp">
+      <Filter>src\Miku\RenderBackend\Direct3D12RenderBackend</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\RenderBackend\RenderBackend.cpp">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\RenderBackend\RenderBackendCommandList.cpp">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\RenderBackend\RenderBackendGPUProfiler.cpp">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Miku\RenderBackend\RenderBackendTextureFormat.cpp">
+      <Filter>src\Miku\RenderBackend</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\RenderBackend\DX12\DX12Context.cpp">
+      <Filter>src\Platform\RenderBackend\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\RenderBackend\DX12\DX12Temp.cpp">
+      <Filter>src\Platform\RenderBackend\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\RenderBackend\DX12\DxException.cpp">
+      <Filter>src\Platform\RenderBackend\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\RenderBackend\DX12\ImGuiDX12Renderer.cpp">
+      <Filter>src\Platform\RenderBackend\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\RenderBackend\DX12\ImGuiGLFW.cpp">
+      <Filter>src\Platform\RenderBackend\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Windows\WindowsInput.cpp">
+      <Filter>src\Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
+      <Filter>src\Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mikupch.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

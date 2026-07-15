@@ -181,12 +181,14 @@
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommands.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendCommon.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendConfig.h" />
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendGPUProfiler.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendHandles.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendInterface.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendModule.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendTextureFormat.h" />
     <ClInclude Include="src\Miku\RenderBackend\RenderBackendTypes.h" />
     <ClInclude Include="src\Miku\Renderer\GraphicsContext.h" />
+    <ClInclude Include="src\Miku\RenderGraph\RenderGraphCommon.h" />
     <ClInclude Include="src\Miku\Window.h" />
     <ClInclude Include="src\Platform\RenderBackend\DX12\DX12Context.h" />
     <ClInclude Include="src\Platform\RenderBackend\DX12\DX12Temp.h" />
@@ -628,6 +630,7 @@
     <ClCompile Include="src\Miku\RenderBackend\Direct3D12RenderBackend\Direct3D12RenderBackend.cpp" />
     <ClCompile Include="src\Miku\RenderBackend\RenderBackend.cpp" />
     <ClCompile Include="src\Miku\RenderBackend\RenderBackendCommandList.cpp" />
+    <ClCompile Include="src\Miku\RenderBackend\RenderBackendGPUProfiler.cpp" />
     <ClCompile Include="src\Miku\RenderBackend\RenderBackendTextureFormat.cpp" />
     <ClCompile Include="src\Platform\RenderBackend\DX12\DX12Context.cpp" />
     <ClCompile Include="src\Platform\RenderBackend\DX12\DX12Temp.cpp" />

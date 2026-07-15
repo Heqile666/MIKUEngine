@@ -1,164 +1,93 @@
+-- ============================================================
+--  MIKUEngine 根构建脚本（对齐 Horizon 风格）
+--  - 根脚本只负责 workspace 级配置 + 路径辅助 + 分组 include
+--  - 每个工程在自己目录下的 premake5.lua 中定义
+--  - imgui 作为独立 StaticLib 工程；glfw 使用预编译库
+-- ============================================================
+
+-- ---------- 路径辅助函数（对齐 Horizon 的 enginepath/thirdpartypath/sourcedirs）----------
+sourcedir = "%{wks.location}/Source"
+function sourcepath(p) return sourcedir .. "/" .. p end
+
+thirdpartydir = "%{wks.location}/ThirdParty"
+function thirdpartypath(p) return thirdpartydir .. "/" .. p end
+
+-- 把一个目录下的所有源码一次性加入 files{}（Horizon 同名封装）
+function sourcedirs(dirs)
+    if type(dirs) ~= "table" then dirs = { dirs } end
+    for _, dir in ipairs(dirs) do
+        files {
+            dir .. "/**.h",
+            dir .. "/**.hpp",
+            dir .. "/**.inl",
+            dir .. "/**.c",
+            dir .. "/**.cpp",
+        }
+    end
+end
+
+-- 输出目录形如 Debug-windows-x86_64（部分场景仍会用到）
+outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+
+-- GLFW 预编译库根目录
+GLFWDir = thirdpartypath("glfw/glfw-3.4.bin.WIN64")
+
+-- ---------- 第三方 include 目录集中管理 ----------
+IncludeDir = {}
+IncludeDir["GLFW"]   = GLFWDir .. "/include"
+IncludeDir["ImGui"]  = thirdpartypath("imgui")
+IncludeDir["glm"]    = thirdpartypath("glm")
+IncludeDir["spdlog"] = thirdpartypath("spdlog/include")
+IncludeDir["DX12"]   = thirdpartypath("DX12/include/directx")
+
+-- ---------- 预编译库文件集中管理 ----------
+Lib = {}
+Lib["GLFW"] = GLFWDir .. "/lib-vc2022/glfw3.lib" -- /MD 版本，匹配 staticruntime Off
+
+-- ============================================================
 workspace "MIKUEngine"
     architecture "x64"
-    startproject "Sandbox"
-    configurations
-    {
-        "Debug",
-        "Release",
-        "Dist"
-    }
+    startproject "MikuEditorLauncher"
+    configurations { "Debug", "Release", "Dist" }
+    flags { "MultiProcessorCompile" }
+    staticruntime "Off" -- 使用动态 CRT(/MD)，与 GLFW 预编译库保持一致
 
-outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"--debug-windows-x64
+filter "system:windows"
+    systemversion "latest"
 
---这里的是文件夹下的源代码文件
-IncludeDir = {}
-IncludeDir["GLFW"] = "MIKUEngine/vender/GLFW/include"
-IncludeDir["ImGui"] = "MIKUEngine/vender/imgui"
-IncludeDir["DX12"] = "MIKUEngine/vender/DX12/include/directx"
-IncludeDir["glm"] = "MIKUEngine/vender/glm"
+filter "configurations:Debug"
+    defines "MIKU_DEBUG"
+    runtime "Debug"
+    symbols "on"
+    optimize "off"
 
-include "MIKUEngine/vender/GLFW" --包含的是GLFW文件夹下的premake5.lua
-include "MIKUEngine/vender/imgui" --包含的是ImGui文件夹下的premake5.lua
+filter "configurations:Release"
+    defines "MIKU_RELEASE"
+    runtime "Release"
+    optimize "on"
 
+filter "configurations:Dist"
+    defines "MIKU_DIST"
+    runtime "Release"
+    optimize "on"
 
+filter {} -- 复位 filter
 
-project "MIKUEngine"
-    location "MIKUEngine"
-    kind "StaticLib" --项目本身是静态库
-    language "C++"
-    cppdialect "C++17"
-    staticruntime "on" --使用静态链接
-    buildoptions { "/utf-8" }
-    linkoptions { "/ignore:4006" }
-    
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+-- ============================================================
+--  工程分组（用 group 组织解决方案资源管理器；不产生真实目录）
+-- ============================================================
+group "Engine"
+    include "Source/MikuEngine"
+group ""
 
-    pchheader "mikupch.h"
-    pchsource "MIKUEngine/src/mikupch.cpp"
+group "Editor"
+    include "Source/MikuEditor"
+group ""
 
-    files
-    {
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp",
-        "%{prj.name}/vender/glm/glm/**.hpp",
-        "%{prj.name}/vender/glm/glm/**.inl",
-    }
+group "App"
+    include "Source/MikuEditorLauncher"
+group ""
 
-    defines
-    {
-        "_CRT_SECURE_NO_WARNINGS"
-
-    }
-
-    includedirs
-    {
-        "%{prj.name}/vender/spdlog/include",
-        "%{prj.name}/src",
-        "%{IncludeDir.GLFW}",
-        "%{IncludeDir.ImGui}",
-        "%{IncludeDir.DX12}",
-        "%{IncludeDir.glm}",
-        
-    }
-
-    links{
-        --DX12
-        "d3dcompiler.lib",
-        "D3D12.lib",
-        "dxgi.lib",
-        --windows
-        "GLFW",--link的vs项目
-        "ImGui"
-      
-    }
-    
-    filter "system:windows"
-        systemversion "latest"
-      
-        
-        defines
-        {
-            "MIKU_BUILD_DLL",
-            "MIKU_PLATFORM_WINDOWS",
-            "GLFW_INCLUDE_NONE", --不包含GLFW的OpenGL头文件
-            
-        }
-        
-       -- postbuildcommands {
-       --     "{MKDIR} %{cfg.targetdir}/../Sandbox/",
-       --     "{COPY} %{cfg.targetdir}/MIKUEngine.dll %{cfg.targetdir}/../Sandbox/"
-       -- }
-
-    filter "configurations:Debug"
-        defines "MIKU_DEBUG"
-        runtime "Debug"
-        optimize "off"
-
-    filter "configurations:Release"
-        defines "MIKU_RELEASE"
-        runtime "Release"
-        optimize "On" 
-
-    filter "configurations:Dist"
-        defines "MIKU_DIST"
-        runtime "Release"
-        optimize "On"
-
-   
-
-
-project "Sandbox"
-    location "Sandbox"
-    kind "ConsoleApp"
-    language "C++"
-    cppdialect "C++17"
-    staticruntime "on"
-    buildoptions { "/utf-8" }
-  
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-
-    files
-    {
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp"
-
-    }
-
-    includedirs
-    {
-        "MIKUEngine/vender/spdlog/include",
-        "MIKUEngine/src",
-        "%{IncludeDir.glm}",
-    }
-
-    links
-    {
-        "MIKUEngine"
-    }
-
-    filter "system:windows"
-        systemversion "latest"
-        
-        defines
-        {
-            "MIKU_PLATFORM_WINDOWS"        
-        }
-        
-            
-    filter "configurations:Debug"
-        defines "MIKU_DEBUG"
-        runtime "Debug"
-        optimize "off"
-
-    filter "configurations:Release"
-        defines "MIKU_RELEASE"
-        runtime "Release"
-        optimize "On" 
-
-    filter "configurations:Dist"
-        defines "MIKU_DIST"
-        runtime "Release"
-        optimize "On"
-   
+group "ThirdParty"
+    include "ThirdParty" -- 加载 ThirdParty/premake5.lua（superproject 跟踪），定义 imgui 独立工程
+group ""

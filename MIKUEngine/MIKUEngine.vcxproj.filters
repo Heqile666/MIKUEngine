@@ -1390,6 +1390,9 @@
     <ClInclude Include="src\Miku\Foundation\FundamentalTypes.h" />
     <ClInclude Include="src\Miku\Foundation\FoundationModule.h" />
     <ClInclude Include="src\Miku\Foundation\Misc\Misc.h" />
+    <ClInclude Include="src\Miku\RenderBackend\Direct3D12RenderBackend\Direct3D12RenderBackendDefinitions.h" />
+    <ClInclude Include="src\Miku\RenderBackend\RenderBackendGPUProfiler.h" />
+    <ClInclude Include="src\Miku\RenderGraph\RenderGraphCommon.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Miku\Application.cpp">
@@ -1431,6 +1434,7 @@
     <ClCompile Include="src\Miku\RenderBackend\RenderBackendCommandList.cpp" />
     <ClCompile Include="src\Miku\RenderBackend\RenderBackendTextureFormat.cpp" />
     <ClCompile Include="src\Miku\Foundation\Misc\CRC.cpp" />
+    <ClCompile Include="src\Miku\RenderBackend\RenderBackendGPUProfiler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
