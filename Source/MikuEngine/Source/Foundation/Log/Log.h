@@ -1,0 +1,35 @@
+﻿#pragma once
+// ============================================================
+//  Log —— 引擎日志模块（对齐 Horizon 的 Core/Log 模块化拆分）
+//  提供 Core / Client 两套 logger 及对应日志宏
+// ============================================================
+#include "Foundation/Definitions.h"
+#include "spdlog/spdlog.h"
+#include "spdlog/fmt/ostr.h"
+
+namespace MIKU {
+	class MIKU_API Log
+	{
+	public:
+		static void Init();
+		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
+		inline static std::shared_ptr<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
+	private:
+		static std::shared_ptr<spdlog::logger> s_CoreLogger;
+		static std::shared_ptr<spdlog::logger> s_ClientLogger;
+	};
+}
+
+// ---------- 引擎(Core)日志宏 ----------
+#define MIKU_CORE_TRACE(...)  ::MIKU::Log::GetCoreLogger()->trace(__VA_ARGS__)
+#define MIKU_CORE_INFO(...)   ::MIKU::Log::GetCoreLogger()->info(__VA_ARGS__)
+#define MIKU_CORE_WARN(...)   ::MIKU::Log::GetCoreLogger()->warn(__VA_ARGS__)
+#define MIKU_CORE_ERROR(...)  ::MIKU::Log::GetCoreLogger()->error(__VA_ARGS__)
+#define MIKU_CORE_FATAL(...)  ::MIKU::Log::GetCoreLogger()->critical(__VA_ARGS__)
+
+// ---------- 客户端(Client)日志宏 ----------
+#define MIKU_TRACE(...)  ::MIKU::Log::GetClientLogger()->trace(__VA_ARGS__)
+#define MIKU_INFO(...)   ::MIKU::Log::GetClientLogger()->info(__VA_ARGS__)
+#define MIKU_WARN(...)   ::MIKU::Log::GetClientLogger()->warn(__VA_ARGS__)
+#define MIKU_ERROR(...)  ::MIKU::Log::GetClientLogger()->error(__VA_ARGS__)
+#define MIKU_FATAL(...)  ::MIKU::Log::GetClientLogger()->critical(__VA_ARGS__)
