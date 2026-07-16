@@ -16,7 +16,7 @@ project "MikuEditor"
 
     includedirs {
         "Source",
-        sourcepath("MikuEngine/src"),
+        sourcepath("MikuEngine/Source"),
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.ImGui}",
         "%{IncludeDir.GLFW}",

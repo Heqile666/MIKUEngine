@@ -15,20 +15,20 @@ project "MikuEngine"
     linkoptions  { "/ignore:4006" }
 
     pchheader "mikupch.h"
-    pchsource "src/mikupch.cpp"
+    pchsource "Source/mikupch.cpp"
 
     -- 引擎自身源码
-    sourcedirs { "src" }
+    sourcedirs { "Source" }
 
     -- Platform/ 与旧 Miku/ImGui(ImGuiLayer) 是之前项目的临时代码：
     -- 从工程中排除（文件保留在磁盘供后续搬运参考），改由引擎内 GlfwWindow + RenderContext 胶水替代
     removefiles {
-        "src/Platform/**",
-        "src/Miku/ImGui/**",
+        "Source/Platform/**",
+        "Source/Miku/ImGui/**",
     }
 
     includedirs {
-        "src",
+        "Source",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.ImGui}",
         "%{IncludeDir.GLFW}",
@@ -52,7 +52,6 @@ project "MikuEngine"
     filter "system:windows"
         systemversion "latest"
         defines {
-            "MIKU_BUILD_DLL",
             "MIKU_PLATFORM_WINDOWS",
         }
     filter {}

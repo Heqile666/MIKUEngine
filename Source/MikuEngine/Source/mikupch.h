@@ -11,7 +11,7 @@
 #include<unordered_map>
 #include<unordered_set>
 
-#include"Miku/Engine/Log.h"
+#include"Miku/Engine/Core/Log/Log.h"
 
 #ifdef MIKU_PLATFORM_WINDOWS
 	#include<Windows.h>

@@ -2,7 +2,7 @@
 
 #include "Miku/Engine/Window.h"
 #include "Miku/Engine/RenderContext.h"
-#include "Miku/Engine/Log.h"
+#include "Miku/Engine/Core/Log/Log.h"
 
 namespace MIKU {
 
