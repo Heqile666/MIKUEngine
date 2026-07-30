@@ -20,11 +20,11 @@ project "MikuEngine"
     -- 引擎自身源码
     sourcedirs { "Source" }
 
-    -- Platform/ 与旧 Miku/ImGui(ImGuiLayer) 是之前项目的临时代码：
+    -- Platform/ 与旧 ImGui/(ImGuiLayer) 是之前项目的临时代码：
     -- 从工程中排除（文件保留在磁盘供后续搬运参考），改由引擎内 GlfwWindow + RenderContext 胶水替代
     removefiles {
         "Source/Platform/**",
-        "Source/Miku/ImGui/**",
+        "Source/ImGui/**",
     }
 
     includedirs {
